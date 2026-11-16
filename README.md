@@ -91,7 +91,6 @@ installations** should list your WhatsApp with a number of conversations.
 | Tab | What it is for |
 |---|---|
 | **Dashboard** | Totals, who is waiting for your reply, activity charts. **Customize** reorders or hides widgets. |
-| **Board** | Followed conversations as cards, by stage, destination or status. |
 | **Conversations** | Search all of WhatsApp (names and message text) and follow chats. |
 | **Following** | Your topics, their folders and keywords, and where each conversation is written. Red = nothing is written. |
 | **Messages** | Read followed conversations WhatsApp-style and search them. |

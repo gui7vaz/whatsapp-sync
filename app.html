@@ -674,7 +674,7 @@ body.locked nav,body.locked #sync,body.locked #last,body.locked main>section,bod
 <div id="bulk" role="region" aria-label="Actions for the selected conversations"></div>
 <div id="pendbar" role="region" aria-label="Contact fixes waiting to be applied"></div>
 <script>
-const TABS = [['painel', 'Dashboard'], ['quadro', 'Board'], ['adicionar', 'Conversations'], ['conversas', 'Following'], ['mapa', 'Map'], ['mensagens', 'Messages'], ['config', 'Settings']];
+const TABS = [['painel', 'Dashboard'], /* Board tab disabled: ['quadro', 'Board'], */ ['adicionar', 'Conversations'], ['conversas', 'Following'], ['mapa', 'Map'], ['mensagens', 'Messages'], ['config', 'Settings']];
 // the address shows the menu name (#conversations); the code keeps its own ids
 const SLUG = Object.fromEntries(TABS.map(([id, name]) => [id, name.toLowerCase()]));
 const UNSLUG = Object.fromEntries(TABS.map(([id, name]) => [name.toLowerCase(), id]));
@@ -1258,7 +1258,7 @@ function openConv(chave, foco) {
   if (c.desde == null) lh.append(el('span', 'h', 'This conversation was added before per-conversation dates existed; pick a date to rebuild the history.'));
   const sel = [...c.assuntos];
   const et = el('select'); et.title = 'This conversation\'s column on the board'; et.append(...etapas.map(e => new Option(e, e))); et.value = c.etapa; et.onchange = () => save({etapa: et.value});
-  const lt = el('label', null, 'Board stage'); lt.append(et);
+  const lt = el('label', null, 'Board stage'); lt.append(et); lt.style.display = 'none';   // Board disabled
   // folders: own folders + the folders of its topics, one per line; tick several and delete
   const where = el('div'); where.style.display = 'grid'; where.style.gap = '8px';
   const drawWhere = () => {
@@ -1713,7 +1713,7 @@ function openBulk(list) {
   const et = keepSel(etapas.map(e => [e, e]), 'Board column');
   const mo = keepSel([['', `Default (${label(MODELS, padrao.modelo)})`], ...MODELS], 'Claude model for drafts');
   const ef = keepSel([['', 'Default' + (padrao.esforco ? ` (${label(EFFORTS, padrao.esforco)})` : '')], ...EFFORTS], 'How much Claude thinks before answering');
-  line('.md files in the folder', rp); line('.md files in subfolders', rs); line('Board stage', et); line('Claude model', mo); line('Effort', ef);
+  line('.md files in the folder', rp); line('.md files in subfolders', rs); line('Claude model', mo); line('Effort', ef);
   mb.append(grid); more.append(ms, mb);
   const ok = btn('Apply', async () => {
     const b = {chaves: keys};
@@ -2009,6 +2009,7 @@ function renderQuadro() {
 // Following tab: the topics as a list (cards) or as a board (one column per destination)
 let fview = 'lista';
 function renderFview() {
+  fview = 'lista'; $('fview').style.display = 'none';   // Board view disabled (code kept below)
   $('fview').replaceChildren(...[['lista', 'List', 'Topics as cards with their followed conversations and suggestions'], ['board', 'Board', 'One column per destination, like the Board tab "By destination". Drag a card to change its destination.']]
     .map(([k, n, tip]) => btn(n, () => { fview = k; pref('fview', k); renderFview(); }, fview === k ? 'on' : '', tip)));
   const b = fview === 'board';
@@ -2459,8 +2460,8 @@ function renderPainel() {
     kpis: () => {
       const kp = el('div', 'kpis');
       kp.append(
-        kpi('To reply', num(d.devo), d.devo ? 'waiting for you over ' + d.pendencia_horas + ' h' : 'nothing pending', 'Conversations whose last message is from the other person. Click to see on the board.', d.devo > 0, () => { modo = 'situacao'; pref('modo', modo); go('quadro'); }),
-        kpi('Waiting for reply', num(d.devem), 'the last message is yours', 'Conversations where you wrote last and got no reply. Click to see on the board.', false, () => { modo = 'situacao'; pref('modo', modo); go('quadro'); }),
+        kpi('To reply', num(d.devo), d.devo ? 'waiting for you over ' + d.pendencia_horas + ' h' : 'nothing pending', 'Conversations whose last message is from the other person. ', d.devo > 0),
+        kpi('Waiting for reply', num(d.devem), 'the last message is yours', 'Conversations where you wrote last and got no reply. ', false),
         kpi('Received', num(d.rec), delta(d.rec, d.rec_antes), `Messages received in the last ${d.dias} days`),
         kpi('Sent', num(d.env), delta(d.env, d.env_antes), `Messages you sent in the last ${d.dias} days`),
         kpi('Your response time', fmtMin(d.resp_min), d.respostas ? `median of ${num(d.respostas)} replies` : 'no replies in the period', 'Median time between the other person\'s message and your reply (one-to-one chats)'),

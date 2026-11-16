@@ -35,11 +35,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # Data lives outside the code folder and outside any synced folder.
 DATA = os.environ.get("WA_DATA") or os.path.expanduser(
     "~/Library/Application Support/WhatsApp Sync")
-CONFIG = os.path.join(DATA, "config.json")
+POINTER = os.path.join(DATA, "local.json")   # where config.json lives
 STATE = os.path.join(DATA, "state.json")
 LIDO = os.path.join(DATA, "lido.json")
 LOG = os.path.join(DATA, "logs", "runs.log")
-BACKUPS = os.path.join(DATA, "backups")      # daily copies of config.json
 ULTIMA = os.path.join(DATA, "ultima.json")   # last sync
 CONECTORES = os.path.join(DATA, "conectores.json")
 VERSAO = 2  # config.json format
@@ -128,6 +127,28 @@ def bump(tab=""):
 
 
 # ---------- config files ----------
+
+def _pointer_dir():
+    """Folder chosen in Settings for config.json ('' = the default DATA).
+    Only this tiny pointer file always stays in DATA."""
+    try:
+        with open(POINTER, encoding="utf-8") as f:
+            p = str(json.load(f).get("pasta_config") or "").strip()
+    except (OSError, ValueError, AttributeError):
+        return ""
+    return os.path.normpath(os.path.expanduser(p)) \
+        if p.startswith(("/", "~")) else ""
+
+
+def set_paths(folder=""):
+    global CONFIG, BACKUPS
+    d = folder or DATA
+    CONFIG = os.path.join(d, "config.json")
+    BACKUPS = os.path.join(d, "backups")      # daily copies of config.json
+
+
+set_paths(_pointer_dir())
+
 
 def load_json(path, default):
     try:
@@ -1994,16 +2015,22 @@ def conn_id(name):
 def api_conectores(force=False):
     """Connectors configured in Claude on this Mac (claude mcp list).
     The lookup takes a few seconds, so it is cached for a day."""
+    cfg = load_config()
+    perfil = claude_cfg(cfg)["perfil"]
     hit = load_json(CONECTORES, None)
-    if not force and hit and time.time() - hit.get("em", 0) < 86400:
+    if not force and hit and hit.get("perfil", "") == perfil \
+            and time.time() - hit.get("em", 0) < 86400:
         return hit
     exe = find_claude()
     if not exe:
         return {"erro": "Claude Code not found on this Mac."}
+    env, err = claude_env(cfg)
+    if err:
+        return {"erro": err}
     tmp = tempfile.mkdtemp(prefix="wa-claude-")
     try:
         r = subprocess.run([exe, "mcp", "list"], capture_output=True,
-                           text=True, timeout=120, cwd=tmp)
+                           text=True, timeout=120, cwd=tmp, env=env)
     except subprocess.TimeoutExpired:
         return {"erro": "Claude took too long to list the connectors."}
     finally:
@@ -2023,7 +2050,7 @@ def api_conectores(force=False):
             "estado": ("ok" if "connected" in st
                        else "auth" if "auth" in st else "erro")})
     items.sort(key=lambda x: (x["estado"] != "ok", x["nome"].lower()))
-    data = {"em": time.time(), "conectores": items}
+    data = {"em": time.time(), "perfil": perfil, "conectores": items}
     save_json(CONECTORES, data)
     return data
 
@@ -2120,6 +2147,206 @@ def find_claude():
         extra + [os.environ.get("PATH", "")]))
 
 
+# ---------- Claude account and provider ----------
+
+PROVEDORES = {"assinatura": "Claude subscription (login)",
+              "api": "Anthropic API key",
+              "bedrock": "Amazon Bedrock",
+              "vertex": "Google Vertex AI"}
+KEYCHAIN = "WhatsApp Sync - Anthropic API key"   # macOS Keychain item
+PERFIS_DIR = os.path.join(DATA, "claude-perfis")  # logins of extra accounts
+REGIAO_RX = re.compile(r"[a-z]{2,}(-[a-z0-9]+){1,3}")
+PROJETO_RX = re.compile(r"[a-z][a-z0-9\-]{4,61}[a-z0-9]")
+AWS_PERFIL_RX = re.compile(r"[\w.\-+=@,]{0,64}")
+CHAVE_RX = re.compile(r"sk-ant-[A-Za-z0-9_\-]{20,300}")
+# inherited variables that would silently pick another account or provider
+CLAUDE_VARS = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL",
+               "CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX",
+               "CLAUDE_CODE_USE_FOUNDRY", "CLAUDE_CONFIG_DIR",
+               "CLAUDE_CODE_OAUTH_TOKEN")
+
+
+def claude_cfg(cfg):
+    """Account and provider chosen in Settings (cleaned)."""
+    c = cfg.get("claude") if isinstance(cfg.get("claude"), dict) else {}
+    perfis = [p for p in c.get("perfis", []) if isinstance(p, dict)
+              and str(p.get("nome") or "").strip()
+              and str(p.get("pasta") or "").startswith(("/", "~"))]
+    pastas = {p["pasta"] for p in perfis}
+    perfil = c.get("perfil") if c.get("perfil") in pastas else ""
+    prov = c.get("provedor") if c.get("provedor") in PROVEDORES else "assinatura"
+    return {"provedor": prov, "perfil": perfil, "perfis": perfis,
+            "aws_regiao": str(c.get("aws_regiao") or ""),
+            "aws_perfil": str(c.get("aws_perfil") or ""),
+            "vertex_regiao": str(c.get("vertex_regiao") or ""),
+            "vertex_projeto": str(c.get("vertex_projeto") or "")}
+
+
+def keychain_key():
+    r = subprocess.run(["/usr/bin/security", "find-generic-password",
+                        "-s", KEYCHAIN, "-a", "anthropic", "-w"],
+                       capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else ""
+
+
+def keychain_set(key):
+    """Saves (or with '' deletes) the API key in the login Keychain. The key
+    goes through stdin, never the command line (visible to other processes)."""
+    if not key:
+        subprocess.run(["/usr/bin/security", "delete-generic-password",
+                        "-s", KEYCHAIN, "-a", "anthropic"],
+                       capture_output=True)
+        return True
+    cmd = (f'add-generic-password -U -s "{KEYCHAIN}" -a anthropic '
+           f'-w "{key}"\n')   # key matched CHAVE_RX: no quotes or spaces
+    r = subprocess.run(["/usr/bin/security", "-i"], input=cmd,
+                       capture_output=True, text=True)
+    return r.returncode == 0 and keychain_key() == key
+
+
+def claude_env(cfg):
+    """Environment for every claude call: only the chosen account and
+    provider, nothing inherited. Returns (env, error)."""
+    c = claude_cfg(cfg)
+    env = {k: v for k, v in os.environ.items() if k not in CLAUDE_VARS
+           and not k.startswith(("CLAUDE_CODE_", "ANTHROPIC_"))}
+    if c["perfil"]:
+        env["CLAUDE_CONFIG_DIR"] = os.path.expanduser(c["perfil"])
+    if c["provedor"] == "api":
+        key = keychain_key()
+        if not key:
+            return None, ("No Anthropic API key saved: add it in Settings > "
+                          "Claude.")
+        env["ANTHROPIC_API_KEY"] = key
+    elif c["provedor"] == "bedrock":
+        if not c["aws_regiao"]:
+            return None, "Set the AWS region in Settings > Claude."
+        env.update(CLAUDE_CODE_USE_BEDROCK="1", AWS_REGION=c["aws_regiao"])
+        if c["aws_perfil"]:
+            env["AWS_PROFILE"] = c["aws_perfil"]
+    elif c["provedor"] == "vertex":
+        if not (c["vertex_regiao"] and c["vertex_projeto"]):
+            return None, ("Set the Google Cloud region and project in "
+                          "Settings > Claude.")
+        env.update(CLAUDE_CODE_USE_VERTEX="1",
+                   CLOUD_ML_REGION=c["vertex_regiao"],
+                   ANTHROPIC_VERTEX_PROJECT_ID=c["vertex_projeto"])
+    return env, None
+
+
+def claude_resumo(cfg):
+    """What the Settings screen shows about the Claude account."""
+    c = claude_cfg(cfg)
+    nome = next((p["nome"] for p in c["perfis"] if p["pasta"] == c["perfil"]),
+                "Default (~/.claude)")
+    return dict(c, conta=nome, provedor_nome=PROVEDORES[c["provedor"]],
+                provedores=PROVEDORES, chave=bool(keychain_key()))
+
+
+def api_claude_conta(body):
+    """Saves the Claude account and provider (applies on the next call)."""
+    with LOCK:
+        cfg = load_config()
+        c = claude_cfg(cfg)
+        if "novo_perfil" in body:   # new account: own login folder
+            nome = str(body.get("novo_perfil") or "").strip()[:60]
+            if not nome:
+                return {"erro": "Give the account a name."}
+            pasta = str(body.get("pasta") or "").strip()
+            if pasta:
+                real = os.path.normpath(os.path.expanduser(pasta))
+                if not pasta.startswith(("/", "~")) or not os.path.isdir(real):
+                    return {"erro": "That folder does not exist."}
+                if in_code_folder({}, [real]):
+                    return {"erro": CODE_FOLDER_ERR}
+                pasta = tilde(real)
+            else:
+                slug = re.sub(r"[^a-z0-9]+", "-", unicodedata.normalize(
+                    "NFKD", nome).encode("ascii", "ignore").decode().lower()
+                ).strip("-") or "conta"
+                d, n = os.path.join(PERFIS_DIR, slug), 2
+                while os.path.exists(d):
+                    d, n = os.path.join(PERFIS_DIR, f"{slug}-{n}"), n + 1
+                os.makedirs(d, mode=0o700)
+                pasta = tilde(d)
+            if any(p["pasta"] == pasta for p in c["perfis"]):
+                return {"erro": "That account is already in the list."}
+            c["perfis"].append({"nome": nome, "pasta": pasta})
+            c["perfil"] = pasta
+        if "remover_perfil" in body:  # the login folder itself is kept
+            c["perfis"] = [p for p in c["perfis"]
+                           if p["pasta"] != body["remover_perfil"]]
+            if c["perfil"] == body["remover_perfil"]:
+                c["perfil"] = ""
+        if "perfil" in body:
+            if body["perfil"] and body["perfil"] not in \
+                    {p["pasta"] for p in c["perfis"]}:
+                return {"erro": "Unknown account."}
+            c["perfil"] = body["perfil"] or ""
+        if "provedor" in body:
+            if body["provedor"] not in PROVEDORES:
+                return {"erro": "Unknown provider."}
+            c["provedor"] = body["provedor"]
+        for k, rx, msg in (("aws_regiao", REGIAO_RX, "AWS region"),
+                           ("aws_perfil", AWS_PERFIL_RX, "AWS profile"),
+                           ("vertex_regiao", REGIAO_RX, "Google Cloud region"),
+                           ("vertex_projeto", PROJETO_RX,
+                            "Google Cloud project ID")):
+            if k in body:
+                v = str(body[k] or "").strip()
+                if v and not rx.fullmatch(v):
+                    return {"erro": f"Invalid {msg}."}
+                c[k] = v
+        if "chave" in body:   # never stored in config.json
+            key = str(body["chave"] or "").strip()
+            if key and not CHAVE_RX.fullmatch(key):
+                return {"erro": "That does not look like an Anthropic API key "
+                                "(it starts with sk-ant-)."}
+            if not keychain_set(key):
+                return {"erro": "Could not save the key in the Keychain."}
+        cfg["claude"] = {k: c[k] for k in (
+            "provedor", "perfil", "perfis", "aws_regiao", "aws_perfil",
+            "vertex_regiao", "vertex_projeto")}
+        save_config(cfg)
+    return {"ok": True, "claude": claude_resumo(cfg)}
+
+
+def api_claude_login(_=None):
+    """Opens Terminal with Claude Code on the chosen account so the user can
+    sign in (/login). The password is typed by the user, never by the app."""
+    exe = find_claude()
+    if not exe:
+        return {"erro": "Claude Code not found on this Mac."}
+    c = claude_cfg(load_config())
+    pre = (f"CLAUDE_CONFIG_DIR={shlex.quote(os.path.expanduser(c['perfil']))} "
+           if c["perfil"] else "")
+    line = (f"cd ~ && unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN "
+            f"CLAUDE_CODE_USE_BEDROCK CLAUDE_CODE_USE_VERTEX; "
+            f"{pre}{shlex.quote(exe)} /login")
+    r = subprocess.run(["/usr/bin/osascript", "-e", "on run argv",
+                        "-e", 'tell application "Terminal" to activate',
+                        "-e", 'tell application "Terminal" to do script '
+                              '(item 1 of argv)', "-e", "end run", line],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        return {"erro": "Could not open Terminal: " + r.stderr.strip()[:200]}
+    return {"ok": True}
+
+
+def api_claude_teste(_=None):
+    """A minimal call with the chosen account and provider."""
+    cfg = load_config()
+    t0 = time.time()
+    out, err = run_claude(cfg, "Reply with only the word OK.", "Test.",
+                          timeout=90)
+    if err:
+        return {"erro": err}
+    return {"ok": True, "segundos": round(time.time() - t0, 1),
+            "resposta": out.strip()[:40],
+            "conta": claude_resumo(cfg)["conta"],
+            "provedor": PROVEDORES[claude_cfg(cfg)["provedor"]]}
+
+
 def api_resposta(body):
     """Asks Claude (the one installed on this Mac) for reply drafts for ONE
     conversation, with its history and the references chosen for it (files,
@@ -2181,6 +2408,9 @@ def api_resposta(body):
                  if body.get("orientacao") else "")
               + f"Write the {n} options for {cfg['meu_nome']}'s next "
                 "message, in the language of the conversation.")
+    env, err = claude_env(cfg)
+    if err:
+        return {"erro": err}
     args = [exe, "-p", "--model", modelo, "--tools", "",
             "--no-session-persistence", "--system-prompt", system]
     if esforco in ESFORCOS:
@@ -2200,7 +2430,7 @@ def api_resposta(body):
     tmp = tempfile.mkdtemp(prefix="wa-claude-")
     try:
         r = subprocess.run(args, input=prompt, capture_output=True, text=True,
-                           timeout=420 if conns else 180, cwd=tmp)
+                           timeout=420 if conns else 180, cwd=tmp, env=env)
     except subprocess.TimeoutExpired:
         return {"erro": "Claude took too long. Try again."}
     finally:
@@ -2221,6 +2451,9 @@ def run_claude(cfg, system, prompt, timeout=300, modelo=None, esforco=None):
     exe = find_claude()
     if not exe:
         return None, "Claude Code not found on this Mac."
+    env, err = claude_env(cfg)
+    if err:
+        return None, err
     modelo = modelo or cfg["modelo_resposta"]
     esforco = cfg["esforco_resposta"] if esforco is None else esforco
     args = [exe, "-p", "--model", modelo, "--tools", "",
@@ -2231,7 +2464,7 @@ def run_claude(cfg, system, prompt, timeout=300, modelo=None, esforco=None):
     tmp = tempfile.mkdtemp(prefix="wa-claude-")
     try:
         r = subprocess.run(args, input=prompt, capture_output=True, text=True,
-                           timeout=timeout, cwd=tmp)
+                           timeout=timeout, cwd=tmp, env=env)
     except subprocess.TimeoutExpired:
         return None, "Claude took too long. Try again."
     finally:
@@ -2514,9 +2747,45 @@ def api_config():
                                 if c["fonte"] == s["id"])
     out.update(fontes=fontes, icones=cfg["fonte_icones"],
                ignoradas=len(cfg["ignoradas"]), dados=DATA,
+               arquivo_config=CONFIG, claude_conta=claude_resumo(cfg),
                codigo=HERE, servico=SERVICE, claude=bool(find_claude()),
                endereco=f"http://{HOSTNAME}:{cfg['porta']}/")
     return out
+
+
+def api_config_pasta(body):
+    """Moves the account's config.json to the folder picked in Settings
+    ('' = back to the default folder). An existing config.json in the
+    destination is adopted, never overwritten; the old copy is left behind."""
+    raw = str(body.get("pasta") or "").strip()
+    if raw and not raw.startswith(("/", "~")):
+        return {"erro": "Pick the full folder path (it must start with / or ~)."}
+    dest = os.path.normpath(os.path.expanduser(raw)) if raw else ""
+    if dest:
+        if not os.path.isdir(dest):
+            return {"erro": "That folder does not exist."}
+        if in_code_folder({}, [dest]):
+            return {"erro": CODE_FOLDER_ERR}
+        if not os.access(dest, os.W_OK):
+            return {"erro": "That folder is not writable."}
+    with LOCK:
+        cfg = load_config()
+        old = CONFIG
+        set_paths(dest)
+        adotou = isinstance(load_json(CONFIG, None), dict)
+        if adotou:
+            cfg = load_config()
+        if CONFIG != old:
+            try:
+                if not adotou:
+                    save_config(cfg)
+                save_json(POINTER, {"pasta_config": tilde(dest) if dest else ""})
+            except OSError as e:
+                set_paths(_pointer_dir())
+                return {"erro": f"Could not write there: {e.strerror or e}"}
+    CHATS.clear()
+    SUG["em"] = 0
+    return {"ok": True, "adotou": adotou, "arquivo": CONFIG}
 
 
 def api_config_save(body):
@@ -2647,7 +2916,8 @@ def api_convite(body):
 
 def api_abrir(body):
     """Shows the data or code folder in Finder."""
-    target = {"dados": DATA, "codigo": HERE}.get(body.get("o"))
+    target = {"dados": DATA, "codigo": HERE,
+              "config": os.path.dirname(CONFIG)}.get(body.get("o"))
     if target:
         subprocess.run(["/usr/bin/open", target])
     return {"ok": bool(target)}
@@ -3130,7 +3400,7 @@ GETS = {"/api/chats": lambda q: api_chats(),
                                           q.get("arquivo", [""])[0],
                                           q.get("n", ["300"])[0])}
 # calls that change nothing: no need to notify other tabs
-QUIET = {"/api/contatos_vcf", "/api/conversas_claude", "/api/painel_claude", "/api/whatsapp", "/api/tela", "/api/escolher", "/api/abrir", "/api/ajustes", "/api/resposta",
+QUIET = {"/api/claude-login", "/api/claude-teste", "/api/contatos_vcf", "/api/conversas_claude", "/api/painel_claude", "/api/whatsapp", "/api/tela", "/api/escolher", "/api/abrir", "/api/ajustes", "/api/resposta",
          "/api/reiniciar", "/api/sync"}
 POSTS = {"/api/sugestoes_claude": api_sugestoes_claude,
          "/api/conversas_claude": api_conversas_claude,
@@ -3141,6 +3411,10 @@ POSTS = {"/api/sugestoes_claude": api_sugestoes_claude,
          "/api/tela": api_tela, "/api/assuntos": api_assuntos,
          "/api/assunto": api_assunto, "/api/etapa": api_etapa,
          "/api/ignorar": api_ignorar, "/api/config": api_config_save,
+         "/api/config-pasta": api_config_pasta,
+         "/api/claude-conta": api_claude_conta,
+         "/api/claude-login": api_claude_login,
+         "/api/claude-teste": api_claude_teste,
          "/api/quadro-config": api_quadro_config,
          "/api/escolher": api_escolher, "/api/abrir": api_abrir,
          "/api/ajustes": api_ajustes, "/api/resposta": api_resposta,

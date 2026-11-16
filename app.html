@@ -3062,9 +3062,80 @@ async function loadConfig() {
   fl.append(el('small', null, 'The app finds WhatsApp installations on this Mac by itself (App Store, Meta website, beta and Business). If an installation keeps its data elsewhere, add the folder that contains ChatStorage.sqlite.'));
   const add = btn('Add folder of another installation…', async () => { const r = await api('/api/escolher', {tipo: 'pasta', titulo: 'Folder that contains ChatStorage.sqlite'}); if (r.caminho && !extras.includes(r.caminho)) { extras.push(r.caminho); fl.insertBefore(el('div', 'call ok', 'Will be added on save: ' + r.caminho), add); dirty(); } }, '', 'Opens the Mac file picker');
   add.style.justifySelf = 'start'; fl.append(add); grid.append(fl);
+  sec('Claude');
+  const cl = d.claude_conta, cbox = el('div', 'wide'); cbox.style.display = 'grid'; cbox.style.gap = '10px';
+  // saved right away (like keywords), not with the Save settings button
+  ['input', 'change'].forEach(ev => cbox.addEventListener(ev, e => e.stopPropagation()));
+  const clSave = async (body, msg) => { const r = await api('/api/claude-conta', body); if (fail(r)) return false; if (msg) toast(msg); loadConfig(); return true; };
+  // account: each one is a separate Claude Code login folder
+  const accSel = el('select'); accSel.append(new Option('Default (~/.claude)', ''));
+  cl.perfis.forEach(p => accSel.append(new Option(`${p.nome} (${tilde(p.pasta)})`, p.pasta)));
+  accSel.value = cl.perfil; accSel.onchange = () => clSave({perfil: accSel.value}, 'Claude account changed.');
+  const accL = el('label', null, 'Account'); accL.title = 'Which Claude Code login the app uses'; accL.append(accSel);
+  const accTools = el('div', 'tools'); accTools.style.margin = '0';
+  accTools.append(
+    btn('New account…', async () => { const n = prompt('Name for this Claude account (e.g. Work):'); if (n && n.trim()) await clSave({novo_perfil: n.trim()}, 'Account added. Click "Sign in" to log in to it.'); }, '', 'Creates a separate login for another Claude account'),
+    btn('Use existing folder…', async () => { const r = await api('/api/escolher', {tipo: 'pasta', titulo: 'Claude Code config folder of the account (e.g. ~/.claude-work)'}); if (!r.caminho) return; const n = prompt('Name for this account:', r.caminho.split('/').pop()); if (n && n.trim()) await clSave({novo_perfil: n.trim(), pasta: r.caminho}, 'Account added.'); }, 'lk', 'Adds an account that is already logged in another Claude Code folder'),
+    btn('Sign in…', async () => { const r = await api('/api/claude-login', {}); if (!fail(r)) toast('Terminal opened: sign in there, then come back and click Test.'); }, 'lk', 'Opens Terminal with Claude Code on this account so you can log in. You type the password there; the app never sees it.'));
+  if (cl.perfil) accTools.append(btn('Remove from list', async () => { if (await ask('Remove this account from the list?\n\nIts login folder stays on your Mac.', 'Remove', true)) clSave({remover_perfil: cl.perfil}, 'Account removed from the list.'); }, 'lk', 'Removes the account from the list (the login folder stays)'));
+  // provider
+  const provSel = el('select'); Object.entries(cl.provedores).forEach(([v, n]) => provSel.append(new Option(n, v))); provSel.value = cl.provedor;
+  const provL = el('label', null, 'Provider'); provL.title = 'Who runs Claude for the app'; provL.append(provSel);
+  const extra = el('div'); extra.style.display = 'grid'; extra.style.gap = '8px';
+  const field = (lb, k, ph, tip) => { const l = el('label', null, lb), i = el('input'); i.value = cl[k] || ''; i.placeholder = ph; l.title = tip; l.append(i); return [l, i]; };
+  const drawProv = () => {
+    const v = provSel.value, kids = [];
+    if (v === 'assinatura') kids.push(el('small', null, 'Uses the login of the account above (Claude Pro, Max, Team or Enterprise). To log in or switch users, click "Sign in…".'));
+    if (v === 'api') {
+      const i = el('input'); i.type = 'password'; i.autocomplete = 'off'; i.placeholder = cl.chave ? 'Saved in the Keychain — paste a new one to replace' : 'sk-ant-…';
+      const l = el('label', null, 'API key'); l.title = 'Kept only in the macOS Keychain, never in config.json'; l.append(i);
+      const t = el('div', 'tools'); t.style.margin = '0';
+      t.append(btn('Save key and use API', async () => { if (!i.value.trim() && !cl.chave) return toast('Paste the API key first.', 'bad'); const b = {provedor: 'api'}; if (i.value.trim()) b.chave = i.value.trim(); i.value = ''; await clSave(b, 'Using the Anthropic API key.'); }, 'cta'));
+      if (cl.chave) t.append(btn('Delete key', async () => { if (await ask('Delete the API key from the Keychain?', 'Delete', true)) clSave({chave: '', provedor: 'assinatura'}, 'Key deleted. Back to the subscription login.'); }, 'lk'));
+      kids.push(l, t, el('small', null, cl.chave ? 'A key is saved in the macOS Keychain.' : 'No key saved yet.'));
+    }
+    if (v === 'bedrock' || v === 'vertex') {
+      const fs = v === 'bedrock'
+        ? [field('AWS region', 'aws_regiao', 'us-east-1', 'Region where Claude is enabled in Bedrock'), field('AWS profile (optional)', 'aws_perfil', 'default', 'Profile from ~/.aws; empty = default credentials')]
+        : [field('Region', 'vertex_regiao', 'us-east5', 'Google Cloud region with Claude enabled'), field('Project ID', 'vertex_projeto', 'my-project', 'Google Cloud project ID')];
+      const keys = v === 'bedrock' ? ['aws_regiao', 'aws_perfil'] : ['vertex_regiao', 'vertex_projeto'];
+      const use = btn(`Use ${cl.provedores[v]}`, () => { const b = {provedor: v}; keys.forEach((k, n) => b[k] = fs[n][1].value.trim()); clSave(b, `Using ${cl.provedores[v]}.`); }, 'cta'); use.style.justifySelf = 'start';
+      kids.push(...fs.map(f => f[0]), use,
+        el('small', null, v === 'bedrock' ? 'Uses the AWS credentials already on this Mac (aws configure / SSO).' : 'Uses the Google Cloud credentials already on this Mac (gcloud auth application-default login).'));
+    }
+    extra.replaceChildren(...kids);
+  };
+  provSel.onchange = () => { drawProv(); res.style.display = 'none'; if (provSel.value === 'assinatura') clSave({provedor: 'assinatura'}, 'Using the subscription login.'); };
+  drawProv();
+  const res = el('div'); res.style.display = 'none';
+  const test = btn('Test', async () => {
+    test.disabled = true; res.className = 'call'; res.style.display = ''; res.replaceChildren(el('span', null, 'Testing…'));
+    const r = await api('/api/claude-teste', {}); test.disabled = false;
+    res.className = 'call ' + (r.erro ? 'bad' : 'ok');
+    const msg = r.erro ? 'Claude test failed: ' + r.erro : `Claude working: ${r.provedor}, account ${r.conta} (${r.segundos}s).`;
+    res.replaceChildren(el('span', null, msg));
+    toast(msg, r.erro ? 'bad' : 'ok');  // survives a screen refresh (e.g. a sync finishing)
+  }, '', 'Makes a tiny call with the chosen account and provider');
+  test.style.justifySelf = 'start';
+  cbox.append(el('small', null, `In use: ${cl.provedor_nome} · account ${cl.conta}. Changes apply right away, from the next draft or suggestion.`), accL, accTools, provL, extra, test, res);
+  grid.append(cbox);
+  sec('Account file');
+  const acc = el('div', 'wide'); acc.style.display = 'grid'; acc.style.gap = '6px';
+  const cur = el('code', null, d.arquivo_config); cur.style.wordBreak = 'break-all';
+  const setDir = async pasta => {
+    const r = await api('/api/config-pasta', {pasta});
+    if (fail(r)) return;
+    toast(r.adotou ? 'Using the config.json already in that folder.' : 'Account file saved in the new folder.');
+    await load(); loadSug(true); loadConfig();
+  };
+  const pickCfg = btn('Choose folder…', async () => { const r = await api('/api/escolher', {tipo: 'pasta', titulo: 'Folder for the account file (config.json)'}); if (r.caminho) await setDir(r.caminho); }, '', 'Opens the Mac folder picker. The account file is copied there; if the folder already has a config.json, that one is used.');
+  const tools = el('div', 'tools'); tools.style.margin = '0';
+  tools.append(pickCfg, btn('Show in Finder', () => api('/api/abrir', {o: 'config'}), 'lk', 'Opens the folder of the account file'), btn('Back to default', () => setDir(''), 'lk', 'Uses the default folder again: ' + d.dados));
+  acc.append(el('small', null, 'Where your account file (config.json: settings, followed conversations, topics) is kept. Changes apply right away. The old copy stays where it was.'), cur, tools);
+  grid.append(acc);
   sec('System');
   const info = el('div', 'wide');
-  info.append(el('small', null, `Address: ${d.endereco} · Background service: ${d.servico ? 'running' : 'no (opened from Terminal)'} · Claude for drafts: ${d.claude ? 'found' : 'not found'} · ${d.ignoradas} ignored suggestions · Settings live in ${d.dados}, outside the code folder: updating or reinstalling the app does not erase them, and there is one backup per day in backups/.`));
+  info.append(el('small', null, `Address: ${d.endereco} · Background service: ${d.servico ? 'running' : 'no (opened from Terminal)'} · Claude for drafts: ${d.claude ? 'found' : 'not found'} · ${d.ignoradas} ignored suggestions · Settings live in ${d.arquivo_config}, outside the code folder: updating or reinstalling the app does not erase them, and there is one backup per day in backups/.`));
   const bar = el('div', 'tools'); bar.style.marginTop = '8px';
   bar.append(btn('Open data folder', () => api('/api/abrir', {o: 'dados'}), '', d.dados),
     btn('Open code folder', () => api('/api/abrir', {o: 'codigo'}), '', d.codigo),

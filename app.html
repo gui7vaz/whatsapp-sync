@@ -51,6 +51,49 @@ button:disabled{opacity:.6;cursor:default}
 a.cl{color:var(--heading);font-weight:700;text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;overflow-wrap:anywhere}
 a.cl:hover{text-decoration-color:var(--cta);color:var(--cta-h)}
 .card{background:#fff;border:1px solid var(--line);border-radius:8px;margin-bottom:14px}
+/* AI privacy: flags and chooser */
+.ptag{display:inline-flex;align-items:center;gap:4px;border:1px solid;border-radius:8px;padding:0 7px;height:21px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;line-height:1}
+.ptag svg{width:14px;height:14px;flex:none}
+.ptag.only{padding:0 4px}
+.p-livre{color:var(--ok);background:var(--ok-bg);border-color:#BFE3CC}
+.p-filtro{color:#9A4A12;background:var(--cta-bg);border-color:#F6C9A8}
+.p-sem_ia{color:#fff;background:var(--heading);border-color:var(--heading)}
+.ptag.herda{border-style:dashed}
+.popts{display:grid;gap:8px}
+.popt{display:flex!important;flex-direction:row!important;gap:10px;align-items:flex-start;border:2px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:#fff;font-weight:400}
+.popt>div{flex:1;min-width:0}
+.popt:hover{border-color:var(--line2)}
+.popt.on{border-color:var(--cta);box-shadow:0 0 0 3px var(--cta-bg)}
+.popt input[type=radio]{margin:6px 0 0!important;flex:0 0 16px!important;width:16px!important;height:16px!important;padding:0!important}
+.pfil .chk input{width:auto!important}
+.popt .pi{width:28px;height:28px;padding:0;border-radius:7px;display:grid;place-items:center;flex:none}
+.popt .pi svg{width:18px;height:18px}
+.popt b{color:var(--heading);display:block}
+.popt small{color:var(--muted);display:block;font-size:12.5px}
+.pfil{display:grid;gap:4px;margin-top:8px}
+.pbank{display:grid;gap:10px}
+.pbank .pf{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:6px}
+.pbank .pf .tools{margin:0}
+/* AI provider picker */
+.ias{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.ia{border:2px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px;align-content:start;background:#fff;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.ia:hover{border-color:var(--line2)}
+.ia.on{border-color:var(--cta);box-shadow:0 0 0 3px var(--cta-bg);cursor:default}
+.ia.off{cursor:default;background:var(--bg)}
+.ia .top{display:flex;align-items:center;gap:10px}
+.ia .logo{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:17px;flex:none}
+.ia .top b{font-size:17px;color:var(--heading);flex:1}
+.ia .badge{font-size:12px;font-weight:700;color:var(--cta);background:var(--cta-bg);border-radius:20px;padding:2px 9px}
+.ia .who{display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--heading);min-height:40px}
+.ia .who .dot{width:9px;height:9px;border-radius:50%;margin-top:6px;flex:none;background:var(--line2)}
+.ia .who.ok .dot{background:#2E9E5B}
+.ia .who.bad .dot{background:var(--bad)}
+.ia .who.bad{color:var(--bad)}
+.ia .who div{display:grid;gap:2px;min-width:0}
+.ia .who strong{overflow-wrap:anywhere;font-weight:600}
+.ia .who small{color:var(--muted);font-size:12px}
+.ia .acts{display:flex;gap:6px;flex-wrap:wrap}
+.ia code{display:block;font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:3px 6px;white-space:nowrap;overflow-x:auto}
 .card>.hd{display:flex;align-items:center;gap:10px;padding:10px 14px;flex-wrap:wrap}
 .card>.hd b{color:var(--heading);font-size:16px}
 .card>.hd span{flex:1;font-size:13px;color:var(--muted);min-width:160px;overflow-wrap:anywhere}
@@ -732,7 +775,7 @@ function askInvite(c, after) {
 const SVG_STOP = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86z"/><text x="12" y="14.3" font-size="6.2" font-weight="700" text-anchor="middle" fill="#fff" font-family="Arial,Helvetica,sans-serif">STOP</text></svg>';
 const SVG_CLOUD = svg('M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z');
 let chats = [], assuntos = [], sug = {}, sugDias = 90, sugJanela = '90 days', editing = null, tab = 'painel', pend = 0, quadro = [], etapas = [], modo = 'etapa', multi = false, cfg = null, qopen = false, qconf = {}, cfgDirty = false;
-let padrao = {modelo: 'sonnet', esforco: '', modelo_contatos: 'claude-sonnet-5-5'}, temClaude = true, painel = null, pdias = 30, booted = false, conectores = null;
+let padrao = {modelo: 'sonnet', esforco: '', modelo_contatos: 'claude-sonnet-5-5'}, temClaude = true, iaNome = 'Claude', painel = null, pdias = 30, booted = false, conectores = null;
 const drafts = {};
 const TAB = Math.random().toString(36).slice(2);
 const openSec = new Set();
@@ -744,6 +787,106 @@ const btn = (text, fn, cls, tip) => { const b = el('button', cls, text); b.type 
 // icon button (pencil, trash…); the tooltip says what it does
 const ico = (svgCode, fn, tip, del) => { const b = btn('', fn, 'ico' + (del ? ' del' : ''), tip); b.innerHTML = svgCode; b.setAttribute('aria-label', tip); return b; };
 const penBtn = c => ico(SVG_PEN, () => openConv(c.chave, 'ajustes'), 'Settings: history date, folders, Claude model and references');
+// ---- AI privacy: ✓ everything passes · funnel = filtered by the chosen prompts · ⦸ no AI
+let filtrosBanco = [], privPadrao = {modo: 'livre', filtros: []};
+const SVG_PRIV = {
+  livre: svg('M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'),
+  filtro: svg('M3 4h18l-7 9v6l-4 2v-8z'),
+  sem_ia: svg('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2c1.85 0 3.55.63 4.9 1.68L5.68 16.9A8 8 0 0 1 12 4zm0 16c-1.85 0-3.55-.63-4.9-1.68L18.32 7.1A8 8 0 0 1 12 20z')};
+const PRIV_TXT = {livre: 'Everything passes', filtro: 'Filtered by AI', sem_ia: 'No AI'};
+const PRIV_DESC = {
+  livre: 'The conversation goes to the AI as it is, when you ask for drafts, suggestions or the dashboard.',
+  filtro: 'Before anything else, the AI removes what the chosen filters describe; only the filtered text is used.',
+  sem_ia: 'This app never sends the conversation to any AI. Sync and .md files keep working.'};
+const PRIV_AVISO = 'Filters are done by the AI itself, so they are not perfect: it can miss something or remove too much. The conversation is still sent to the AI provider to be filtered. Use No AI for anything that must never leave your Mac.';
+const filtroNomes = ids => (ids || []).map(i => (filtrosBanco.find(f => f.id === i) || {}).nome || i).join(', ');
+const privLabel = p => PRIV_TXT[p.modo] + (p.modo === 'filtro' && p.filtros.length ? ': ' + filtroNomes(p.filtros) : '');
+function privTag(p, fn, tip, full) {
+  const b = btn('', fn, 'ptag p-' + p.modo + (full ? '' : ' only') + (p.herda ? ' herda' : ''), tip || ('AI privacy: ' + privLabel(p) + (p.origem ? ` (${p.origem})` : '') + '. Click to change.'));
+  b.innerHTML = SVG_PRIV[p.modo]; if (full) b.append(full === true ? PRIV_TXT[p.modo] : full);
+  b.setAttribute('aria-label', b.title); return b;
+}
+// chooser: herda = label of the "follow topic/default" option (null = no such option)
+function privEditor(cur, herda, onChange) {
+  let modo = cur.modo || '', fil = new Set(cur.filtros || []);
+  const box = el('div', 'popts');
+  const draw = () => {
+    const opts = (herda ? [['', herda.titulo, herda.desc, herda.icone]] : []).concat(['livre', 'filtro', 'sem_ia'].map(m => [m, PRIV_TXT[m], PRIV_DESC[m], m]));
+    box.replaceChildren(...opts.map(([v, t, desc, icon]) => {
+      const l = el('label', 'popt' + (modo === v ? ' on' : '')), r = el('input'); r.type = 'radio'; r.name = 'priv'; r.checked = modo === v;
+      r.onchange = () => { modo = v; if (v === 'filtro' && !fil.size && filtrosBanco[0]) fil.add(filtrosBanco[0].id); draw(); onChange && onChange(); };
+      const pi = el('span', 'pi ptag p-' + icon); pi.innerHTML = SVG_PRIV[icon];
+      const tx = el('div'); tx.append(el('b', null, t), el('small', null, desc));
+      if (v === 'filtro' && modo === 'filtro') {
+        const fl = el('div', 'pfil');
+        if (!filtrosBanco.length) fl.append(el('small', 'bad', 'No filter prompt yet: add one in Settings > AI privacy.'));
+        filtrosBanco.forEach(f => { const cl = el('label', 'chk'), cb = el('input'); cb.type = 'checkbox'; cb.checked = fil.has(f.id); cb.onchange = () => { cb.checked ? fil.add(f.id) : fil.delete(f.id); onChange && onChange(); }; cl.title = f.texto; cl.append(cb, f.nome); fl.append(cl); });
+        fl.append(el('div', 'call warn', PRIV_AVISO));
+        tx.append(fl);
+      }
+      l.append(r, pi, tx); return l;
+    }));
+  };
+  draw();
+  return {el: box, get value() { return {modo, filtros: modo === 'filtro' ? [...fil] : []}; }};
+}
+// conversation privacy (the drawer tab)
+function privPane(c) {
+  const p = c.priv || privPadrao, f = el('div'); f.style.display = 'grid'; f.style.gap = '10px';
+  const topicRule = c.assuntos.map(a => assuntos.find(t => t.id === a)).filter(t => t && t.privacidade && t.privacidade.modo);
+  const herdaDe = topicRule.length ? 'its topic' + (topicRule.length > 1 ? 's' : '') + ' (' + topicRule.map(t => t.nome).join(', ') + ')' : 'the default in Settings';
+  const own = c.privacidade || {modo: ''};
+  const now = el('div', 'tools'); now.style.margin = '0';
+  now.append(el('span', 'h', 'Now:'), privTag(p, () => {}, '', privLabel(p)), el('span', 'h', p.origem ? `set by ${p.origem.toLowerCase()}` : ''));
+  const inh = topicRule.length ? priv_merge_js(topicRule.map(t => t.privacidade)) : privPadrao;
+  const ed = privEditor(own, {titulo: 'Follow ' + herdaDe, desc: 'Uses ' + privLabel(inh).toLowerCase() + '. Changes there apply here too.', icone: inh.modo}, () => { sv.disabled = false; });
+  const sv = btn('Save privacy', async () => {
+    const v = ed.value; if (v.modo === 'filtro' && !v.filtros.length) return toast('Pick at least one filter.', 'bad');
+    const r = await api('/api/privacidade', {chave: c.chave, ...v}); if (fail(r)) return;
+    toast('Privacy saved: ' + (v.modo ? privLabel(v) : 'follows ' + herdaDe) + '.'); await load(); openConv(c.chave, 'privacy');
+  }, 'cta', 'Saves the privacy of this conversation'); sv.disabled = true; sv.style.justifySelf = 'start';
+  f.append(el('span', 'h', 'What this app may send to the AI from this conversation (drafts, suggestions, dashboard, contact suggestions).'), now, ed.el, sv);
+  return f;
+}
+const priv_merge_js = ps => ps.some(p => p.modo === 'sem_ia') ? {modo: 'sem_ia', filtros: []} : ps.some(p => p.modo === 'filtro') ? {modo: 'filtro', filtros: [...new Set(ps.flatMap(p => p.filtros || []))]} : {modo: 'livre', filtros: []};
+// topic privacy: dialog
+function topicPriv(t) {
+  const d = $('ask'), f = el('div', 'form'), n = chats.filter(c => c.sel && c.assuntos.includes(t.id));
+  const own = n.filter(c => c.privacidade && c.privacidade.modo).length;
+  const ed = privEditor(t.privacidade || {modo: ''}, {titulo: 'No topic rule', desc: 'Each conversation follows its own setting or the default (' + privLabel(privPadrao).toLowerCase() + ').', icone: privPadrao.modo});
+  const l = el('label', 'chk'), cb = el('input'); cb.type = 'checkbox'; l.append(cb, `Apply to all ${n.length} conversation(s) of this topic now` + (own ? `, replacing the own setting of ${own}` : ''));
+  const bar = el('div', 'tools'); bar.style.margin = '4px 0 0';
+  bar.append(btn('Save', async () => {
+    const v = ed.value; if (v.modo === 'filtro' && !v.filtros.length) return toast('Pick at least one filter.', 'bad');
+    const r = await api('/api/privacidade', {assunto: t.id, ...v, aplicar_todas: cb.checked}); if (fail(r)) return;
+    d.close(); toast(`Privacy of "${t.nome}": ${v.modo ? privLabel(v) : 'no topic rule'}.`); await load();
+  }, 'cta'), btn('Cancel', () => d.close(), '', 'Does nothing'));
+  f.append(el('b', null, `AI privacy — topic "${t.nome}"`), el('span', 'h', 'Conversations of this topic without their own setting follow this rule. If a conversation is in several topics, the strictest rule wins.'), ed.el, l, bar);
+  d.replaceChildren(f); d.onclose = null; d.showModal();
+}
+// Settings card: default + prompt bank
+function privCard(d, sec, grid) {
+  sec('AI privacy');
+  const g = grid(), w = el('div', 'wide'); w.style.display = 'grid'; w.style.gap = '12px';
+  ['input', 'change'].forEach(ev => w.addEventListener(ev, e => e.stopPropagation()));
+  const ed = privEditor(d.priv_padrao, null, () => { sv.disabled = false; });
+  const sv = btn('Save default', async () => { const v = ed.value; if (v.modo === 'filtro' && !v.filtros.length) return toast('Pick at least one filter.', 'bad'); const r = await api('/api/privacidade', {padrao: v}); if (fail(r)) return; toast('Default privacy saved.'); await load(); loadConfig(); }, 'cta', 'Saves the default privacy'); sv.disabled = true; sv.style.justifySelf = 'start';
+  w.append(el('small', null, 'Default for every conversation without its own setting or topic rule, and for the conversations you do not follow (Ask AI in suggestions). Each conversation (menu > Privacy) and each topic (privacy flag next to its name in Following) can have its own. Symbols: ✓ everything passes · funnel = filtered by AI · ⦸ no AI.'), ed.el, sv);
+  // prompt bank
+  const bank = (d.filtros || []).map(f => ({...f})), list = el('div', 'pbank');
+  const save = async msg => { const r = await api('/api/privacidade', {banco: bank}); if (fail(r)) return; toast(msg); await load(); loadConfig(); };
+  const draw = () => list.replaceChildren(...bank.map((f, i) => {
+    const b = el('div', 'pf'), n = el('input'), t = el('textarea'); n.value = f.nome; n.placeholder = 'Filter name'; t.rows = 3; t.value = f.texto; t.placeholder = 'What the AI must remove, e.g. "Prices, discounts and contract values."';
+    n.oninput = () => { f.nome = n.value; ok.disabled = false; }; t.oninput = () => { f.texto = t.value; ok.disabled = false; };
+    const tl = el('div', 'tools'), ok = btn('Save', () => save('Filter saved.'), 'cta'); ok.disabled = !!f.id;
+    tl.append(ok, btn('Delete', async () => { if (!await ask(`Delete the filter "${f.nome}"?\n\nConversations and topics using it stop using it.`, 'Delete', true)) return; bank.splice(i, 1); save('Filter deleted.'); }, 'lk'));
+    b.append(n, t, tl); return b;
+  }));
+  draw();
+  const add = btn('New filter', () => { bank.push({nome: '', texto: ''}); draw(); list.lastChild.querySelector('input').focus(); }, '', 'Adds a ready-made prompt to the bank'); add.style.justifySelf = 'start';
+  w.append(el('b', null, 'Ready-made filters'), el('small', null, 'Each filter is an instruction telling the AI what to remove before it reads the conversation. Pick them in Filtered by AI.'), list, add, el('div', 'call warn', PRIV_AVISO));
+  g.append(w);
+}
 const tilde = p => (p || '').replace(/^\/Users\/[^/]+/, '~');
 const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
 const brDate = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '';
@@ -954,6 +1097,7 @@ function convRow(c, slim, ctx) {
   const nc = (c.referencias.conectores || []).length;
   if (nc) { const t = el('span', 'tag good', `Connectors: ${nc}`); t.title = 'Claude checks connectors when drafting replies for this conversation'; tags.append(t); }
   tags.prepend(histTag(c));
+  if (c.priv) tags.prepend(privTag(c.priv, () => openConv(c.chave, 'privacy')));
   const acts = el('div', 'acts'), topic = ctx && typeof ctx === 'object' ? ctx : null;
   const stop = btn('', () => stopFollow(c, topic), 'ico stop', topic ? `Stop following in ${topic.nome}` : 'Stop following');
   stop.innerHTML = SVG_STOP; stop.setAttribute('aria-label', stop.title);
@@ -1043,6 +1187,22 @@ function ask(text, okLabel, danger, check) {
     d.replaceChildren(f);
     d.onclose = () => done(check ? (answer ? {apagar: cb.checked} : null) : answer);
     d.showModal(); ok.focus();
+  });
+}
+// text input in the app's own dialog (window.prompt does not work in every browser)
+function askText(text, okLabel, value) {
+  return new Promise(done => {
+    const d = $('ask'), f = el('form', 'form'), bar = el('div', 'tools'), i = el('input');
+    let answer = null;
+    i.value = value || ''; i.required = true; i.maxLength = 60;
+    f.onsubmit = e => { e.preventDefault(); if (i.value.trim()) { answer = i.value.trim(); d.close(); } };
+    const ok = el('button', 'cta', okLabel || 'OK'); ok.type = 'submit';
+    bar.style.margin = '4px 0 0';
+    bar.append(ok, btn('Cancel', () => d.close(), '', 'Does nothing'));
+    f.append(el('p', null, text), i, bar);
+    d.replaceChildren(f);
+    d.onclose = () => done(answer);
+    d.showModal(); i.focus(); i.select();
   });
 }
 for (const id of ['dlg', 'drawer', 'prev']) $(id).addEventListener('click', e => { if (e.target === $(id)) $(id).close(); });
@@ -1160,10 +1320,10 @@ function openConv(chave, foco) {
   const showDrafts = d => out.replaceChildren(...d.sugestoes.map(txt => {
     const o = el('div', 'opt'), b = btn('Copy', async () => { try { await navigator.clipboard.writeText(txt); b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy'; }, 2000); } catch (e) { b.textContent = 'Select and copy'; } }, '', 'Copies the draft to paste into WhatsApp');
     o.append(el('div', null, txt), b); return o;
-  }), el('span', 'h', `Made with ${label(MODELS, d.usou.modelo)}${d.usou.esforco ? ', ' + label(EFFORTS, d.usou.esforco).toLowerCase() + ' effort' : ''}` + (d.usou.arquivos ? ` · ${d.usou.arquivos} reference file(s)` : '') + (d.usou.conectores.length ? ` · ${d.usou.conectores.length} connector(s)` : '') + '. Nothing was sent: copy and paste into WhatsApp.'));
+  }), el('span', 'h', d.usou.provedor ? `Made with ${d.usou.provedor} (${d.usou.modelo})` + (d.usou.arquivos ? ` · ${d.usou.arquivos} reference file(s)` : '') + '. Nothing was sent: copy and paste into WhatsApp.' : `Made with ${label(MODELS, d.usou.modelo)}${d.usou.esforco ? ', ' + label(EFFORTS, d.usou.esforco).toLowerCase() + ' effort' : ''}` + (d.usou.arquivos ? ` · ${d.usou.arquivos} reference file(s)` : '') + (d.usou.conectores.length ? ` · ${d.usou.conectores.length} connector(s)` : '') + (d.usou.privacidade === 'filtro' ? ' · privacy filter applied' : '') + '. Nothing was sent: copy and paste into WhatsApp.'));
   const gen = btn(drafts[chave] ? 'Generate again' : 'Generate drafts', async () => {
     gen.disabled = true; gen.textContent = 'Thinking…';
-    const wait = el('div', 'h'); wait.append(el('span', 'spin'), R.conectores.length ? 'Claude is reading the conversation and checking the connectors. This can take a few minutes.' : 'Claude is reading the conversation…'); out.replaceChildren(wait);
+    const wait = el('div', 'h'); wait.append(el('span', 'spin'), R.conectores.length ? 'Claude is reading the conversation and checking the connectors. This can take a few minutes.' : `${iaNome} is reading the conversation…`); out.replaceChildren(wait);
     const d = await api('/api/resposta', {chave, orientacao: g.value.trim()});
     gen.disabled = false; gen.textContent = 'Generate again';
     if (d.erro) return out.replaceChildren(el('div', 'call bad', d.erro));
@@ -1171,7 +1331,10 @@ function openConv(chave, foco) {
   }, 'cta', 'Uses the Claude installed on this Mac, this conversation\'s history and the chosen references');
   const resp = [];
   if (k.texto) { const q = el('div', 'quote'); q.append(el('small', null, `${k.de} · ${ago(k.data)}`), k.texto); resp.push(q); }
-  if (!temClaude) resp.push(el('div', 'call bad', 'Claude Code was not found on this Mac. Install it to generate drafts.'));
+  if (!temClaude) resp.push(el('div', 'call bad', `${iaNome} is not installed on this Mac. Install it in Settings > AI provider to generate drafts.`));
+  if (c.priv && c.priv.modo === 'sem_ia') { gen.disabled = true; resp.push(el('div', 'call', `⦸ No AI: this conversation is never sent to an AI (${c.priv.origem}). Change it in the Privacy tab.`)); }
+  else if (c.priv && c.priv.modo === 'filtro') resp.push(el('small', 'h', `Funnel — filtered by AI before drafting (${filtroNomes(c.priv.filtros)}). Not perfect: check the draft.`));
+  if (iaNome !== 'Claude') { two.style.display = 'none'; resp.push(el('small', 'h', `Drafts are made by ${iaNome} (Settings > AI provider). Connectors and the model/effort choice work only with Claude.`)); }
   resp.push(g, two, refLine, gen, out);
   const sResp = pane('reply', 'Reply', ...resp);
   if (drafts[chave]) showDrafts(drafts[chave]);
@@ -1236,7 +1399,7 @@ function openConv(chave, foco) {
   const cbar = el('div', 'tools'); cbar.style.margin = '0'; cbar.append(btn('Refresh list', () => loadConns(true), 'lk', 'Asks Claude again which connectors are on'));
   const cx = el('details', 'cx'), cxs = el('summary', null, 'Claude connectors'), cxb = el('div');
   cxs.title = 'Click to see and choose connectors'; cxs.append(cxInfo);
-  cxb.append(el('span', 'h', 'Read-only: only tools that read (get, list, search…) are allowed; sending, creating or changing anything is blocked. Drafts take longer with connectors.'), el('div', 'call warn', 'Drafts may include information Claude found in these connectors. Read each draft before you paste it into WhatsApp.'), conns, cbar);
+  cxb.append(el('div', 'call ok', 'Optional: you do not have to use AI. Syncing and the .md files work without it; connectors only help when you ask for reply drafts. Leave them all off if you prefer.'), el('span', 'h', 'Read-only: only tools that read (get, list, search…) are allowed; sending, creating or changing anything is blocked. Drafts take longer with connectors.'), el('div', 'call warn', 'Drafts may include information Claude found in these connectors. Read each draft before you paste it into WhatsApp.'), conns, cbar);
   cx.append(cxs, cxb);
   cx.addEventListener('toggle', () => { if (cx.open) loadConns(); });
   const sRef = pane('refs', 'External references',
@@ -1298,12 +1461,13 @@ function openConv(chave, foco) {
   drawDest(); drawWhere();
   const sTop = pane('topics', 'Topics', el('span', 'h', 'Topics with a folder write this conversation to their folder.'), dchk, lt);
   const sHist = pane('history', 'History', lh, apply);
+  const sPriv = pane('privacy', 'Privacy', privPane(c));
   const sFold = pane('folder', 'Folders', el('span', 'h', 'Every folder this conversation is written to: its own folders and the folders of its topics.'), where);
   // tab order: topics, history, folder, external references, reply
-  ['topics', 'history', 'folder', 'refs', 'reply'].forEach(id => tabsBar.append(tabsBar.querySelector(`[data-p="${id}"]`)));
+  ['topics', 'history', 'folder', 'refs', 'privacy', 'reply'].forEach(id => tabsBar.append(tabsBar.querySelector(`[data-p="${id}"]`)));
   const tw = el('div', 'dtw'); tw.append(tabsBar);
-  dw.replaceChildren(hd, tw, sTop, sHist, sFold, sRef, sResp); modal(dw);
-  pickPane(foco === 'ajustes' ? 'topics' : 'reply');
+  dw.replaceChildren(hd, tw, sTop, sHist, sFold, sRef, sPriv, sResp); modal(dw);
+  pickPane(foco === 'ajustes' ? 'topics' : foco === 'privacy' ? 'privacy' : 'reply');
   sumR(); drawFiles(); drawConns(); loadFiles();
   if (R.conectores.length) loadConns();
   dw.scrollTop = 0; if (foco !== 'ajustes') setTimeout(() => g.focus({preventScroll: true}), 50);
@@ -1948,6 +2112,8 @@ function renderAssuntos() {
     hd.onclick = e => { if (editing === t.id || e.target.closest('button,input,a,.grip')) return; toggle(); };
     const right = el('div', 'tr');
     if (err) right.append(el('span', 'terr', (t.dirs || []).length ? 'folder not found: nothing is written' : 'no folder: nothing is written'));
+    const tp = t.privacidade && t.privacidade.modo ? t.privacidade : {modo: privPadrao.modo, filtros: privPadrao.filtros, herda: true};
+    right.append(privTag(tp, () => topicPriv(t), t.privacidade && t.privacidade.modo ? `AI privacy of this topic: ${privLabel(tp)}. Applies to its conversations without their own setting. Click to change.` : `No AI privacy rule for this topic (conversations use their own setting or the default: ${privLabel(privPadrao)}). Click to set one for all its conversations.`, t.privacidade && t.privacidade.modo ? true : false));
     right.append(ico(SVG_PEN, () => { editing = t.id; renderAssuntos(); }, 'Rename this topic'), ico(SVG_TRASH, () => deleteTopic(t), 'Delete this topic', true));
     hd.append(left, right);
     card.append(hd);
@@ -2986,15 +3152,20 @@ const FIELDS = [
   ['Conversation suggestions'],
   ['sugestao_horas', 'Look for mentions in the last', 'dur:h:h,d,mo', 'Message window searched for keywords'],
   ['sugestao_max', 'Max suggestions per topic', 'number', 'How many conversations to suggest per topic'],
-  ['Claude — default for every conversation'],
-  ['modelo_resposta', 'Default model', 'select:' + MODELS.map(m => m.join('=')).join(','), 'Used for drafts of every conversation without its own model (conversation menu). Uses your Claude account\'s usage limit'],
-  ['esforco_resposta', 'Default effort', 'select:=Claude default,' + EFFORTS.map(m => m.join('=')).join(','), 'How much Claude thinks before answering. Each conversation can have its own in the conversation menu'],
-  ['modelo_contatos', 'Model for contact suggestions', 'text', 'Claude model that reads a conversation to suggest a contact\'s name and company (Contacts tab). Default: claude-sonnet-5-5'],
-  ['notas_contatos', 'Instruction for contact notes', 'textarea', 'How Claude writes the Notes field of a contact card when it suggests a contact (Conversations > Edit > Suggest from conversation). Empty = back to the default'],
+  // AI provider, then ONLY the settings of the AI in use, then what every AI shares
+  ['@ia'],
+  ['Claude — default for every conversation', '', '', '', 'claude'],
+  ['modelo_resposta', 'Default model', 'select:' + MODELS.map(m => m.join('=')).join(','), 'Used for drafts of every conversation without its own model (conversation menu). Uses your Claude account\'s usage limit', 'claude'],
+  ['esforco_resposta', 'Default effort', 'select:=Claude default,' + EFFORTS.map(m => m.join('=')).join(','), 'How much Claude thinks before answering. Each conversation can have its own in the conversation menu', 'claude'],
+  ['modelo_contatos', 'Model for contact suggestions', 'text', 'Claude model that reads a conversation to suggest a contact\'s name and company (Contacts tab). Default: claude-sonnet-5-5', 'claude'],
+  ['@claudeadv'], ['@outra'],
+  ['Drafts and contact notes'],
+  ['notas_contatos', 'Instruction for contact notes', 'textarea', 'How the AI writes the Notes field of a contact card when it suggests a contact (Conversations > Edit > Suggest from conversation). Empty = back to the default'],
   ['resposta_opcoes', 'Drafts per request', 'number', 'How many reply options to generate (1 to 5)'],
-  ['resposta_mensagens', 'Context messages', 'number', 'How many recent messages Claude reads'],
+  ['resposta_mensagens', 'Context messages', 'number', 'How many recent messages the AI reads'],
   ['voz_arquivos', 'Files with your writing style', 'arquivos', 'Optional texts in your style (.md or .txt); all are read on every draft request'],
   ['instrucoes_resposta', 'Standing instructions for drafts', 'textarea', 'Apply to every draft (e.g. always be informal, never promise deadlines)'],
+  ['@priv'],
 ];
 async function loadConfig() {
   const d = await api('/api/config');
@@ -3002,8 +3173,123 @@ async function loadConfig() {
   cfg = d; cfgDirty = false;
   const inputs = {}, out = [];
   let grid = null;
+  const iaKey = d.ia.provedor;
+  // AI provider: visual and explicit about WHICH account is in use
+  const iaCard = () => {
+    const card = el('div', 'card'), hd = el('div', 'hd');
+    hd.append(el('b', null, 'AI provider'), el('span', null, 'Who writes drafts and suggestions. Each one uses its own subscription, signed in once in your browser. The conversation history is sent only to the provider you choose.'));
+    const wrap = el('div'); wrap.style.padding = '4px 14px 14px'; wrap.style.display = 'grid'; wrap.style.gap = '12px';
+    const grid3 = el('div', 'ias'), res = el('div'); res.style.display = 'none';
+    // keep these controls out of the Save settings flow
+    ['input', 'change'].forEach(ev => wrap.addEventListener(ev, e => e.stopPropagation()));
+    const LOOK = {claude: ['#D97757', 'C'], chatgpt: ['#10A37F', 'G'], gemini: ['linear-gradient(135deg,#4285F4,#9B72CB 60%,#D96570)', '✦']};
+    const showRes = (r, nome) => {
+      const msg = r.erro ? `${nome}: ${r.erro}` : `${r.nome} working${r.conta ? ' — ' + r.conta : ''} (${r.segundos}s).`;
+      res.className = 'call ' + (r.erro ? 'bad' : 'ok'); res.style.display = ''; res.replaceChildren(el('span', null, msg));
+      toast(msg, r.erro ? 'bad' : 'ok');
+    };
+    Object.entries(d.ias).forEach(([k, s]) => {
+      const on = d.ia.provedor === k, c = el('div', 'ia' + (on ? ' on' : '') + (s.instalado ? '' : ' off'));
+      const top = el('div', 'top'), logo = el('div', 'logo', LOOK[k][1]); logo.style.background = LOOK[k][0];
+      top.append(logo, el('b', null, s.nome)); if (on) top.append(el('span', 'badge', 'In use'));
+      const who = el('div', 'who'), txt = el('div');
+      if (!s.instalado) { who.classList.add('bad'); txt.append(el('strong', null, 'Not installed on this Mac'), el('small', null, 'Install command:'), el('code', null, s.instalar)); }
+      else if (s.aviso) { who.classList.add('bad'); txt.append(el('strong', null, s.aviso)); }
+      else if (s.conta) { who.classList.add('ok'); txt.append(el('small', null, 'Connected as'), el('strong', null, s.conta)); const extra = [s.pessoa, s.plano, s.org].filter(Boolean).join(' · '); if (extra) txt.append(el('small', null, extra)); }
+      else txt.append(el('strong', null, 'Not signed in'), el('small', null, 'Click Sign in: your browser opens to log in.'));
+      if (s.perfil) txt.append(el('small', null, `Claude profile: ${s.perfil}`));
+      who.prepend(el('span', 'dot')); who.append(txt);
+      const acts = el('div', 'acts');
+      if (!s.instalado) acts.append(btn('Install…', async () => { const r = await api('/api/ia-instalar', {provedor: k}); if (!fail(r)) toast(`Terminal opened with the install command for ${s.nome}. When it finishes, come back and reload this page.`); }, '', 'Opens Terminal with the official install command; you see it before it runs'));
+      else {
+        if (!on) acts.append(btn('Use ' + s.nome, async () => { const r = await api('/api/ia', {provedor: k}); if (fail(r)) return; toast(`${s.nome} now writes your drafts and suggestions.`); await load(); loadConfig(); }, 'cta', `Drafts and suggestions will be made by ${s.nome}`));
+        acts.append(btn(s.conta ? 'Switch account…' : 'Sign in…', async () => { const r = await api('/api/ia-login', {provedor: k}); if (!fail(r)) toast(`Terminal opened: follow the steps to sign in to ${s.nome} in your browser, then reload this page.`); }, s.conta ? 'lk' : '', 'Opens the sign-in in your browser. The app never sees your password'));
+        const t = btn('Test', async () => { t.disabled = true; t.textContent = 'Testing…'; const r = await api('/api/ia-teste', {provedor: k}); t.disabled = false; t.textContent = 'Test'; showRes(r, s.nome); }, 'lk', `Makes a tiny call to ${s.nome}`);
+        acts.append(t);
+      }
+      c.append(top, who, acts);
+      if (!on && s.instalado) c.onclick = e => { if (e.target === c || e.target.closest('.top,.who')) c.querySelector('.cta')?.click(); };
+      grid3.append(c);
+    });
+    wrap.append(grid3, res, el('small', 'h', 'Using AI is optional: syncing and the .md files work without it. Only the settings of the AI in use are shown below. Claude also offers connectors and per-conversation model and effort; ChatGPT and Gemini write only from the conversation history and the reference files. What each conversation may send is set in AI privacy.'));
+    card.append(hd, wrap); out.push(card);
+  };
+  // settings of ChatGPT or Gemini (only the one in use)
+  const outraCard = () => {
+    if (iaKey === 'claude') return;
+    const s = d.ias[iaKey], mk = 'modelo_' + iaKey;
+    sec(`${s.nome} settings`);
+    const l = el('label', null, 'Model'), i = el('input'); i.value = d.ia[mk] || ''; i.placeholder = `${s.nome} default`;
+    l.title = iaKey === 'gemini' ? 'e.g. pro, flash or gemini-2.5-pro' : 'e.g. gpt-5';
+    ['input', 'change'].forEach(ev => i.addEventListener(ev, e => e.stopPropagation()));
+    i.onchange = async () => { const r = await api('/api/ia', {[mk]: i.value.trim()}); if (!fail(r)) toast(`${s.nome} model saved.`); };
+    l.append(i, el('small', null, `Optional. Empty = the default model of the ${s.nome} tool. Saved right away.`));
+    grid.append(l, el('small', 'wide', `${s.nome} uses the account shown in AI provider. Connectors and per-conversation model/effort are Claude-only.`));
+  };
   const sec = title => { const c = el('div', 'card'), h = el('div', 'hd'); h.append(el('b', null, title)); grid = el('div', 'cfg'); c.append(h, grid); out.push(c); };
-  FIELDS.forEach(([k, lb, type, tip]) => {
+  const claudeAdv = () => {
+  sec('Claude: accounts and advanced options');
+  const cl = d.claude_conta, cbox = el('div', 'wide'); cbox.style.display = 'grid'; cbox.style.gap = '10px';
+  // saved right away (like keywords), not with the Save settings button
+  ['input', 'change'].forEach(ev => cbox.addEventListener(ev, e => e.stopPropagation()));
+  const clSave = async (body, msg) => { const r = await api('/api/claude-conta', body); if (fail(r)) return false; if (msg) toast(msg); loadConfig(); return true; };
+  // account: each one is a separate Claude Code login folder
+  const accSel = el('select'); accSel.append(new Option('Default (~/.claude)', ''));
+  cl.perfis.forEach(p => accSel.append(new Option(`${p.nome} (${tilde(p.pasta)})`, p.pasta)));
+  accSel.value = cl.perfil; accSel.onchange = () => clSave({perfil: accSel.value}, 'Claude account changed.');
+  const accL = el('label', null, 'Account'); accL.title = 'Which Claude Code login the app uses'; accL.append(accSel);
+  const accTools = el('div', 'tools'); accTools.style.margin = '0';
+  accTools.append(
+    btn('New account…', async () => { const n = await askText('Name for this Claude account (e.g. Work, Personal):', 'Add account'); if (n) await clSave({novo_perfil: n.trim()}, 'Account added. Click "Sign in" to log in to it.'); }, '', 'Creates a separate login for another Claude account'),
+    btn('Use existing folder…', async () => { const r = await api('/api/escolher', {tipo: 'pasta', titulo: 'Claude Code config folder of the account (e.g. ~/.claude-work)'}); if (!r.caminho) return; const n = await askText('Name for this account:', 'Add account', r.caminho.split('/').pop()); if (n) await clSave({novo_perfil: n.trim(), pasta: r.caminho}, 'Account added.'); }, 'lk', 'Adds an account that is already logged in another Claude Code folder'),
+    btn('Sign in…', async () => { const r = await api('/api/claude-login', {}); if (!fail(r)) toast('Terminal opened: sign in there, then come back and click Test.'); }, 'lk', 'Opens Terminal with Claude Code on this account so you can log in. You type the password there; the app never sees it.'));
+  if (cl.perfil) accTools.append(btn('Remove from list', async () => { if (await ask('Remove this account from the list?\n\nIts login folder stays on your Mac.', 'Remove', true)) clSave({remover_perfil: cl.perfil}, 'Account removed from the list.'); }, 'lk', 'Removes the account from the list (the login folder stays)'));
+  // provider
+  const provSel = el('select'); Object.entries(cl.provedores).forEach(([v, n]) => provSel.append(new Option(n, v))); provSel.value = cl.provedor;
+  const provL = el('label', null, 'Provider'); provL.title = 'Who runs Claude for the app'; provL.append(provSel);
+  const extra = el('div'); extra.style.display = 'grid'; extra.style.gap = '8px';
+  const field = (lb, k, ph, tip) => { const l = el('label', null, lb), i = el('input'); i.value = cl[k] || ''; i.placeholder = ph; l.title = tip; l.append(i); return [l, i]; };
+  const drawProv = () => {
+    const v = provSel.value, kids = [];
+    if (v === 'assinatura') kids.push(el('small', null, 'Uses the login of the account above (Claude Pro, Max, Team or Enterprise). To log in or switch users, click "Sign in…".'));
+    if (v === 'api') {
+      const i = el('input'); i.type = 'password'; i.autocomplete = 'off'; i.placeholder = cl.chave ? 'Saved in the Keychain — paste a new one to replace' : 'sk-ant-…';
+      const l = el('label', null, 'API key'); l.title = 'Kept only in the macOS Keychain, never in config.json'; l.append(i);
+      const t = el('div', 'tools'); t.style.margin = '0';
+      t.append(btn('Save key and use API', async () => { if (!i.value.trim() && !cl.chave) return toast('Paste the API key first.', 'bad'); const b = {provedor: 'api'}; if (i.value.trim()) b.chave = i.value.trim(); i.value = ''; await clSave(b, 'Using the Anthropic API key.'); }, 'cta'));
+      if (cl.chave) t.append(btn('Delete key', async () => { if (await ask('Delete the API key from the Keychain?', 'Delete', true)) clSave({chave: '', provedor: 'assinatura'}, 'Key deleted. Back to the subscription login.'); }, 'lk'));
+      kids.push(l, t, el('small', null, cl.chave ? 'A key is saved in the macOS Keychain.' : 'No key saved yet.'));
+    }
+    if (v === 'bedrock' || v === 'vertex') {
+      const fs = v === 'bedrock'
+        ? [field('AWS region', 'aws_regiao', 'us-east-1', 'Region where Claude is enabled in Bedrock'), field('AWS profile (optional)', 'aws_perfil', 'default', 'Profile from ~/.aws; empty = default credentials')]
+        : [field('Region', 'vertex_regiao', 'us-east5', 'Google Cloud region with Claude enabled'), field('Project ID', 'vertex_projeto', 'my-project', 'Google Cloud project ID')];
+      const keys = v === 'bedrock' ? ['aws_regiao', 'aws_perfil'] : ['vertex_regiao', 'vertex_projeto'];
+      const use = btn(`Use ${cl.provedores[v]}`, () => { const b = {provedor: v}; keys.forEach((k, n) => b[k] = fs[n][1].value.trim()); clSave(b, `Using ${cl.provedores[v]}.`); }, 'cta'); use.style.justifySelf = 'start';
+      kids.push(...fs.map(f => f[0]), use,
+        el('small', null, v === 'bedrock' ? 'Uses the AWS credentials already on this Mac (aws configure / SSO).' : 'Uses the Google Cloud credentials already on this Mac (gcloud auth application-default login).'));
+    }
+    extra.replaceChildren(...kids);
+  };
+  provSel.onchange = () => { drawProv(); res.style.display = 'none'; if (provSel.value === 'assinatura') clSave({provedor: 'assinatura'}, 'Using the subscription login.'); };
+  drawProv();
+  const res = el('div'); res.style.display = 'none';
+  const test = btn('Test', async () => {
+    test.disabled = true; res.className = 'call'; res.style.display = ''; res.replaceChildren(el('span', null, 'Testing…'));
+    const r = await api('/api/claude-teste', {}); test.disabled = false;
+    res.className = 'call ' + (r.erro ? 'bad' : 'ok');
+    const msg = r.erro ? 'Claude test failed: ' + r.erro : `Claude working: ${r.provedor}, account ${r.conta} (${r.segundos}s).`;
+    res.replaceChildren(el('span', null, msg));
+    toast(msg, r.erro ? 'bad' : 'ok');  // survives a screen refresh (e.g. a sync finishing)
+  }, '', 'Makes a tiny call with the chosen account and provider');
+  test.style.justifySelf = 'start';
+  cbox.append(el('small', null, `In use: ${cl.provedor_nome} · account ${cl.conta}. Changes apply right away, from the next draft or suggestion.`), accL, accTools, provL, extra, test, res);
+  grid.append(cbox);
+  };
+  const SPECIAL = {'@ia': iaCard, '@claudeadv': () => iaKey === 'claude' && claudeAdv(), '@outra': outraCard, '@priv': () => privCard(d, sec, () => grid)};
+  FIELDS.forEach(([k, lb, type, tip, only]) => {
+    if (SPECIAL[k]) return SPECIAL[k]();
+    if (only && only !== iaKey) return;
     if (!lb) return sec(k);
     const l = el('label', type === 'textarea' || type === 'arquivos' ? 'wide' : '', lb); l.title = tip;
     let i;
@@ -3062,63 +3348,6 @@ async function loadConfig() {
   fl.append(el('small', null, 'The app finds WhatsApp installations on this Mac by itself (App Store, Meta website, beta and Business). If an installation keeps its data elsewhere, add the folder that contains ChatStorage.sqlite.'));
   const add = btn('Add folder of another installation…', async () => { const r = await api('/api/escolher', {tipo: 'pasta', titulo: 'Folder that contains ChatStorage.sqlite'}); if (r.caminho && !extras.includes(r.caminho)) { extras.push(r.caminho); fl.insertBefore(el('div', 'call ok', 'Will be added on save: ' + r.caminho), add); dirty(); } }, '', 'Opens the Mac file picker');
   add.style.justifySelf = 'start'; fl.append(add); grid.append(fl);
-  sec('Claude');
-  const cl = d.claude_conta, cbox = el('div', 'wide'); cbox.style.display = 'grid'; cbox.style.gap = '10px';
-  // saved right away (like keywords), not with the Save settings button
-  ['input', 'change'].forEach(ev => cbox.addEventListener(ev, e => e.stopPropagation()));
-  const clSave = async (body, msg) => { const r = await api('/api/claude-conta', body); if (fail(r)) return false; if (msg) toast(msg); loadConfig(); return true; };
-  // account: each one is a separate Claude Code login folder
-  const accSel = el('select'); accSel.append(new Option('Default (~/.claude)', ''));
-  cl.perfis.forEach(p => accSel.append(new Option(`${p.nome} (${tilde(p.pasta)})`, p.pasta)));
-  accSel.value = cl.perfil; accSel.onchange = () => clSave({perfil: accSel.value}, 'Claude account changed.');
-  const accL = el('label', null, 'Account'); accL.title = 'Which Claude Code login the app uses'; accL.append(accSel);
-  const accTools = el('div', 'tools'); accTools.style.margin = '0';
-  accTools.append(
-    btn('New account…', async () => { const n = prompt('Name for this Claude account (e.g. Work):'); if (n && n.trim()) await clSave({novo_perfil: n.trim()}, 'Account added. Click "Sign in" to log in to it.'); }, '', 'Creates a separate login for another Claude account'),
-    btn('Use existing folder…', async () => { const r = await api('/api/escolher', {tipo: 'pasta', titulo: 'Claude Code config folder of the account (e.g. ~/.claude-work)'}); if (!r.caminho) return; const n = prompt('Name for this account:', r.caminho.split('/').pop()); if (n && n.trim()) await clSave({novo_perfil: n.trim(), pasta: r.caminho}, 'Account added.'); }, 'lk', 'Adds an account that is already logged in another Claude Code folder'),
-    btn('Sign in…', async () => { const r = await api('/api/claude-login', {}); if (!fail(r)) toast('Terminal opened: sign in there, then come back and click Test.'); }, 'lk', 'Opens Terminal with Claude Code on this account so you can log in. You type the password there; the app never sees it.'));
-  if (cl.perfil) accTools.append(btn('Remove from list', async () => { if (await ask('Remove this account from the list?\n\nIts login folder stays on your Mac.', 'Remove', true)) clSave({remover_perfil: cl.perfil}, 'Account removed from the list.'); }, 'lk', 'Removes the account from the list (the login folder stays)'));
-  // provider
-  const provSel = el('select'); Object.entries(cl.provedores).forEach(([v, n]) => provSel.append(new Option(n, v))); provSel.value = cl.provedor;
-  const provL = el('label', null, 'Provider'); provL.title = 'Who runs Claude for the app'; provL.append(provSel);
-  const extra = el('div'); extra.style.display = 'grid'; extra.style.gap = '8px';
-  const field = (lb, k, ph, tip) => { const l = el('label', null, lb), i = el('input'); i.value = cl[k] || ''; i.placeholder = ph; l.title = tip; l.append(i); return [l, i]; };
-  const drawProv = () => {
-    const v = provSel.value, kids = [];
-    if (v === 'assinatura') kids.push(el('small', null, 'Uses the login of the account above (Claude Pro, Max, Team or Enterprise). To log in or switch users, click "Sign in…".'));
-    if (v === 'api') {
-      const i = el('input'); i.type = 'password'; i.autocomplete = 'off'; i.placeholder = cl.chave ? 'Saved in the Keychain — paste a new one to replace' : 'sk-ant-…';
-      const l = el('label', null, 'API key'); l.title = 'Kept only in the macOS Keychain, never in config.json'; l.append(i);
-      const t = el('div', 'tools'); t.style.margin = '0';
-      t.append(btn('Save key and use API', async () => { if (!i.value.trim() && !cl.chave) return toast('Paste the API key first.', 'bad'); const b = {provedor: 'api'}; if (i.value.trim()) b.chave = i.value.trim(); i.value = ''; await clSave(b, 'Using the Anthropic API key.'); }, 'cta'));
-      if (cl.chave) t.append(btn('Delete key', async () => { if (await ask('Delete the API key from the Keychain?', 'Delete', true)) clSave({chave: '', provedor: 'assinatura'}, 'Key deleted. Back to the subscription login.'); }, 'lk'));
-      kids.push(l, t, el('small', null, cl.chave ? 'A key is saved in the macOS Keychain.' : 'No key saved yet.'));
-    }
-    if (v === 'bedrock' || v === 'vertex') {
-      const fs = v === 'bedrock'
-        ? [field('AWS region', 'aws_regiao', 'us-east-1', 'Region where Claude is enabled in Bedrock'), field('AWS profile (optional)', 'aws_perfil', 'default', 'Profile from ~/.aws; empty = default credentials')]
-        : [field('Region', 'vertex_regiao', 'us-east5', 'Google Cloud region with Claude enabled'), field('Project ID', 'vertex_projeto', 'my-project', 'Google Cloud project ID')];
-      const keys = v === 'bedrock' ? ['aws_regiao', 'aws_perfil'] : ['vertex_regiao', 'vertex_projeto'];
-      const use = btn(`Use ${cl.provedores[v]}`, () => { const b = {provedor: v}; keys.forEach((k, n) => b[k] = fs[n][1].value.trim()); clSave(b, `Using ${cl.provedores[v]}.`); }, 'cta'); use.style.justifySelf = 'start';
-      kids.push(...fs.map(f => f[0]), use,
-        el('small', null, v === 'bedrock' ? 'Uses the AWS credentials already on this Mac (aws configure / SSO).' : 'Uses the Google Cloud credentials already on this Mac (gcloud auth application-default login).'));
-    }
-    extra.replaceChildren(...kids);
-  };
-  provSel.onchange = () => { drawProv(); res.style.display = 'none'; if (provSel.value === 'assinatura') clSave({provedor: 'assinatura'}, 'Using the subscription login.'); };
-  drawProv();
-  const res = el('div'); res.style.display = 'none';
-  const test = btn('Test', async () => {
-    test.disabled = true; res.className = 'call'; res.style.display = ''; res.replaceChildren(el('span', null, 'Testing…'));
-    const r = await api('/api/claude-teste', {}); test.disabled = false;
-    res.className = 'call ' + (r.erro ? 'bad' : 'ok');
-    const msg = r.erro ? 'Claude test failed: ' + r.erro : `Claude working: ${r.provedor}, account ${r.conta} (${r.segundos}s).`;
-    res.replaceChildren(el('span', null, msg));
-    toast(msg, r.erro ? 'bad' : 'ok');  // survives a screen refresh (e.g. a sync finishing)
-  }, '', 'Makes a tiny call with the chosen account and provider');
-  test.style.justifySelf = 'start';
-  cbox.append(el('small', null, `In use: ${cl.provedor_nome} · account ${cl.conta}. Changes apply right away, from the next draft or suggestion.`), accL, accTools, provL, extra, test, res);
-  grid.append(cbox);
   sec('Account file');
   const acc = el('div', 'wide'); acc.style.display = 'grid'; acc.style.gap = '6px';
   const cur = el('code', null, d.arquivo_config); cur.style.wordBreak = 'break-all';
@@ -3186,7 +3415,7 @@ async function load(soft) {
   if (fail(d)) return false;
   $('msg').replaceChildren();
   (d.renomeadas || []).forEach(x => toast(x.replace(/^↻ /, 'Renamed: '), '', []));
-  chats = d.chats; assuntos = d.assuntos; palavras = d.palavras || []; icones = d.icones || {}; multi = d.fontes > 1; padrao = d.padrao; etapas = d.etapas; temClaude = d.claude;
+  chats = d.chats; assuntos = d.assuntos; palavras = d.palavras || []; icones = d.icones || {}; multi = d.fontes > 1; padrao = d.padrao; etapas = d.etapas; temClaude = d.claude; iaNome = d.ia || 'Claude'; filtrosBanco = d.filtros || []; privPadrao = d.priv_padrao || privPadrao;
   if (!booted) {  // preferences live in config.json on this Mac; they win over the browser's copy
     booted = true;
     const t = d.tela || {};

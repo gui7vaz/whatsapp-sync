@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WhatsApp Sync</title>
+<meta name="description" content="A Mac app that keeps the WhatsApp chats you choose as Markdown files for Claude. Local only, never sends messages.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap">
+<style>
+:root {
+  --orange-500: #F46F29;
+  --orange-600: #D8551B;
+  --orange-0: #FEEAE3;
+  --mercury-700: #152329;
+  --mercury-600: #1C2E36;
+  --mercury-500: #233A44;
+  --mercury-200: #A7B0B4;
+  --uranus-0: #F5F8F8;
+  --uranus-100: #DBE4E5;
+  --gray-600: #4F5155;
+  --gray-500: #63656A;
+  --green-0: #ECF7F0;
+  --green-600: #368A55;
+  --white: #FFFFFF;
+  --radius: 8px;
+  --shadow-m: 0px 1.75px 4px -1px rgba(0, 0, 0, 0.14);
+  --shadow-l: 0px 4px 6px -2px rgba(0, 0, 0, 0.08), 0px 10px 15px -3px rgba(0, 0, 0, 0.12);
+  --font: "Manrope", Arial, Helvetica, sans-serif;
+}
+* { box-sizing: border-box; }
+html { color-scheme: light; }
+body { margin: 0; background: var(--uranus-0); color: var(--gray-600); font-family: var(--font); font-size: 16px; line-height: 1.5; }
+h1, h2, h3 { color: var(--mercury-600); font-weight: 700; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* shell: dark band with the hero */
+.shell { background: var(--mercury-700); color: var(--uranus-100); padding-block: 20px 0; }
+.bar { display: flex; align-items: center; gap: 12px; }
+.bar img { width: 32px; height: 32px; border-radius: 8px; }
+.bar b { color: var(--white); font-size: 18px; }
+.hero { padding-block: 56px 0; display: flex; flex-direction: column; gap: 20px; align-items: flex-start; }
+.hero h1 { color: var(--white); font-size: clamp(34px, 6vw, 54px); line-height: 1.12; max-width: 18ch; }
+.hero p { font-size: 18px; max-width: 58ch; color: var(--uranus-100); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-size: 14px; font-weight: 500; padding: 4px 12px; border-radius: 999px; background: var(--mercury-500); color: var(--uranus-100); }
+.cta { display: inline-block; background: var(--orange-500); color: var(--white); font-weight: 700; text-decoration: none; padding: 12px 20px; border-radius: var(--radius); }
+.cta:hover { background: var(--orange-600); }
+.cta:focus-visible { outline: 2px solid var(--white); outline-offset: 2px; }
+.hero-shot { margin-top: 48px; margin-bottom: -1px; }
+.hero-shot img { display: block; width: 100%; height: auto; border-radius: 12px 12px 0 0; box-shadow: var(--shadow-l); }
+
+main { padding-block: 72px 80px; display: flex; flex-direction: column; gap: 72px; }
+section { display: flex; flex-direction: column; gap: 24px; }
+h2 { font-size: 30px; line-height: 1.2; }
+.sub { max-width: 62ch; color: var(--gray-500); }
+
+/* chat to file */
+.flow { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; }
+.panel { background: var(--white); border: 1px solid var(--uranus-100); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; box-shadow: var(--shadow-m); }
+.cap { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-500); }
+.bubble { background: var(--uranus-0); padding: 8px 12px; border-radius: var(--radius); font-size: 14px; max-width: 90%; }
+.bubble.out { background: var(--green-0); align-self: flex-end; }
+.arrow { font-size: 28px; font-weight: 700; color: var(--orange-500); }
+pre { margin: 0; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--mercury-600); }
+pre .d { color: var(--gray-500); }
+.note { font-size: 14px; color: var(--gray-500); }
+
+/* features */
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.card { background: var(--white); border: 1px solid var(--uranus-100); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card h3 { font-size: 18px; }
+.card p { font-size: 15px; }
+
+/* screens */
+.screens { display: flex; flex-direction: column; gap: 48px; }
+.screen { display: grid; grid-template-columns: 5fr 7fr; gap: 32px; align-items: center; }
+.screen:nth-child(even) { grid-template-columns: 7fr 5fr; }
+.screen:nth-child(even) .txt { order: 2; }
+.txt { display: flex; flex-direction: column; gap: 8px; }
+.txt h3 { font-size: 22px; }
+.frame { border: 1px solid var(--uranus-100); border-radius: 12px; overflow: hidden; background: var(--white); box-shadow: var(--shadow-l); min-width: 0; }
+.frame img { display: block; width: 100%; height: auto; }
+
+/* privacy */
+.callout { background: var(--green-0); border-left: 4px solid var(--green-600); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+.callout ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.callout li::marker { color: var(--green-600); }
+.need { background: var(--white); border: 1px solid var(--uranus-100); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+.foot { text-align: center; color: var(--gray-500); font-size: 14px; padding-bottom: 48px; }
+
+@media (max-width: 760px) {
+  .flow { grid-template-columns: 1fr; }
+  .arrow { transform: rotate(90deg); justify-self: center; }
+  .grid { grid-template-columns: 1fr; }
+  .screen, .screen:nth-child(even) { grid-template-columns: 1fr; gap: 16px; }
+  .screen:nth-child(even) .txt { order: 0; }
+  main { padding-block: 48px 56px; gap: 56px; }
+  .hero { padding-top: 36px; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="wrap">
+    <div class="bar"><img src="img/logo.svg" alt="" width="32" height="32"><b>WhatsApp Sync</b></div>
+    <div class="hero">
+      <h1>Your WhatsApp chats, as files Claude can read</h1>
+      <p>WhatsApp Sync keeps the conversations you choose as Markdown files in the folders you choose. Claude, or anyone on your team, gets the full history of each customer or project.</p>
+      <div class="chips">
+        <span class="chip">Runs only on your Mac</span>
+        <span class="chip">Reads WhatsApp, never changes it</span>
+        <span class="chip">Never sends messages</span>
+      </div>
+      <a class="cta" href="https://github.com/gui7vaz/whatsapp-sync#install-about-10-minutes">Install guide</a>
+    </div>
+    <div class="hero-shot"><img src="img/dashboard.png" alt="The WhatsApp Sync dashboard with totals, a messages-per-day chart and conversations waiting for a reply" width="1360" height="800"></div>
+  </div>
+</div>
+
+<div class="wrap">
+<main>
+
+  <section aria-labelledby="how">
+    <h2 id="how">From a chat to a file</h2>
+    <p class="sub">Each followed conversation becomes one Markdown file. It updates by itself when new messages arrive.</p>
+    <div class="flow">
+      <div class="panel">
+        <span class="cap">Chat in WhatsApp</span>
+        <div class="bubble">Hi! Can we confirm the delivery for Thursday?</div>
+        <div class="bubble out">Yes, confirmed. I'll send the invoice today.</div>
+        <div class="bubble">Perfect, thank you.</div>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="panel">
+        <span class="cap">.md file in your folder</span>
+        <pre><span class="d"># WhatsApp — </span>Maria Silva (Acme)
+
+<span class="d">[10/11 09:12]</span> Maria: Hi! Can we confirm the delivery for Thursday?
+<span class="d">[10/11 09:15]</span> You: Yes, confirmed. I'll send the invoice today.
+<span class="d">[10/11 09:16]</span> Maria: Perfect, thank you.</pre>
+      </div>
+    </div>
+    <p class="note">Illustration with made-up names and messages.</p>
+  </section>
+
+  <section aria-labelledby="does">
+    <h2 id="does">What it does for you</h2>
+    <div class="grid">
+      <div class="card"><h3>You choose what to save</h3><p>Search all of your WhatsApp and click Follow on the chats that matter. Everything else stays untouched.</p></div>
+      <div class="card"><h3>Organized by topic</h3><p>Create topics such as a customer or a partner, pick a folder for each, and add keywords that suggest where a chat belongs.</p></div>
+      <div class="card"><h3>Context ready for Claude</h3><p>Plain Markdown is the format Claude reads best. Point it at the folder and it has the history.</p></div>
+      <div class="card"><h3>Nothing falls through</h3><p>The dashboard shows who is waiting for your reply and how fast you and others respond.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="screens-h">
+    <h2 id="screens-h">A look inside</h2>
+    <div class="screens">
+      <div class="screen">
+        <div class="txt"><h3>Dashboard</h3><p>Totals, conversations waiting for your reply, response times and a chart of daily activity. Reorder or hide widgets to fit your routine.</p></div>
+        <div class="frame"><img src="img/dashboard.png" alt="Dashboard screen" width="1360" height="800" loading="lazy"></div>
+      </div>
+      <div class="screen">
+        <div class="txt"><h3>Board</h3><p>Followed conversations as cards. Drag them across your own stages, or group them by status.</p></div>
+        <div class="frame"><img src="img/board.png" alt="Board screen with four columns: New, In progress, Waiting and Done" width="1360" height="520" loading="lazy"></div>
+      </div>
+      <div class="screen">
+        <div class="txt"><h3>Conversations</h3><p>Search every chat by name or by what was said, then follow the ones you want. Followed chats are highlighted.</p></div>
+        <div class="frame"><img src="img/conversations.png" alt="Conversations screen listing chats with Follow controls" width="1360" height="800" loading="lazy"></div>
+      </div>
+      <div class="screen">
+        <div class="txt"><h3>Messages</h3><p>Read the followed conversations in a familiar chat layout and search inside them.</p></div>
+        <div class="frame"><img src="img/messages.png" alt="Messages screen showing a conversation in a chat layout" width="1360" height="700" loading="lazy"></div>
+      </div>
+    </div>
+    <p class="note">Screens show demo data, not real conversations.</p>
+  </section>
+
+  <section aria-labelledby="privacy">
+    <h2 id="privacy">Private by design</h2>
+    <div class="callout">
+      <ul>
+        <li>It runs only on your Mac. No other device can reach it.</li>
+        <li>It reads the WhatsApp for Mac database read-only. It never changes WhatsApp and never sends a message.</li>
+        <li>Files are written only into folders you picked, and the app only edits or deletes files it created.</li>
+        <li>Your settings live outside the app folder, in your own user folder.</li>
+        <li>If a destination folder syncs to the cloud, such as Drive or iCloud, the app shows a cloud icon next to it.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="need">
+    <h2 id="need">What you need</h2>
+    <div class="need">
+      <p>A Mac with macOS 13 or newer, and WhatsApp for Mac installed and signed in. Setup takes about 10 minutes. The app asks for Full Disk Access in macOS, which is what lets it read the WhatsApp database.</p>
+      <a class="cta" href="https://github.com/gui7vaz/whatsapp-sync#install-about-10-minutes">Read the install guide</a>
+    </div>
+  </section>
+
+</main>
+<p class="foot">WhatsApp Sync is an independent tool and is not affiliated with WhatsApp or Meta.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WhatsApp Sync">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A4651"/>
+      <stop offset="1" stop-color="#152329"/>
+    </linearGradient>
+    <linearGradient id="ear" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF8A4C"/>
+      <stop offset="1" stop-color="#D8551B"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
+  <!-- a chat bubble that is also a page: the folded corner turns the message into a file -->
+  <path fill="#fff" d="M21 13H40L51 24V35A7 7 0 0 1 44 42H30L19.6 50.4C18.8 51 17.8 50.4 18 49.4L19.6 42.0A7 7 0 0 1 14 35V20A7 7 0 0 1 21 13Z"/>
+  <path fill="url(#ear)" d="M40 13V21A3 3 0 0 0 43 24H51Z"/>
+  <g stroke-linecap="round" stroke-width="3.4">
+    <path stroke="#F46F29" d="M21.5 22.5H32"/>
+    <path stroke="#233A44" d="M21.5 29H43.5"/>
+    <path stroke="#233A44" d="M21.5 35.5H37"/>
+  </g>
+</svg>

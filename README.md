@@ -17,7 +17,7 @@ account (see *Privacy*).
 
 > **Using an AI assistant (Claude Code, etc.)?** Open a terminal session in
 > any folder and say: *"Install WhatsApp Sync by following the README at
-> https://github.com/gui7vaz/whats-local-sync"*. The section
+> https://github.com/gui7vaz/whatsapp-sync"*. The section
 > [For AI assistants](#for-ai-assistants) tells it exactly what to do and
 > when to hand over to you.
 
@@ -44,7 +44,7 @@ account (see *Privacy*).
    iCloud or Dropbox folders — the app gets Full Disk Access, so its code
    should live in a normal local folder):
    ```bash
-   mkdir -p ~/Applications && cd ~/Applications && git clone https://github.com/gui7vaz/whats-local-sync.git "WhatsApp Sync"
+   mkdir -p ~/Applications && cd ~/Applications && git clone https://github.com/gui7vaz/whatsapp-sync.git "WhatsApp Sync"
    ```
 
 2. **Install the background service** (builds a tiny launcher app and starts

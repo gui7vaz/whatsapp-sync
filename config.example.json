@@ -1,0 +1,27 @@
+{
+  "meu_nome": "Me",
+  "auto_sync_min": 15,
+  "dias_iniciais": 30,
+  "sugestao_horas": 2160,
+  "sugestao_max": 12,
+  "pendencia_horas": 24,
+  "followup_dias": 3,
+  "etapas": [
+    "New",
+    "In progress",
+    "Waiting",
+    "Done"
+  ],
+  "modelo_resposta": "sonnet",
+  "esforco_resposta": "",
+  "resposta_mensagens": 120,
+  "resposta_opcoes": 3,
+  "instrucoes_resposta": "",
+  "voz_arquivos": [],
+  "porta": 8765,
+  "assuntos": [],
+  "palavras": [],
+  "conversas": [],
+  "ignoradas": [],
+  "tela": {}
+}

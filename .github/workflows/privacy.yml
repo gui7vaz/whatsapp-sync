@@ -1,0 +1,14 @@
+name: Privacy check
+# This repository is public: no personal data may ever be committed.
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  privacy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 scripts/privacy_check.py --all
+      - run: python3 scripts/privacy_check.py --history

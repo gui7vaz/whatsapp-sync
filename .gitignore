@@ -1,0 +1,25 @@
+# Built locally (recreated by servico/instalar.sh)
+WhatsApp Sync.app/
+__pycache__/
+.DS_Store
+
+# Personal data never goes into the repository. It lives in
+# ~/Library/Application Support/WhatsApp Sync/ — these rules are a second
+# safety net in case a copy ever lands in this folder.
+# Only config.example.json (the default settings) is versioned.
+config.json
+config*.json
+!config.example.json
+*.corrompido
+state.json
+lido.json
+backups/
+raw/
+logs/
+*.md.tmp
+*.bak
+# exported conversations must never land in the repository, even if someone
+# picks this folder as a destination (the app refuses it too)
+*.md
+!README.md
+.wa-*.tmp

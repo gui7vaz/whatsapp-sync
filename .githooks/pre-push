@@ -1,0 +1,3 @@
+#!/bin/sh
+# Last check before anything reaches GitHub: every tracked file.
+exec /usr/bin/python3 -I "$(git rev-parse --show-toplevel)/scripts/privacy_check.py" --all

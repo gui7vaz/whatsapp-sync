@@ -76,8 +76,13 @@ SNAPS_LOCK = threading.Lock()
 MSGS = {}   # messages read per conversation: {key: (version, list)}
 TEXTS = {}  # search index over all conversations, per source
 
+# Saved files are named <prefix><conversation name>.md
+PREFIXO_PADRAO = "whatsapp-sync-"
+PREFIXO_RX = re.compile(r"[\w.\- ]{0,40}")
+
 # Everything the Settings screen can change: key -> (default, min, max)
 DEFAULTS = {
+    "prefixo_md": (PREFIXO_PADRAO, None, None),
     "meu_nome": ("Me", None, None),
     "porta": (8765, 1024, 65535),
     "auto_sync_min": (15, 1, 43200),
@@ -889,9 +894,10 @@ def track_renames(cfg, chats):
         novo = unique_file(new, k, cfg["conversas"])
         moves, free = {}, True
         for p in st.get("gravados", []):
-            if os.path.basename(p) != arquivo + ".md":
+            pref = cfg.get("prefixo_md", PREFIXO_PADRAO)
+            if os.path.basename(p) != pref + arquivo + ".md":
                 continue
-            q = os.path.join(os.path.dirname(p), novo + ".md")
+            q = os.path.join(os.path.dirname(p), pref + novo + ".md")
             # a case-only change is the same file on the Mac disk
             if os.path.exists(q) and file_key(q) != file_key(p):
                 free = False
@@ -920,7 +926,8 @@ def track_renames(cfg, chats):
         c["nome"] = new
         MSGS.pop(k, None)
         changes.append(f"↻ '{clean_name(old)}' is now '{new}'" + (
-            f" ({arquivo}.md → {novo}.md)" if moved else
+            f" ({cfg.get('prefixo_md', PREFIXO_PADRAO)}{arquivo}.md → "
+            f"{cfg.get('prefixo_md', PREFIXO_PADRAO)}{novo}.md)" if moved else
             " (.md name kept: a file with the new name already exists)"
             if not free else ""))
     if changes:
@@ -949,6 +956,19 @@ def sync():
             with LOCK:
                 cfg = load_config()
                 active_sources(cfg)
+                # files saved before the prefix existed are renamed once; a
+                # prefix changed by hand in config.json leaves old files alone
+                st0 = load_json(STATE, {})
+                if st0.get("_prefixo") != cfg["prefixo_md"]:
+                    nr, presos = apply_prefix(cfg, st0, cfg["prefixo_md"],
+                                              "_prefixo" not in st0)
+                    save_json(STATE, st0)
+                    if nr or presos:
+                        summary.append(f"✎ {nr} saved file(s) renamed to start"
+                                       f" with '{cfg['prefixo_md']}'"
+                                       + (f"; {presos} left as they were (the"
+                                          " new name was taken)" if presos
+                                          else ""))
                 if not all(isinstance(c, dict) for c in cfg["conversas"]):
                     cfg = migrate(cfg, get_chats(cfg, force=True))
                 summary += track_renames(cfg, get_chats(cfg))
@@ -1067,6 +1087,64 @@ def sync_later():
 MD_HEAD = "# WhatsApp — "
 
 
+def md_name(cfg, c, prefixo=None):
+    """File name of a conversation's .md: <prefix><name>.md"""
+    p = cfg.get("prefixo_md", PREFIXO_PADRAO) if prefixo is None else prefixo
+    return p + c["arquivo"] + ".md"
+
+
+def apply_prefix(cfg, state, novo, renomear):
+    """The file name prefix changed (or files from before the prefix existed
+    are found). renomear: rename every .md the app saved (only its own files)
+    in the declared folders. Otherwise the old files stay exactly where they
+    are, never updated again, and new files start from scratch. Returns
+    (renamed, left alone because the new name was taken)."""
+    antigo = state.get("_prefixo", "")
+    feitos = presos = 0
+    if antigo != novo:
+        for c in selected(cfg):
+            st = state.get(key(c))
+            if not isinstance(st, dict):
+                st = {}
+            old_n, new_n = antigo + c["arquivo"] + ".md", novo + c["arquivo"] + ".md"
+            if not renomear:
+                if st:   # old files stay as they are; new ones start from scratch
+                    st.update(gravados=[], arquivos={}, assinatura=None,
+                              marca=None)
+                    state[key(c)] = st
+                continue
+            cand = {p for p in st.get("gravados", [])
+                    if os.path.basename(p) == old_n}
+            cand |= {os.path.join(d["caminho"], old_n) for d in destinos(cfg, c)}
+            moves, drop = {}, set()
+            for p in sorted(cand):
+                if not (os.path.isfile(p) and is_ours(p)):
+                    continue
+                q = os.path.join(os.path.dirname(p), new_n)
+                if os.path.exists(q) and file_key(q) != file_key(p):
+                    presos += 1      # the new name is taken: leave this one alone
+                    drop.add(p)
+                    continue
+                try:
+                    os.replace(p, q)
+                    moves[p] = q
+                    feitos += 1
+                except OSError:
+                    presos += 1
+                    drop.add(p)
+            st["gravados"] = [moves.get(p, p) for p in st.get("gravados", [])
+                              if p not in drop]
+            st["arquivos"] = {moves.get(p, p): m for p, m in
+                              (st.get("arquivos") or {}).items()
+                              if p not in drop}
+            if drop:
+                st["assinatura"] = None
+            if st:
+                state[key(c)] = st
+    state["_prefixo"] = novo
+    return feitos, presos
+
+
 def render_md(c, msgs):
     lines = [f"{MD_HEAD}{c['nome']}\n",
              "_Automatic log of a personal conversation. Internal use;"
@@ -1173,7 +1251,7 @@ def save_md(cfg, c, msgs, antigos=(), marks=None):
     name = c["nome"]
     dests = destinos(cfg, c)
     # paused destinations are left exactly as they are (not written, not deleted)
-    pausados = {os.path.join(d["caminho"], c["arquivo"] + ".md")
+    pausados = {os.path.join(d["caminho"], md_name(cfg, c))
                 for d in dests if d.get("pausado")}
     dests = [d for d in dests if not d.get("pausado")]
     marks = marks or {}
@@ -1183,7 +1261,7 @@ def save_md(cfg, c, msgs, antigos=(), marks=None):
         if not d["existe"]:
             notes.append(f"✗ '{name}': folder does not exist ({tilde(d['caminho'])})")
             continue
-        path = os.path.join(d["caminho"], c["arquivo"] + ".md")
+        path = os.path.join(d["caminho"], md_name(cfg, c))
         if os.path.exists(path) and not is_ours(path):
             notes.append(f"✗ '{name}': {tilde(path)} already exists and was not"
                          " written by the app; not overwritten")
@@ -2248,7 +2326,7 @@ def api_select(body):
             st = state.pop(k, None) or {}
             if body.get("apagar"):
                 paths = list(st.get("gravados", [])) + [
-                    os.path.join(d["caminho"], old["arquivo"] + ".md")
+                    os.path.join(d["caminho"], md_name(cfg, old))
                     for d in destinos(cfg, old)]
                 apagados = remove_ours(paths)
             save_json(STATE, state)   # kept .md files are no longer the app's
@@ -2300,7 +2378,7 @@ def saved_md_files(cfg, state):
     found = {}
     for c in selected(cfg):
         paths = list((state.get(key(c)) or {}).get("gravados", [])) + [
-            os.path.join(d["caminho"], c["arquivo"] + ".md")
+            os.path.join(d["caminho"], md_name(cfg, c))
             for d in destinos(cfg, c)]
         for pth in paths:
             if os.path.isfile(pth) and is_ours(pth):
@@ -3035,7 +3113,7 @@ def claude_json(text, kind):
     return v if isinstance(v, kind) else None
 
 
-def unfollowed_blocks(cfg, ignoradas=False):
+def unfollowed_blocks(cfg, ignoradas=False, seguidas=False):
     """Names and up to 8 recent messages of EVERY conversation not followed
     and not ignored (or, with ignoradas, only the ignored ones), whole
     database, newest conversation first. Too much for one request, so it is
@@ -3045,7 +3123,8 @@ def unfollowed_blocks(cfg, ignoradas=False):
     ign = set(cfg["ignoradas"])
     if ignoradas:
         chats = {k: c for k, c in chats.items() if k in ign}
-    skip = {key(c) for c in selected(cfg)} | (set() if ignoradas else ign)
+    skip = (set() if seguidas else {key(c) for c in selected(cfg)}) \
+        | (set() if ignoradas else ign)   # seguidas: the followed ones are read too
     recent = {}   # key -> newest-first list of (from me, text)
     for src in active_sources(cfg):
         with open_db(src) as con:
@@ -3096,7 +3175,7 @@ PICK_RULES = (
     "in the language of the request, saying why. Reply [] if none fits.")
 
 
-def claude_pick(cfg, request, ignoradas=False):
+def claude_pick(cfg, request, ignoradas=False, seguidas=False):
     """Asks Claude which unfollowed conversations match a request.
     Returns {"itens": [chat + motivo], "analisadas": n} or {"erro"}."""
     pv = priv_default(cfg)
@@ -3104,7 +3183,7 @@ def claude_pick(cfg, request, ignoradas=False):
         return {"erro": "Privacy: the default for conversations you do not "
                         "follow is No AI (Settings > AI privacy), so they are "
                         "never sent to an AI."}
-    chats, batches = unfollowed_blocks(cfg, ignoradas)
+    chats, batches = unfollowed_blocks(cfg, ignoradas, seguidas)
     if not batches:
         return {"itens": [], "analisadas": 0}
     out, seen, analisadas = [], set(), 0
@@ -3170,7 +3249,8 @@ def api_conversas_claude(body):
         return {"erro": "Type what you are looking for."}
     cfg = load_config()
     return claude_pick(cfg, f"Request: {pedido}",
-                       ignoradas=body.get("lista") == "ignoradas")
+                       ignoradas=body.get("lista") == "ignoradas",
+                       seguidas=bool(body.get("seguidas")))
 
 
 PAINEL_RULES = """You answer questions about the user's WhatsApp
@@ -3325,7 +3405,8 @@ def api_config():
                                 if c["fonte"] == s["id"])
     out.update(fontes=fontes, icones=cfg["fonte_icones"],
                ignoradas=len(cfg["ignoradas"]), dados=DATA,
-               arquivo_config=CONFIG,                codigo=HERE, servico=SERVICE, claude=ia_disponivel(cfg),
+               arquivo_config=CONFIG,
+               arquivo_config_nuvem=is_synced(os.path.dirname(CONFIG)),                codigo=HERE, servico=SERVICE, claude=ia_disponivel(cfg),
                ia=ia_cfg(cfg), ias=ia_status(cfg),
                filtros=filtros_banco(cfg), priv_padrao=priv_default(cfg),
                endereco=f"http://{HOSTNAME}:{cfg['porta']}/")
@@ -3374,6 +3455,21 @@ def api_config_save(body):
             cfg["fonte_icones"] = {str(k)[:300]: str(v)[:8]
                                    for k, v in body["fonte_icones"].items()
                                    if str(v).strip()}
+        resultado = {}
+        if "prefixo_md" in body:
+            novo = str(body["prefixo_md"]).strip()
+            if not PREFIXO_RX.fullmatch(novo) or novo.startswith("."):
+                return {"erro": "The file prefix can only have letters, "
+                                "numbers, spaces, dots, dashes and "
+                                "underscores (up to 40), and cannot start "
+                                "with a dot."}
+            if novo != cfg["prefixo_md"]:
+                state = load_json(STATE, {})
+                nr, presos = apply_prefix(cfg, state, novo,
+                                          bool(body.get("renomear_md")))
+                save_json(STATE, state)
+                resultado = {"renomeados": nr, "presos": presos,
+                             "renomear": bool(body.get("renomear_md"))}
         for k, (default, lo, hi) in DEFAULTS.items():
             if k not in body:
                 continue
@@ -3409,7 +3505,9 @@ def api_config_save(body):
         save_config(cfg)
     CHATS.clear()
     SUG["em"] = 0
-    return {"ok": True}
+    if resultado:
+        sync_later()
+    return dict(resultado, ok=True)
 
 
 def api_escolher(body):

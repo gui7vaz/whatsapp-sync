@@ -48,6 +48,7 @@ button.on:not(.tag){background:var(--cta);border-color:var(--cta);color:#fff}
 button.lk:hover{color:var(--heading)}
 button:disabled{opacity:.6;cursor:default}
 :focus-visible{outline:2px solid var(--cta);outline-offset:2px}
+.brand,.brand:hover,.brand:focus,.brand:visited{color:inherit;text-decoration:none}
 a.cl{color:var(--heading);font-weight:700;text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;overflow-wrap:anywhere}
 a.cl:hover{text-decoration-color:var(--cta);color:var(--cta-h)}
 .card{background:#fff;border:1px solid var(--line);border-radius:8px;margin-bottom:14px}
@@ -71,12 +72,14 @@ a.cl:hover{text-decoration-color:var(--cta);color:var(--cta-h)}
 .popt b{color:var(--heading);display:block}
 .popt small{color:var(--muted);display:block;font-size:12.5px}
 .pfil{display:grid;gap:4px;margin-top:8px}
-.pbank{display:grid;gap:10px}
+.pbank{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:700px){.pbank{grid-template-columns:1fr}}
 .pbank .pf{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:6px}
 .pbank .pf .tools{margin:0}
 .ficon{display:inline-block;min-width:1.3em;text-align:center}
 .pbank .pft{display:flex;gap:8px;align-items:center}
 .pbank .pft input{flex:1;min-width:0}
+.pbank .pft button.ico{flex:none;font-size:22px;line-height:1;padding:2px 9px}
 .pbank .pft .icsel{flex:none;width:auto;min-width:0;padding:4px 6px;font-size:16px}
 .ia .mdl{display:grid;gap:6px}
 .ia .mdl label{display:grid;gap:2px;font-size:12px;color:var(--muted)}
@@ -264,6 +267,10 @@ details.cx.fbox>summary{display:none}
 .tdirs .fd .fico{display:inline-flex;color:var(--muted)}
 .tdirs .fd .fico svg{width:16px;height:16px}
 .tdirs .fd .fico.cloud{color:#3B82F6}
+.accpath{display:flex;gap:8px;align-items:center}
+.accpath .fico{display:inline-flex;flex:none;color:var(--muted)}
+.accpath .fico svg{width:16px;height:16px}
+.accpath .fico.cloud{color:#3B82F6}
 .row .n .opath{display:flex!important;align-items:center;gap:5px;font-size:13px;color:var(--muted);margin-top:2px}
 .row .n .opath .fico{display:inline-flex}
 .row .n .opath svg{width:14px;height:14px}
@@ -331,8 +338,8 @@ button.tag{cursor:pointer;font-weight:500}
 .card>.hd.th,.card.err>.hd.th{background:#EEF2F3;border-radius:8px 8px 0 0;border-bottom:1px solid var(--line)}
 .card.err>.hd.th .tl b{color:var(--bad)}
 .card>.hd.th+.row,.card>.hd.th+details.sec{border-top:0}
-button.ico.stop{color:#C0392B;opacity:.75}
-button.ico.stop:hover{opacity:1;background:var(--bad-bg)}
+button.ico.stop{color:var(--muted);opacity:.85}   /* gray trash can */
+button.ico.stop:hover{opacity:1;background:var(--line)}
 .row .acts{display:flex;gap:2px;align-items:center}
 .row .acts button.ico{padding:7px}
 #ask .tools .grow{flex:1}
@@ -352,6 +359,7 @@ label.chk{display:flex!important;gap:8px;align-items:center;color:var(--heading)
 label.chk small{color:var(--muted);margin-left:auto;white-space:nowrap}
 label.chk.off{color:var(--muted)!important}
 .cfg{display:grid;column-gap:20px;row-gap:4px;padding:14px;grid-template-columns:repeat(2,minmax(0,1fr))}
+#cf-box .cfg{padding-top:4px}   /* same title-to-content distance in every Settings card as in AI provider */
 .cfg>label{display:grid;grid-template-rows:subgrid;grid-row:span 3;gap:4px;align-content:start}
 .cfg>label>small{padding-bottom:10px}
 .cfg input:not([type=checkbox]),.cfg select{height:40px}
@@ -610,44 +618,141 @@ body.locked nav,body.locked #sync,body.locked #last,body.locked main>section,bod
 }
 
 /* Map tab: dark "second brain" graph */
-#mp{position:relative;height:calc(100vh - var(--top, 110px) - 36px);min-height:360px;border-radius:10px;overflow:hidden;background:#1E1F22;border:1px solid #2B2D31}
-#mp-c{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
-#mp-ui{position:absolute;top:12px;left:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 24px)}
-#mp-ui input[type=text]{width:260px;background:#2B2D31;border:1px solid #3F4147;color:#E5E7EB;border-radius:8px;padding:6px 10px;font-size:13px}
-#mp-ui label.chk{color:#D1D5DB!important;display:inline-flex;align-items:center;gap:6px;font-size:13px;background:#2B2D31;border:1px solid #3F4147;border-radius:8px;padding:5px 10px}
-#mp-ui button{background:#2B2D31;border-color:#3F4147;color:#E5E7EB;font-weight:500;font-size:13px;padding:5px 10px}
-#mp-ui button:hover{background:#383A40}
-#mp-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:#9CA3AF;background:rgba(43,45,49,.85);border-radius:8px;padding:6px 10px}
-#mp-legend span{display:inline-flex;align-items:center;gap:5px}
-#mp-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
-#mp-stats{color:#9CA3AF;font-size:12px}
-#mp-help{position:absolute;bottom:10px;left:12px;color:#6B7280;font-size:12px;pointer-events:none}
-#mp-panel{position:absolute;top:12px;right:12px;bottom:12px;width:300px;max-width:calc(100% - 24px);background:rgba(30,31,34,.96);border:1px solid #3F4147;border-radius:10px;color:#D1D5DB;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.4)}
-#mp-panel .mph{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #2B2D31}
-#mp-panel .mph i{width:10px;height:10px;border-radius:50%;flex:none}
-#mp-panel .mph b{flex:1;color:#F3F4F6;font-size:15px;overflow-wrap:anywhere}
-#mp-panel .mph button.x{color:#9CA3AF;font-size:18px;padding:0 4px}
-#mp-panel .mpb{padding:12px 14px;overflow:auto;display:grid;gap:8px;align-content:start}
-#mp-panel h4{margin:6px 0 0;font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em}
-#mp-panel small{color:#9CA3AF}
-#mp-panel code{font-size:12px;color:#5EEAD4;background:#2B2D31;border-radius:6px;padding:3px 6px;overflow-wrap:anywhere;display:block}
-#mp-panel .mpls{display:grid;gap:2px}
-#mp-panel button.mpl{color:#C4B5FD;text-align:left;padding:2px 0;white-space:normal;overflow-wrap:anywhere;font-weight:500}
-#mp-panel button.mpl:hover{color:#fff}
-#mp-panel .bad{color:#F87171;background:none}
-#mp-panel .tools{margin:8px 0 0;display:flex;gap:8px;flex-wrap:wrap}
-#mp-panel button.mpf{display:grid;gap:3px;text-align:left;white-space:normal;background:none;border:0;border-bottom:1px solid #2B2D31;border-radius:0;padding:8px 0;font-weight:400}
-#mp-panel button.mpf:hover{background:#26272B}
-#mp-panel button.mpf code{display:block}
-#mp-panel .tools button:not(.cta){background:#2B2D31;border-color:#3F4147;color:#E5E7EB}
-@media (max-width:700px){#mp-panel{top:auto;height:55%;width:auto;left:12px}}
+#mp{--mp-bg:#16171A;--mp-card:rgba(32,33,37,.92);--mp-line:#34363C;--mp-tx:#E5E7EB;--mp-mu:#9CA3AF;--mp-bad:#F87171;--mp-ok:#4ADE80;position:relative;height:calc(100vh - var(--top, 110px) - 36px);min-height:380px;border-radius:12px;overflow:hidden;background:var(--mp-bg);border:1px solid #2B2D31;color:var(--mp-tx);font-size:13px}
+#mp-c{display:block;width:100%;height:100%;cursor:grab;touch-action:none;outline:none}
+#mp-c.grabbing{cursor:grabbing}
+#mp button{font-weight:600}
+#mp .mpbtn{background:var(--mp-card);border:1px solid var(--mp-line);color:var(--mp-tx);border-radius:9px;padding:6px 11px;font-size:13px;display:inline-flex;align-items:center;gap:7px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:background .15s,border-color .15s,opacity .15s}
+#mp .mpbtn:hover{background:#2C2E33;border-color:#4B4E55}
+#mp .mpbtn[aria-pressed=false]{opacity:.5}
+#mp .mpbtn[aria-pressed=false] .sw{background:transparent!important;box-shadow:inset 0 0 0 1.5px var(--c)}
+#mp .mpbtn.bad{color:#FCA5A5;border-color:rgba(248,113,113,.45)}
+#mp .mpbtn.bad[aria-pressed=true]{background:rgba(248,113,113,.18);border-color:var(--mp-bad);color:#fff;opacity:1}
+#mp .mpbtn.bad[aria-pressed=false]{opacity:1}
+#mp .mpbtn b{font-weight:600;color:var(--mp-mu);font-variant-numeric:tabular-nums}
+#mp .sw{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block;background:var(--c)}
+#mp .sw.sq{border-radius:3px}
+#mp .sw.dm{border-radius:2px;transform:rotate(45deg) scale(.85)}
+#mp .sw.bd{background:transparent!important;box-shadow:inset 0 0 0 2px var(--mp-bad)}
+#mp-top{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;pointer-events:none}
+#mp-top>*{pointer-events:auto}
+#mp.panel #mp-top{right:352px}
+#mp-search{position:relative;flex:0 1 320px;min-width:200px}
+#mp-search svg{position:absolute;z-index:1;left:11px;top:9px;width:16px;height:16px;color:var(--mp-mu);pointer-events:none}
+#mp-q{width:100%;background:var(--mp-card);border:1px solid var(--mp-line);color:var(--mp-tx);border-radius:10px;padding:7px 34px 7px 34px;font-size:14px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#mp-q::placeholder{color:#6B7280}
+#mp-q:focus{outline:none;border-color:#A78BFA;box-shadow:0 0 0 3px rgba(167,139,250,.25)}
+#mp-search kbd{position:absolute;right:9px;top:7px;font:600 11px ui-monospace,Menlo,monospace;color:var(--mp-mu);border:1px solid var(--mp-line);border-radius:5px;padding:1px 6px;pointer-events:none}
+#mp-q:focus~kbd,#mp-q:not(:placeholder-shown)~kbd{display:none}
+#mp-res{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#202125;border:1px solid var(--mp-line);border-radius:10px;padding:4px;box-shadow:0 14px 34px rgba(0,0,0,.5);display:grid;max-height:min(360px,60vh);overflow:auto;z-index:3}
+#mp-res[hidden]{display:none}
+#mp-res button{display:flex;align-items:center;gap:10px;background:none;border:0;border-radius:7px;padding:7px 9px;text-align:left;color:var(--mp-tx);font-weight:500;white-space:normal;min-width:0}
+#mp-res button.on,#mp-res button:hover{background:#2E3036}
+#mp-res .tx{display:grid;min-width:0;flex:1}
+#mp-res .tx span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mp-res small{color:var(--mp-mu);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mp-res mark{background:rgba(167,139,250,.3);color:#fff;border-radius:3px}
+#mp-res .none{padding:10px;color:var(--mp-mu)}
+#mp-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+#mp-alert{position:absolute;left:12px;bottom:52px;width:min(440px,calc(100% - 80px));display:grid;gap:6px;z-index:1}
+#mp-alert:empty{display:none}
+#mp-alert .pill{justify-self:start;display:inline-flex;align-items:center;gap:8px;background:rgba(56,24,26,.94);border:1px solid rgba(248,113,113,.55);color:#FECACA;border-radius:999px;padding:6px 12px 6px 10px;font-size:13px;box-shadow:0 8px 22px rgba(0,0,0,.35);white-space:normal;text-align:left}
+#mp-alert .pill:hover{background:rgba(80,30,32,.96);color:#fff}
+#mp-alert .pill svg{width:15px;height:15px;color:var(--mp-bad);flex:none}
+#mp-alert .pill b{white-space:nowrap;background:var(--mp-bad);color:#2A0E0E;border-radius:999px;padding:0 7px;font-size:11.5px;font-weight:800}
+#mp-alert .pill i{font-style:normal;color:#FCA5A5}
+#mp-alert .it{display:flex;gap:10px;align-items:flex-start;background:rgba(56,24,26,.94);border:1px solid rgba(248,113,113,.5);border-radius:10px;padding:9px 10px 9px 12px;color:#FECACA;box-shadow:0 8px 22px rgba(0,0,0,.35);animation:mpIn .25s ease}
+#mp-alert .it>svg{flex:none;width:16px;height:16px;color:var(--mp-bad);margin-top:2px}
+#mp-alert .it p{margin:0;flex:1;line-height:1.4}
+#mp-alert .it b{color:#fff}
+#mp-alert .acts{display:flex;gap:10px;margin-top:4px}
+#mp-alert .acts button{background:none;border:0;padding:0;color:#FCA5A5;font-size:12.5px;text-decoration:underline;text-underline-offset:2px}
+#mp-alert .acts button:hover{color:#fff}
+#mp-alert button.x{background:none;border:0;color:#FCA5A5;padding:0 2px;font-size:17px;line-height:1}
+#mp-zoom{position:absolute;right:12px;bottom:12px;display:grid;background:var(--mp-card);border:1px solid var(--mp-line);border-radius:10px;overflow:hidden;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:right .25s ease}
+#mp.panel #mp-zoom{right:352px}
+#mp.panel #mp-alert{width:min(440px,calc(100% - 430px))}
+#mp-zoom button{background:none;border:0;border-radius:0;color:var(--mp-tx);width:36px;height:34px;padding:0;display:grid;place-items:center;font-size:18px;font-weight:500}
+#mp-zoom button+button{border-top:1px solid var(--mp-line)}
+#mp-zoom button:hover{background:#2C2E33}
+#mp-zoom svg{width:16px;height:16px}
+#mp-foot{position:absolute;left:14px;bottom:11px;color:var(--mp-mu);font-size:12px;pointer-events:none;display:grid;gap:1px}
+#mp-foot i{font-style:normal;color:#5B5F67}
+#mp-tip{position:absolute;pointer-events:none;background:rgba(24,25,28,.97);border:1px solid var(--mp-line);border-radius:10px;padding:8px 11px;max-width:260px;box-shadow:0 10px 28px rgba(0,0,0,.45);display:grid;gap:3px;z-index:2;opacity:0;transition:opacity .12s}
+#mp-tip.on{opacity:1}
+#mp-tip .t{display:flex;align-items:center;gap:7px;font-weight:700;color:#F9FAFB}
+#mp-tip .t span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mp-tip small{color:var(--mp-mu)}
+#mp-tip .st{font-size:12px;font-weight:600}
+#mp-tip .hint{color:#6B7280;font-size:11.5px;margin-top:2px}
+.mp-ok{color:var(--mp-ok)} .mp-bad{color:var(--mp-bad)} .mp-mu{color:var(--mp-mu)}
+#mp-panel{position:absolute;top:12px;right:12px;bottom:12px;width:328px;max-width:calc(100% - 24px);background:rgba(26,27,30,.97);border:1px solid var(--mp-line);border-radius:12px;display:flex;flex-direction:column;box-shadow:0 16px 40px rgba(0,0,0,.5);transform:translateX(calc(100% + 24px));opacity:0;transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .2s;pointer-events:none}
+#mp.panel #mp-panel{transform:none;opacity:1;pointer-events:auto}
+#mp-panel .mph{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center;padding:14px 14px 12px;border-bottom:1px solid #2A2C31}
+#mp-panel .mph .sw{width:14px;height:14px}
+#mp-panel .mph .kd{grid-column:2;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mp-mu);font-weight:700}
+#mp-panel .mph b{grid-column:1/3;color:#F9FAFB;font-size:17px;line-height:1.25;overflow-wrap:anywhere}
+#mp-panel .mph .x{grid-row:1;grid-column:3;background:none;border:0;color:var(--mp-mu);font-size:20px;padding:0 4px;line-height:1}
+#mp-panel .mph .x:hover{color:#fff}
+#mp-panel .mph .bk{grid-column:1/4;justify-self:start;background:none;border:0;padding:0;color:#C4B5FD;font-size:12.5px}
+#mp-panel .mpb{padding:12px 14px 16px;overflow:auto;display:grid;gap:10px;align-content:start}
+#mp-panel h4{margin:6px 0 -2px;font-size:11px;color:var(--mp-mu);text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between}
+#mp-panel code{font-size:12px;color:#E2E8F0;background:#24262B;border:1px solid #2F3237;border-radius:7px;padding:6px 8px;overflow-wrap:anywhere;display:block}
+#mp-panel .stat{display:flex;gap:8px;align-items:flex-start;border-radius:9px;padding:9px 11px;font-size:13px;line-height:1.4}
+#mp-panel .stat svg{flex:none;width:16px;height:16px;margin-top:1px}
+#mp-panel .stat.ok{background:rgba(74,222,128,.09);color:#BBF7D0}
+#mp-panel .stat.ok svg{color:var(--mp-ok)}
+#mp-panel .stat.bad{background:rgba(248,113,113,.11);color:#FECACA}
+#mp-panel .stat.bad svg{color:var(--mp-bad)}
+#mp-panel .stat.mu{background:#24262B;color:#D1D5DB}
+#mp-panel .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+#mp-panel .tile{background:#222428;border:1px solid #2C2E33;border-radius:9px;padding:8px 9px;display:grid;gap:1px;min-width:0}
+#mp-panel .tile b{color:#F9FAFB;font-size:16px;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mp-panel .tile small{color:var(--mp-mu);font-size:11px}
+#mp-panel .chips{display:flex;gap:6px;flex-wrap:wrap}
+#mp-panel .chip{display:inline-flex;align-items:center;gap:6px;background:#24262B;border:1px solid #33363C;color:#E5E7EB;border-radius:999px;padding:3px 10px 3px 8px;font-size:12.5px;font-weight:600;white-space:normal;text-align:left}
+#mp-panel .chip:hover{border-color:#555962;background:#2C2E33}
+#mp-panel .ls{display:grid;gap:2px}
+#mp-panel .li{display:flex;align-items:center;gap:9px;background:none;border:0;border-radius:7px;padding:6px 8px;margin:0 -8px;color:#E5E7EB;font-weight:500;text-align:left;white-space:normal;position:relative;min-width:0}
+#mp-panel .li:hover{background:#26282D}
+#mp-panel .li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mp-panel .li .ct{color:var(--mp-mu);font-size:12px;font-variant-numeric:tabular-nums}
+#mp-panel .li .bar{position:absolute;left:8px;right:8px;bottom:2px;height:2px;border-radius:2px;background:#2A2C31}
+#mp-panel .li .bar i{display:block;height:100%;border-radius:2px;background:var(--c);opacity:.7}
+#mp-panel .more{background:none;border:0;color:#C4B5FD;padding:4px 0;justify-self:start;font-size:12.5px}
+#mp-panel .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+#mp-panel .acts button:not(.cta){background:#26282D;border-color:#3A3D44;color:#E5E7EB}
+#mp-panel .acts button:not(.cta):hover{background:#30333A}
+#mp-panel .mpf{display:grid;gap:4px;text-align:left;white-space:normal;background:none;border:0;border-bottom:1px solid #2A2C31;border-radius:0;padding:9px 0;font-weight:400;color:var(--mp-tx)}
+#mp-panel .mpf:hover{background:#222428}
+#mp-panel .mpf small{color:var(--mp-mu)}
+#mp-panel .mpf.bad code{border-color:rgba(248,113,113,.45);color:#FECACA}
+#mp-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px}
+#mp-empty[hidden]{display:none}
+#mp-empty div{max-width:360px;display:grid;gap:10px;justify-items:center}
+#mp-empty svg{width:64px;height:64px;color:#4B4E55}
+#mp-empty b{font-size:17px;color:#F3F4F6}
+#mp-empty p{margin:0;color:var(--mp-mu);line-height:1.5}
+@keyframes mpIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (max-width:700px){
+  #mp.panel #mp-top,#mp.panel #mp-zoom{right:12px}
+  #mp-panel{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-width:none;height:58%;transform:translateY(calc(100% + 16px))}
+  #mp.panel #mp-zoom{bottom:calc(58% + 18px)}
+  #mp-search{flex:1 1 100%}
+  #mp-foot i{display:none}
+  #mp-alert,#mp.panel #mp-alert{width:auto;right:60px}
+  #mp.panel #mp-alert{display:none}
+  #mp-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%}
+  #mp-chips::-webkit-scrollbar{display:none}
+  #mp .mpbtn{flex:none}
+}
 </style>
 </head>
 <body>
 <header><div class="in">
   <div class="top">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="logo" aria-hidden="true"><defs><linearGradient id="lg-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A4651"/><stop offset="1" stop-color="#152329"/></linearGradient><linearGradient id="lg-ear" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A4C"/><stop offset="1" stop-color="#D8551B"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#lg-bg)"/><path fill="#fff" d="M21 13H40L51 24V35A7 7 0 0 1 44 42H30L19.6 50.4C18.8 51 17.8 50.4 18 49.4L19.6 42.0A7 7 0 0 1 14 35V20A7 7 0 0 1 21 13Z"/><path fill="url(#lg-ear)" d="M40 13V21A3 3 0 0 0 43 24H51Z"/><g stroke-linecap="round" stroke-width="3.4"><path stroke="#F46F29" d="M21.5 22.5H32"/><path stroke="#233A44" d="M21.5 29H43.5"/><path stroke="#233A44" d="M21.5 35.5H37"/></g></svg>
-    <h1>WhatsApp Sync</h1>
+    <h1><a href="http://whatsapp-sync.localhost:8765" class="brand" title="Open WhatsApp Sync">WhatsApp Sync</a></h1>
     <small id="last"></small>
     <button id="pause" title="Pauses the whole app: nothing is synced or written until you resume">Pause app</button>
     <button class="cta" id="sync" title="Reads new messages from followed conversations now. Sends nothing and marks nothing as read.">Sync now</button>
@@ -686,17 +791,31 @@ body.locked nav,body.locked #sync,body.locked #last,body.locked main>section,bod
 
   <section id="t-mapa">
     <div id="mp">
-      <canvas id="mp-c" aria-label="Map of conversations, topics and folders"></canvas>
-      <div id="mp-ui">
-        <input type="text" id="mp-q" placeholder="Find a conversation, topic or folder" autocomplete="off" title="Highlights matches; Enter centers the first one">
-        <label class="chk" title="Show every conversation name (they also appear when you zoom in)"><input type="checkbox" id="mp-names"> Names</label>
-        <button id="mp-fit" title="Back to the whole map">Reset view</button>
-        <button id="mp-folders" title="List every folder the app writes to">Folders</button>
-        <div id="mp-legend"><span><i style="background:#A78BFA"></i>Topic</span><span><i style="background:#2DD4BF"></i>Folder</span><span><i style="background:#9CA3AF"></i>Contact</span><span><i style="background:#F5B83D"></i>Group</span><span><i style="background:#F87171"></i>Not written</span></div>
-        <small id="mp-stats"></small>
+      <canvas id="mp-c" tabindex="0" role="img" aria-label="Map of followed conversations, their topics and the folders they are written to"></canvas>
+      <div id="mp-top">
+        <div id="mp-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="text" id="mp-q" placeholder="Search conversations, topics, folders" autocomplete="off" spellcheck="false" role="combobox" aria-controls="mp-res" aria-expanded="false">
+          <kbd>/</kbd>
+          <div id="mp-res" role="listbox" hidden></div>
+        </div>
+        <div id="mp-chips"></div>
       </div>
-      <div id="mp-panel" style="display:none"></div>
-      <small id="mp-help">Drag to move · scroll to zoom · click a point for details · double-click a conversation to read it</small>
+      <div id="mp-alert"></div>
+      <div id="mp-zoom">
+        <button type="button" id="mp-in" title="Zoom in (+)">+</button>
+        <button type="button" id="mp-out" title="Zoom out (−)">−</button>
+        <button type="button" id="mp-fit" title="Fit everything (0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      </div>
+      <div id="mp-foot"><span id="mp-stats"></span><i>Scroll to zoom · drag to move · double-click to open · / to search</i></div>
+      <div id="mp-tip"></div>
+      <div id="mp-panel" aria-live="polite"></div>
+      <div id="mp-empty" hidden><div>
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="32" cy="32" r="8"/><circle cx="12" cy="16" r="4"/><circle cx="52" cy="14" r="5"/><circle cx="50" cy="50" r="4"/><circle cx="14" cy="50" r="5"/><path d="M15 19l11 8M48 18l-10 9M47 47l-9-9M18 47l8-9" stroke-dasharray="3 4"/></svg>
+        <b>Your map is empty</b>
+        <p>Follow conversations and give them topics: this map then shows each one, its topic and the folder it is written to.</p>
+        <button type="button" class="cta" id="mp-go">Find conversations</button>
+      </div></div>
     </div>
   </section>
 
@@ -787,7 +906,7 @@ const penBtn = c => ico(SVG_PEN, () => openConv(c.chave, 'ajustes'), 'Settings: 
 // ---- AI privacy: ✓ everything passes · funnel = filtered by the chosen prompts · ⦸ no AI
 let filtrosBanco = [], privPadrao = {modo: 'livre', filtros: []};
 const SVG_PRIV = {
-  livre: svg('M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'),
+  livre: svg('M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z'),   // AI sparkles (was a check mark)
   filtro: svg('M3 4h18l-7 9v6l-4 2v-8z'),
   sem_ia: svg('M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2c1.85 0 3.55.63 4.9 1.68L5.68 16.9A8 8 0 0 1 12 4zm0 16c-1.85 0-3.55-.63-4.9-1.68L18.32 7.1A8 8 0 0 1 12 20z')};
 const PRIV_TXT = {livre: 'Everything passes', filtro: 'Filtered by AI', sem_ia: 'No AI'};
@@ -863,28 +982,30 @@ function topicPriv(t) {
 }
 // Settings card: default + prompt bank
 const FILTER_ICONS = ['🔒', '💰', '👤', '🏢', '📞', '✉️', '🔑', '📍', '🏥', '⚖️', '🚫', '💬', '📎', '⭐'];
-function privCard(d, sec, grid) {
-  sec('AI Ready-made filters');
+// the filters are edited here and saved together with the rest by "Save settings"
+let privBank = null;
+function privCard(d, sec, grid, onChange) {
+  sec('AI Filters');
   const g = grid(), w = el('div', 'wide'); w.style.display = 'grid'; w.style.gap = '12px';
-  ['input', 'change'].forEach(ev => w.addEventListener(ev, e => e.stopPropagation()));
   // prompt bank
   const bank = (d.filtros || []).map(f => ({...f})), list = el('div', 'pbank');
-  const save = async msg => { const r = await api('/api/privacidade', {banco: bank}); if (fail(r)) return; toast(msg); await load(); loadConfig(); };
+  privBank = {get: () => bank, changed: false};
+  const touched = () => { privBank.changed = true; onChange && onChange(); };
+  list.addEventListener('input', () => { privBank.changed = true; }); list.addEventListener('change', () => { privBank.changed = true; });
   const draw = () => list.replaceChildren(...bank.map((f, i) => {
     const b = el('div', 'pf'), top = el('div', 'pft'), n = el('input'), t = el('textarea'), ic = el('select');
     ic.className = 'icsel'; ic.title = 'Icon of this filter'; ic.append(new Option('▽', '')); FILTER_ICONS.forEach(x => ic.append(new Option(x, x))); ic.value = f.icone || '';
     n.value = f.nome; n.placeholder = 'Filter name'; t.rows = 3; t.value = f.texto; t.placeholder = 'What the AI must remove, e.g. "Prices, discounts and contract values."';
-    const ok = btn('Save', () => save('Filter saved.'), 'cta'); ok.disabled = !!f.id;
-    n.oninput = () => { f.nome = n.value; ok.disabled = false; }; t.oninput = () => { f.texto = t.value; ok.disabled = false; };
-    ic.onchange = () => { f.icone = ic.value; ok.disabled = false; };
-    top.append(ic, n, ok, btn('Delete', async () => { if (!await ask(`Delete the filter "${f.nome}"?\n\nConversations and topics using it stop using it.`, 'Delete', true)) return; bank.splice(i, 1); save('Filter deleted.'); }, 'lk'));
+    n.oninput = () => { f.nome = n.value; }; t.oninput = () => { f.texto = t.value; };
+    ic.onchange = () => { f.icone = ic.value; };
+    top.append(ic, n, ico('−', async () => { if (!await ask(`Delete the filter "${f.nome}"?\n\nConversations and topics using it stop using it. Click Save settings to apply.`, 'Delete', true)) return; bank.splice(i, 1); draw(); touched(); }, 'Delete this filter', true));
     b.append(top, t); return b;
   }));
   draw();
   // new filter: + at the right of the card title
   const hd = g.parentNode.firstChild; hd.style.flexWrap = 'nowrap';
-  const add = btn('+', () => { bank.push({nome: '', texto: '', icone: ''}); draw(); list.lastChild.querySelector('input:not(.icsel)').focus(); }, 'ico', 'New filter: adds a ready-made prompt to the bank');
-  add.style.marginLeft = 'auto'; add.style.fontSize = '20px'; add.style.lineHeight = '1'; add.setAttribute('aria-label', 'New filter'); hd.append(add);
+  const add = btn('+', () => { bank.push({nome: '', texto: '', icone: ''}); draw(); touched(); list.lastChild.querySelector('input:not(.icsel)').focus(); }, 'ico', 'New filter: adds a ready-made prompt to the bank');
+  add.style.marginLeft = 'auto'; add.style.fontSize = '20px'; add.style.lineHeight = '1'; add.style.padding = '0 8px'; add.style.height = '24px'; add.setAttribute('aria-label', 'New filter'); hd.append(add);
   w.append(el('small', null, 'Each filter is an instruction telling the AI what to remove before it reads the conversation. Pick them in Filtered by AI.'), list, el('div', 'call warn', PRIV_AVISO));
   g.append(w);
 }
@@ -1119,7 +1240,7 @@ function convRow(c, slim, ctx) {
   if (c.priv) tags.append(privTag(c.priv, () => openConv(c.chave, 'privacy')));   // privacy icon: after the tags, next to the buttons
   const acts = el('div', 'acts'), topic = ctx && typeof ctx === 'object' ? ctx : null;
   const stop = btn('', () => stopFollow(c, topic), 'ico stop', topic ? `Stop following in ${topic.nome}` : 'Stop following');
-  stop.innerHTML = SVG_STOP; stop.setAttribute('aria-label', stop.title);
+  stop.innerHTML = SVG_TRASH; stop.setAttribute('aria-label', stop.title);   // trash can (was a stop sign)
   const pz = ico(c.pausada ? SVG_PLAY : SVG_PAUSE, () => setPausa({chave: c.chave, pausada: !c.pausada}, c.pausada ? `Resumed: ${c.nome}.` : `Paused: ${c.nome}.`), c.pausada ? 'Resume this conversation: it is synced and written again' : 'Pause this conversation: nothing is synced or written, its .md stays as it is');
   acts.append(pz, penBtn(c), stop);
   const r = row(named(c, openMsgs(c), 'Read the messages'), subSel(c) + (c.md_salvo ? ' · ' + fmtSize(c.md_salvo) : ''), tags, acts);
@@ -1811,9 +1932,9 @@ const CF = {};
 // Ask Claude to filter a Conversations list (Not watched or Ignored) in plain words
 const newAI = () => ({q: '', loading: false, erro: '', rank: null, why: {}, n: 0, ui: null});
 const cvAI = newAI(), cvAIign = newAI();
-async function askConversas(A, lista, q) {
+async function askConversas(A, lista, q, seguidas) {
   Object.assign(A, {q, loading: true, erro: ''}); renderConversas();
-  const r = await api('/api/conversas_claude', {pedido: q, lista});
+  const r = await api('/api/conversas_claude', {pedido: q, lista, seguidas: !!seguidas});
   A.loading = false;
   if (r.erro) A.erro = r.erro;
   else {
@@ -1827,8 +1948,19 @@ function drawCvAsk(A, boxId, lista) {
   if (!A.ui) {
     const q = el('textarea'), bar = el('div', 'bar'), st = el('div');
     q.rows = 1; q.placeholder = (lista === 'ignoradas' ? 'Filter the hidden conversations with AI' : 'Filter with AI') + ', e.g. customers asking for a quote. Uses your AI account; only runs when you click.';
-    q.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && q.value.trim()) { e.preventDefault(); askConversas(A, lista, q.value.trim()); } };
-    const b = btn('Filter with AI', () => q.value.trim() && askConversas(A, lista, q.value.trim()), 'cta', `Sends the names and a few recent messages of the ${lista === 'ignoradas' ? 'ignored conversations' : 'conversations you don\'t follow'} (the whole database, in batches) to the AI provider chosen in Settings, which picks the ones that match. Nothing is followed or written.`);
+    // the conversations already followed: filter them too, or leave them out of the filter?
+    const run = async text => {
+      let seg = false;
+      if (lista !== 'ignoradas' && chats.some(c => c.sel)) {
+        const a = await askChoice('Filter with AI\n\nSome conversations are already followed. Do you want the AI to filter them too, or discard them from the filter (only the ones you do not follow are filtered)?',
+          [['Filter the followed ones too', 'sim', 'cta'], ['Discard the followed ones', 'nao', ''], ['Cancel', 'cancelar', 'lk']]);
+        if (!a || a.v === 'cancelar') return;
+        seg = a.v === 'sim';
+      }
+      askConversas(A, lista, text, seg);
+    };
+    q.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && q.value.trim()) { e.preventDefault(); run(q.value.trim()); } };
+    const b = btn('Filter with AI', () => q.value.trim() && run(q.value.trim()), 'cta', `Sends the names and a few recent messages of the ${lista === 'ignoradas' ? 'ignored conversations' : 'conversations you don\'t follow'} (the whole database, in batches) to the AI provider chosen in Settings, which picks the ones that match. Nothing is followed or written.`);
     bar.append(q, b); box.append(bar, st);
     A.ui = {b, st};
   }
@@ -2181,8 +2313,9 @@ function renderAssuntos() {
     const mine = chats.filter(c => c.sel && c.assuntos.includes(t.id)), s = sug[t.id];
     if (editing === t.id) left.append(nameInput(t));
     else {
-      const name = el('b', 'tn', t.nome); name.title = isOpen ? 'Click to close' : 'Click to show its conversations'; name.tabIndex = 0;
-      name.onkeydown = e => { if (e.key === 'Enter') toggle(); };
+      const name = el('b', 'tn', t.nome); name.title = 'Click to rename this topic (click the arrow or the empty part of the bar to ' + (isOpen ? 'close' : 'open') + ' it)'; name.tabIndex = 0;
+      const rename = e => { e.stopPropagation(); editing = t.id; renderAssuntos(); };
+      name.onclick = rename; name.onkeydown = e => { if (e.key === 'Enter') rename(e); };
       const nf = (t.dirs || []).length;
       left.append(name, el('span', 'tcount', `${mine.length} followed · ${nf} folder${nf === 1 ? '' : 's'}` + (s && s.length ? ` · ${s.length} suggested` : '')));
     }
@@ -2194,7 +2327,7 @@ function renderAssuntos() {
     else if (pausedIn) right.append(el('span', 'terr', `${pausedIn} paused conversation${pausedIn === 1 ? '' : 's'}`));
     const tp = t.privacidade && t.privacidade.modo ? t.privacidade : {modo: privPadrao.modo, filtros: privPadrao.filtros, herda: true};
     right.append(privTag(tp, () => topicPriv(t), t.privacidade && t.privacidade.modo ? `AI privacy of this topic: ${privLabel(tp)}. Applies to its conversations without their own setting. Click to change.` : `No AI privacy rule for this topic (conversations use their own setting or the default: ${privLabel(privPadrao)}). Click to set one for all its conversations.`, t.privacidade && t.privacidade.modo ? true : false));
-    right.append(ico(t.pausado ? SVG_PLAY : SVG_PAUSE, () => setPausa({assunto: t.id, pausado: !t.pausado}, t.pausado ? `Resumed: ${t.nome}.` : `Paused: ${t.nome}.`), t.pausado ? 'Resume this topic: its folders are written again' : 'Pause this topic: nothing is written to its folders, its .md files stay as they are'), ico(SVG_PEN, () => { editing = t.id; renderAssuntos(); }, 'Rename this topic'), ico(SVG_TRASH, () => deleteTopic(t), 'Delete this topic', true));
+    right.append(ico(t.pausado ? SVG_PLAY : SVG_PAUSE, () => setPausa({assunto: t.id, pausado: !t.pausado}, t.pausado ? `Resumed: ${t.nome}.` : `Paused: ${t.nome}.`), t.pausado ? 'Resume this topic: its folders are written again' : 'Pause this topic: nothing is written to its folders, its .md files stay as they are'), ico(SVG_TRASH, () => deleteTopic(t), 'Delete this topic', true));
     hd.append(left, right);
     card.append(hd);
     if (!isOpen) return card;
@@ -2724,190 +2857,610 @@ function renderPainel() {
 let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (tab === 'painel') renderPainel(); }, 200); });
 
 // ---- Map: conversations, topics and folders as a graph ("second brain" view) ----
-// topics link to their folders, conversations link to their topics and their own folders;
-// conversations written nowhere hang on a red "Not written" node
-const MP = {nodes: [], links: [], byId: {}, adj: {}, k: 1, ox: 0, oy: 0, alpha: 1, hover: null, sel: null, drag: null, pan: null, q: '', names: false, raf: 0, built: false};
-const MP_COL = {topic: '#A78BFA', folder: '#2DD4BF', conv: '#9CA3AF', group: '#F5B83D', bad: '#F87171'};
+// each topic is a colored cluster: its conversations orbit it and its folders sit on the edge;
+// conversations that are written nowhere get a red ring, and the problems are listed on top
+const MP = {nodes: [], links: [], byId: {}, adj: {}, k: 1, ox: 0, oy: 0, anim: null, alpha: 0, hover: null, sel: null, drag: null, pan: null, ptrs: new Map(), pinch: null,
+  q: '', res: [], ri: 0, show: {conv: true, group: true, folder: true}, probs: false, names: false, raf: 0, built: false, touched: false, list: false, back: null, gone: new Set(), sig: ''};
+const MP_PAL = ['#A78BFA', '#60A5FA', '#F472B6', '#A3E635', '#FDBA74', '#67E8F9', '#818CF8', '#86EFAC', '#F0ABFC', '#93C5FD'];
+const MP_COL = {folder: '#CBD5E1', none: '#9CA3AF', bad: '#F87171', ok: '#4ADE80', bg: '#16171A'};
+const MP_KIND = {topic: 'Topic', folder: 'Folder', conv: 'Contact', group: 'Group', hub: 'Not written'};
+const mpKind = n => n.kind === 'conv' ? (n.data.grupo ? 'group' : 'conv') : n.kind;
+const mpIco = {
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>'
+};
+const mpSvg = k => { const s = el('span'); s.innerHTML = mpIco[k]; return s.firstChild; };
+// a small swatch in the node's shape and color, for lists and the legend
+function mpSw(kind, col, bad) {
+  const s = el('i', 'sw' + (kind === 'group' ? ' sq' : kind === 'folder' ? ' dm' : '') + (bad ? ' bd' : ''));
+  s.style.setProperty('--c', col); return s;
+}
+// why a conversation is not written, in words
+function mpWhy(c) {
+  if (c.pausada) return 'Paused: nothing is synced or written';
+  if (c.salva) return '';
+  const tops = c.assuntos.map(a => assuntos.find(t => t.id === a)).filter(Boolean);
+  const broken = tops.filter(pastaErr);
+  if (broken.length) return `Not written: the folder of ${broken.map(t => '“' + t.nome + '”').join(', ')} does not exist`;
+  if (!tops.length && !(c.pastas || []).length) return 'Not written: no topic and no folder of its own';
+  return 'Not written: its folder was not found';
+}
+
 function mapData() {
-  const old = MP.byId, nodes = [], links = [], byId = {};
-  const add = (id, kind, label, r, data) => {
+  const old = MP.byId, nodes = [], links = [], byId = {}, sel = chats.filter(c => c.sel);
+  const tcol = {}; assuntos.forEach((t, i) => { tcol[t.id] = MP_PAL[i % MP_PAL.length]; });
+  const add = (id, kind, label, r, data, extra) => {
     const o = old[id];
-    const n = {id, kind, label, r, data, x: o ? o.x : (Math.random() - .5) * 600, y: o ? o.y : (Math.random() - .5) * 600, vx: 0, vy: 0, fixed: false};
+    const n = Object.assign({id, kind, label, r, data, x: o ? o.x : NaN, y: o ? o.y : NaN, vx: 0, vy: 0, fixed: false, bad: false, paused: false, w: 0}, extra);
     nodes.push(n); byId[id] = n; return n;
   };
-  const link = (a, b, kind) => { if (byId[a] && byId[b]) links.push({a: byId[a], b: byId[b], kind}); };
-  const short = p => { const parts = tilde(p).replace(/\/+$/, '').split('/'); return parts.slice(-2).join('/'); };
-  const sel = chats.filter(c => c.sel);
-  assuntos.forEach(t => add('t:' + t.id, 'topic', t.nome, 9 + Math.sqrt(sel.filter(c => c.assuntos.includes(t.id)).length) * 2.2, t));
-  const folder = (path, label) => { const id = 'f:' + tilde(path).replace(/\/+$/, ''); if (!byId[id]) add(id, 'folder', label || short(path), 7, {caminho: path}); return id; };
-  assuntos.forEach(t => (t.dirs || []).forEach(d => { const p = d.caminho || d.pasta; if (p) link('t:' + t.id, folder(p), 'tf'); }));
-  let bad = false;
-  sel.forEach(c => {
-    const r = 3 + Math.log10((c.mensagens || 0) + 1) * 1.6;
-    add('c:' + c.chave, 'conv', c.nome, r, c);
-    c.assuntos.forEach(a => link('c:' + c.chave, 't:' + a, 'ct'));
-    (c.destinos || []).filter(d => d.nome === 'Conversation folder').forEach(d => link('c:' + c.chave, folder(d.caminho), 'cf'));
-    // only conversations with no topic and no own folder hang on "Not written"; the rest stay red in their topic
-    if (!c.salva && !c.assuntos.length && !(c.pastas || []).length) { if (!bad) { add('x:bad', 'bad', 'Not written', 9, null); bad = true; } link('c:' + c.chave, 'x:bad', 'cx'); }
+  const link = (a, b, kind, col) => { if (byId[a] && byId[b] && a !== b) links.push({a: byId[a], b: byId[b], kind, col}); };
+  const short = p => tilde(p).replace(/\/+$/, '').split('/').slice(-2).join('/');
+  assuntos.forEach(t => {
+    const mine = sel.filter(c => c.assuntos.includes(t.id));
+    add('t:' + t.id, 'topic', t.nome, 15 + Math.sqrt(mine.length) * 3.4, t, {col: tcol[t.id], count: mine.length, msgs: mine.reduce((s, c) => s + (c.mensagens || 0), 0), bad: pastaErr(t) && !t.pausado, paused: !!t.pausado, w: 1e9 + mine.length, cr: 15 + Math.sqrt(mine.length) * 3.4 + 22 + Math.sqrt(mine.length) * 12});
   });
-  const adj = {}; nodes.forEach(n => adj[n.id] = new Set());
+  const folder = (path, exists) => {
+    const id = 'f:' + tilde(path).replace(/\/+$/, '');
+    if (!byId[id]) add(id, 'folder', short(path), 6.5, {caminho: path}, {col: MP_COL.folder, bad: !exists, w: 1e8});
+    else if (exists) byId[id].bad = false;
+    return id;
+  };
+  assuntos.forEach(t => (t.dirs || []).forEach(d => { const p = d.caminho || d.pasta; if (p) link('t:' + t.id, folder(p, d.existe), 'tf'); }));
+  let hub = false;
+  sel.forEach(c => {
+    const col = c.assuntos.length ? tcol[c.assuntos[0]] || MP_COL.none : MP_COL.none;
+    add('c:' + c.chave, 'conv', c.nome, 3.6 + Math.log10((c.mensagens || 0) + 1) * 1.9, c, {col, cols: c.assuntos.map(a => tcol[a]).filter(Boolean), bad: !c.salva && !c.pausada, paused: !!c.pausada, w: c.mensagens || 0});
+    c.assuntos.forEach(a => link('c:' + c.chave, 't:' + a, 'ct', tcol[a]));
+    (c.destinos || []).filter(d => d.nome === 'Conversation folder').forEach(d => link('c:' + c.chave, folder(d.caminho, d.existe), 'cf'));
+    // only conversations with no topic and no own folder hang on "Not written"; the rest stay red in their topic
+    if (!c.salva && !c.pausada && !c.assuntos.length && !(c.pastas || []).length) {
+      if (!hub) { add('x:bad', 'hub', 'Not written', 12, null, {col: MP_COL.bad, bad: true, w: 1e9, cr: 70}); hub = true; }
+      link('c:' + c.chave, 'x:bad', 'cx', MP_COL.bad);
+    }
+  });
+  const adj = {}; nodes.forEach(n => { adj[n.id] = new Set(); });
   links.forEach(l => { adj[l.a.id].add(l.b.id); adj[l.b.id].add(l.a.id); });
   Object.assign(MP, {nodes, links, byId, adj});
-  if (MP.sel && !byId[MP.sel.id]) MP.sel = null; else if (MP.sel) MP.sel = byId[MP.sel.id];
-  MP.alpha = Math.max(MP.alpha, MP.built ? .3 : 1); MP.built = true;
+  if (MP.sel) MP.sel = byId[MP.sel.id] || null;
+  if (MP.hover) MP.hover = byId[MP.hover.id] || null;
+  const cv = $('mp-c'); if (cv && cv.clientWidth) MP.ax = Math.min(2.5, Math.max(.35, cv.clientHeight / cv.clientWidth * .85));
+  const fresh = mapSeed();
+  if (!MP.built) { MP.alpha = 1; for (let i = 0; i < 420 && MP.alpha > .02; i++) mapTick(); MP.built = true; return true; }
+  if (fresh) MP.alpha = Math.max(MP.alpha, .35);
+  return false;
+}
+// starting spots: topics on a ring (biggest first), every other node next to what it links to
+function mapSeed() {
+  const N = MP.nodes, todo = N.filter(n => isNaN(n.x));
+  if (!todo.length) return false;
+  const tops = todo.filter(n => n.kind === 'topic' || n.kind === 'hub').sort((a, b) => (b.count || 0) - (a.count || 0));
+  const R = 40 + 16 * Math.sqrt(N.length);
+  tops.forEach((n, i) => {
+    const a = i / Math.max(1, tops.length) * Math.PI * 2 - Math.PI / 2, rr = tops.length === 1 && !MP.built ? 0 : R * (i % 2 ? .82 : 1);
+    n.x = Math.cos(a) * rr / Math.sqrt(MP.ax || 1); n.y = Math.sin(a) * rr * Math.sqrt(MP.ax || 1);
+  });
+  const slot = {};
+  for (let guard = 0; guard < 6 * N.length && N.some(n => isNaN(n.x)); guard++) {
+    let moved = false;
+    N.forEach(n => {
+      if (!isNaN(n.x)) return;
+      const nb = [...MP.adj[n.id]].map(id => MP.byId[id]).filter(m => !isNaN(m.x));
+      if (!nb.length) return;
+      const ax = nb.reduce((s, m) => s + m.x, 0) / nb.length, ay = nb.reduce((s, m) => s + m.y, 0) / nb.length;
+      const key = nb.map(m => m.id).sort().join('|'), i = slot[key] = (slot[key] || 0) + 1;
+      const out = n.kind === 'folder' ? 1 : 0, d = Math.hypot(ax, ay) || 1;
+      const rr = 14 + 10 * Math.sqrt(i), th = i * 2.39996;
+      n.x = ax + Math.cos(th) * rr + out * ax / d * 60; n.y = ay + Math.sin(th) * rr + out * ay / d * 60;
+      moved = true;
+    });
+    if (!moved) { const n = N.find(m => isNaN(m.x)), a = Math.random() * Math.PI * 2; n.x = Math.cos(a) * R * 1.3; n.y = Math.sin(a) * R * 1.3; }
+  }
+  return true;
 }
 function mapTick() {
-  const N = MP.nodes, a = MP.alpha;
-  for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
-    const p = N[i], q = N[j]; let dx = q.x - p.x, dy = q.y - p.y, d2 = dx * dx + dy * dy || .01;
-    if (d2 > 250000) continue;
-    const both = (p.kind === 'conv') + (q.kind === 'conv'), f = (both === 2 ? 260 : both === 1 ? 700 : 4200) / d2 * a, d = Math.sqrt(d2);
-    dx /= d; dy /= d; p.vx -= dx * f; p.vy -= dy * f; q.vx += dx * f; q.vy += dy * f;
+  const N = MP.nodes, a = MP.alpha, L = N.length;
+  for (let i = 0; i < L; i++) {
+    const p = N[i];
+    for (let j = i + 1; j < L; j++) {
+      const q = N[j]; let dx = q.x - p.x, dy = q.y - p.y; const d2 = dx * dx + dy * dy || .01, d = Math.sqrt(d2);
+      dx /= d; dy /= d;
+      if (d2 < 360000) {
+        const cp = p.kind === 'conv', cq = q.kind === 'conv', f = (cp && cq ? 90 : cp || cq ? 380 : 900) / d2 * a;
+        p.vx -= dx * f; p.vy -= dy * f; q.vx += dx * f; q.vy += dy * f;
+      }
+      // clusters keep apart as wholes; single nodes just must not overlap
+      const min = p.cr && q.cr ? p.cr + q.cr : p.r + q.r + 6;
+      if (d < min) { const f = (min - d) * .35; p.vx -= dx * f; p.vy -= dy * f; q.vx += dx * f; q.vy += dy * f; }
+    }
   }
   MP.links.forEach(l => {
-    const len = l.kind === 'tf' ? 70 : l.kind === 'cf' ? 60 : 50 + l.b.r * 2;
-    let dx = l.b.x - l.a.x, dy = l.b.y - l.a.y; const d = Math.sqrt(dx * dx + dy * dy) || .01, f = (d - len) / d * .06 * a;
+    const len = l.kind === 'tf' ? l.a.r + 48 : l.kind === 'cf' ? 34 : l.kind === 'cx' ? 40 : l.b.r + 26 + l.a.r;
+    let dx = l.b.x - l.a.x, dy = l.b.y - l.a.y; const d = Math.sqrt(dx * dx + dy * dy) || .01, f = (d - len) / d * .07 * a;
     dx *= f; dy *= f; l.a.vx += dx; l.a.vy += dy; l.b.vx -= dx; l.b.vy -= dy;
   });
   N.forEach(n => {
-    n.vx -= n.x * .004 * a; n.vy -= n.y * .004 * a;
+    const g = n.kind === 'conv' ? .002 : .02;
+    n.vx -= n.x * g * a * (MP.ax || 1); n.vy -= n.y * g * a;
     if (n.fixed) { n.vx = n.vy = 0; return; }
-    n.vx *= .82; n.vy *= .82; n.x += n.vx; n.y += n.vy;
+    n.vx *= .6; n.vy *= .6; n.x += n.vx; n.y += n.vy;
   });
-  MP.alpha *= .985;
+  MP.alpha *= .975; if (MP.alpha < .006) MP.alpha = 0;
 }
-function mapMatch(n) { const q = fold(MP.q.trim()); return !q || fold(n.label).includes(q) || (n.kind === 'folder' && fold(n.data.caminho).includes(q)); }
+
+const mapVis = n => n.kind === 'folder' ? MP.show.folder : n.kind === 'conv' ? MP.show[n.data.grupo ? 'group' : 'conv'] : true;
+function mapMatch(n) { const q = fold(MP.q.trim()); return !q || fold(n.label).includes(q) || (n.kind === 'folder' && fold(tilde(n.data.caminho)).includes(q)); }
+// what stays bright: the search, else the "Not written" filter, else the hovered/selected node and its neighbors
+function mapLitFn() {
+  const focus = MP.hover || MP.sel, near = focus ? MP.adj[focus.id] : null, q = MP.q.trim();
+  if (q) return n => mapMatch(n);
+  if (MP.probs) return n => n.bad || (focus && (n === focus || near.has(n.id)));
+  if (focus) return n => n === focus || near.has(n.id);
+  return () => true;
+}
+// the part of the canvas not covered by the toolbar and the side panel
+function mapArea() {
+  const cv = $('mp-c'), W = cv.clientWidth, H = cv.clientHeight, wide = W > 700, pan = $('mp').classList.contains('panel');
+  const top = ($('mp-top').offsetHeight || 40) + 18, right = pan && wide ? 352 : 0, bottom = pan && !wide ? H * .6 : 0;
+  const l = 0, r = W - right, t = top, b = H - bottom - 10;
+  return {W, H, w: Math.max(80, r - l), h: Math.max(80, b - t), cx: (l + r) / 2 - W / 2, cy: (t + b) / 2 - H / 2};
+}
+function mapCam(k, ox, oy, ms) {
+  if (!ms) { MP.anim = null; Object.assign(MP, {k, ox, oy}); }
+  else MP.anim = {k0: MP.k, x0: MP.ox / MP.k, y0: MP.oy / MP.k, k, x: ox / k, y: oy / k, t0: performance.now(), ms};
+  mapKick();
+}
+function mapFit(list, ms = 550, maxK = 2) {
+  const ns = (list || MP.nodes).filter(mapVis); if (!ns.length) return;
+  const A = mapArea();
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  ns.forEach(n => { x0 = Math.min(x0, n.x - n.r); x1 = Math.max(x1, n.x + n.r); y0 = Math.min(y0, n.y - n.r); y1 = Math.max(y1, n.y + n.r + 18); });
+  const pad = 50, k = Math.max(.15, Math.min(maxK, (A.w - pad * 2) / Math.max(1, x1 - x0), (A.h - pad) / Math.max(1, y1 - y0)));
+  mapCam(k, A.cx - (x0 + x1) / 2 * k, A.cy - (y0 + y1) / 2 * k, ms);
+}
+function mapFly(n, minK) {
+  const A = mapArea(), k = Math.min(3, Math.max(MP.k, minK || (n.kind === 'conv' ? 1.7 : 1.2)));
+  mapCam(k, A.cx - n.x * k, A.cy - n.y * k, 600);
+}
+function mapZoom(f, sx, sy) {
+  if (sx == null) { const A = mapArea(); sx = A.cx; sy = A.cy; }
+  const k = Math.min(5, Math.max(.12, MP.k * f)), r = k / MP.k;
+  MP.touched = true; MP.anim = null; MP.ox = sx - (sx - MP.ox) * r; MP.oy = sy - (sy - MP.oy) * r; MP.k = k; mapKick();
+}
+function mapKick() { if (!MP.raf && tab === 'mapa') MP.raf = requestAnimationFrame(mapLoop); }
+function mapLoop() {
+  MP.raf = 0; if (tab !== 'mapa') return;
+  let busy = false;
+  if (MP.alpha) { mapTick(); busy = true; if (!MP.touched && !MP.sel) mapFit(null, 0); }
+  if (MP.anim) {
+    const A = MP.anim, p = Math.min(1, (performance.now() - A.t0) / A.ms), e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+    const k = A.k0 * Math.pow(A.k / A.k0, e);
+    MP.k = k; MP.ox = (A.x0 + (A.x - A.x0) * e) * k; MP.oy = (A.y0 + (A.y - A.y0) * e) * k;
+    if (p >= 1) MP.anim = null; else busy = true;
+  }
+  mapDraw();
+  if (MP.hover && !MP.drag) mapTip();
+  if (busy) mapKick();
+}
+
 function mapDraw() {
   const cv = $('mp-c'); if (!cv) return;
   const W = cv.clientWidth, H = cv.clientHeight, dpr = devicePixelRatio || 1;
-  if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
-  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  g.fillStyle = '#1E1F22'; g.fillRect(0, 0, W, H);
-  g.translate(W / 2 + MP.ox, H / 2 + MP.oy); g.scale(MP.k, MP.k);
-  const focus = MP.hover || MP.sel, near = focus ? MP.adj[focus.id] : null, q = MP.q.trim();
-  const lit = n => (!focus || n === focus || near.has(n.id)) && (!q || mapMatch(n));
-  MP.links.forEach(l => {
-    const on = focus && (l.a === focus || l.b === focus);
-    g.strokeStyle = on ? 'rgba(167,139,250,.75)' : focus || q ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.13)';
-    g.lineWidth = (on ? 1.6 : 1) / MP.k; g.beginPath(); g.moveTo(l.a.x, l.a.y); g.lineTo(l.b.x, l.b.y); g.stroke();
+  if (!W || !H) return;
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  const g = cv.getContext('2d'), k = MP.k, tx = W / 2 + MP.ox, ty = H / 2 + MP.oy;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.fillStyle = MP_COL.bg; g.fillRect(0, 0, W, H);
+  // dot grid that moves with the map
+  const step = 36 * k * (k < .6 ? 2 : 1);
+  if (step > 12) {
+    g.fillStyle = 'rgba(255,255,255,.045)';
+    for (let x = ((tx % step) + step) % step; x < W; x += step) for (let y = ((ty % step) + step) % step; y < H; y += step) g.fillRect(x - .75, y - .75, 1.5, 1.5);
+  }
+  g.setTransform(dpr * k, 0, 0, dpr * k, dpr * tx, dpr * ty);
+  const focus = MP.hover || MP.sel, lit = mapLitFn(), dimAll = !!(focus || MP.q.trim() || MP.probs);
+  const vis = MP.nodes.filter(mapVis);
+  // soft halo behind each topic cluster
+  vis.filter(n => n.kind === 'topic').forEach(t => {
+    const kids = [...MP.adj[t.id]].map(id => MP.byId[id]).filter(n => n.kind === 'conv' && n.cols.length < 2 && mapVis(n));
+    let r = t.r + 26; kids.forEach(n => { r = Math.max(r, Math.hypot(n.x - t.x, n.y - t.y) + n.r + 16); });
+    const on = !dimAll || lit(t), gr = g.createRadialGradient(t.x, t.y, t.r * .5, t.x, t.y, r);
+    gr.addColorStop(0, hexA(t.col, on ? .13 : .04)); gr.addColorStop(.7, hexA(t.col, on ? .06 : .015)); gr.addColorStop(1, hexA(t.col, 0));
+    g.fillStyle = gr; g.beginPath(); g.arc(t.x, t.y, r, 0, Math.PI * 2); g.fill();
   });
-  MP.nodes.forEach(n => {
-    const on = lit(n), col = n.kind === 'conv' ? (n.data.grupo ? MP_COL.group : MP_COL.conv) : MP_COL[n.kind];
-    g.globalAlpha = on ? 1 : .15;
-    if (on && (n === focus || n.kind !== 'conv')) { g.shadowColor = col; g.shadowBlur = n === focus ? 18 : 10; }
-    g.fillStyle = n.kind === 'conv' && (!n.data.salva || n.data.pausada) ? MP_COL.bad : col;
-    g.beginPath(); g.arc(n.x, n.y, n.r, 0, 7); g.fill(); g.shadowBlur = 0;
-    if (n.kind === 'topic' && (pastaErr(n.data) || n.data.pausado)) { g.strokeStyle = MP_COL.bad; g.lineWidth = 3 / MP.k; g.stroke(); }
-    if (n === MP.sel) { g.strokeStyle = '#fff'; g.lineWidth = 2 / MP.k; g.stroke(); }
-    const showLabel = n.kind !== 'conv' || MP.names || MP.k > 1.6 || n === focus || (focus && near.has(n.id)) || (q && on);
-    if (showLabel && on) {
-      g.font = `${n.kind === 'conv' ? 400 : 600} ${(n.kind === 'conv' ? 11 : 13) / Math.max(.6, Math.min(MP.k, 2))}px system-ui,-apple-system,sans-serif`;
-      g.fillStyle = n.kind === 'conv' ? 'rgba(229,231,235,.85)' : '#F3F4F6'; g.textAlign = 'center';
-      g.fillText(n.label.length > 34 ? n.label.slice(0, 32) + '…' : n.label, n.x, n.y + n.r + 12 / Math.max(.6, Math.min(MP.k, 2)));
+  // links: gently curved, in the topic's color
+  MP.links.forEach(l => {
+    if (!mapVis(l.a) || !mapVis(l.b)) return;
+    const hl = focus && (l.a === focus || l.b === focus), on = lit(l.a) && lit(l.b);
+    const base = l.kind === 'ct' ? .22 : l.kind === 'cx' ? .35 : .3;
+    g.strokeStyle = hexA(l.kind === 'ct' || l.kind === 'cx' ? l.col : MP_COL.folder, hl ? .9 : dimAll && !on ? .035 : dimAll ? base + .15 : base);
+    g.lineWidth = (hl ? 1.8 : 1) / k;
+    g.setLineDash(l.kind === 'tf' || l.kind === 'cf' ? [4 / k, 3 / k] : []);
+    const mx = (l.a.x + l.b.x) / 2, my = (l.a.y + l.b.y) / 2, bx = (l.b.y - l.a.y) * .12, by = (l.a.x - l.b.x) * .12;
+    g.beginPath(); g.moveTo(l.a.x, l.a.y); g.quadraticCurveTo(mx + bx, my + by, l.b.x, l.b.y); g.stroke();
+  });
+  g.setLineDash([]);
+  const order = {conv: 0, folder: 1, hub: 2, topic: 3};
+  vis.slice().sort((a, b) => order[a.kind] - order[b.kind] || (a === focus) - (b === focus)).forEach(n => {
+    const on = lit(n), sel = n === MP.sel || n === focus;
+    g.globalAlpha = on ? 1 : .13;
+    if (n.kind === 'topic') {
+      g.shadowColor = n.col; g.shadowBlur = on ? (sel ? 34 : 18) : 0;
+      const gr = g.createRadialGradient(n.x - n.r * .35, n.y - n.r * .35, n.r * .1, n.x, n.y, n.r);
+      gr.addColorStop(0, mixW(n.col, .45)); gr.addColorStop(1, n.col);
+      g.fillStyle = n.paused ? MP_COL.bg : gr; g.beginPath(); g.arc(n.x, n.y, n.r, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0;
+      if (n.paused) { g.strokeStyle = n.col; g.lineWidth = 2.5 / k; g.setLineDash([5 / k, 4 / k]); g.stroke(); g.setLineDash([]); }
+      if (n.bad) { g.strokeStyle = MP_COL.bad; g.lineWidth = 3.2 / k; g.beginPath(); g.arc(n.x, n.y, n.r + 3 / k, 0, Math.PI * 2); g.stroke(); }
+      if (n.r * k > 9) {
+        g.fillStyle = n.paused ? n.col : 'rgba(17,18,20,.85)'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `800 ${Math.max(7, n.r * .72)}px Manrope,system-ui,sans-serif`; g.fillText(n.paused ? 'II' : String(n.count), n.x, n.y + .5);
+      }
+      if (n.bad) badge(g, n.x + n.r * .72, n.y - n.r * .72, Math.max(5.5, 7 / k));
+    } else if (n.kind === 'folder') {
+      const s = n.r * 1.25;
+      g.beginPath(); g.moveTo(n.x, n.y - s); g.lineTo(n.x + s, n.y); g.lineTo(n.x, n.y + s); g.lineTo(n.x - s, n.y); g.closePath();
+      if (n.bad) { g.fillStyle = 'rgba(248,113,113,.15)'; g.fill(); g.strokeStyle = MP_COL.bad; g.lineWidth = 1.8 / k; g.setLineDash([3 / k, 2 / k]); g.stroke(); g.setLineDash([]); }
+      else { g.shadowColor = n.col; g.shadowBlur = on ? 10 : 0; g.fillStyle = n.col; g.fill(); g.shadowBlur = 0; }
+    } else if (n.kind === 'hub') {
+      g.shadowColor = MP_COL.bad; g.shadowBlur = on ? 20 : 0;
+      g.fillStyle = 'rgba(248,113,113,.18)'; g.strokeStyle = MP_COL.bad; g.lineWidth = 2.4 / k;
+      g.beginPath(); g.arc(n.x, n.y, n.r, 0, Math.PI * 2); g.fill(); g.stroke(); g.shadowBlur = 0;
+      g.fillStyle = MP_COL.bad; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${n.r * 1.1}px Manrope,system-ui,sans-serif`; g.fillText('!', n.x, n.y + .5);
+    } else {
+      const path = () => { g.beginPath(); if (n.data.grupo) roundRect(g, n.x - n.r, n.y - n.r, n.r * 2, n.r * 2, n.r * .45); else g.arc(n.x, n.y, n.r, 0, Math.PI * 2); };
+      if (sel) { g.shadowColor = n.col; g.shadowBlur = 16; }
+      path();
+      if (n.paused) { g.strokeStyle = n.col; g.lineWidth = 1.5 / k; g.setLineDash([2.5 / k, 2 / k]); g.stroke(); g.setLineDash([]); }
+      else { g.fillStyle = n.bad ? hexA(n.col, .55) : n.col; g.fill(); }
+      g.shadowBlur = 0;
+      if (n.cols.length > 1) { g.strokeStyle = n.cols[1]; g.lineWidth = 1.6 / k; g.beginPath(); g.arc(n.x, n.y, n.r + 2.2 / k, 0, Math.PI * 2); g.stroke(); }
+      if (n.bad) { g.strokeStyle = MP_COL.bad; g.lineWidth = Math.max(1.4, n.r * .32) / k * Math.min(1.6, Math.max(1, k)); path(); g.stroke(); }
     }
+    if (n === MP.sel) { g.strokeStyle = '#fff'; g.lineWidth = 2 / k; g.beginPath(); g.arc(n.x, n.y, n.r * (n.kind === 'folder' ? 1.3 : 1) + 4 / k, 0, Math.PI * 2); g.stroke(); }
     g.globalAlpha = 1;
   });
+  // labels in screen space, most important first, skipping any that would overlap
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const q = MP.q.trim(), near = focus ? MP.adj[focus.id] : null, want = [];
+  vis.forEach(n => {
+    if (dimAll && !lit(n)) return;
+    const sx = n.x * k + tx, sy = n.y * k + ty;
+    if (sx < -200 || sx > W + 200 || sy < -50 || sy > H + 50) return;
+    let pr = -1;
+    if (n === focus) pr = 5e9;
+    else if (n.kind === 'topic' || n.kind === 'hub') pr = 4e9 + n.w / 1e6;
+    else if (q || (near && near.has(n.id))) pr = 3e9 + n.w;
+    else if (n.kind === 'folder' && (k > .8 || MP.names)) pr = 2e9;
+    else if (n.kind === 'conv' && (MP.names || k > 1.35 || (MP.probs && n.bad))) pr = n.w;
+    if (pr >= 0) want.push([pr, n, sx, sy]);
+  });
+  want.sort((a, b) => b[0] - a[0]);
+  // topic circles count as taken space, so smaller labels never cover them
+  const placed = vis.filter(n => n.kind === 'topic' || n.kind === 'hub').map(n => { const sx = n.x * k + tx, sy = n.y * k + ty, r = n.r * k + 2; return [sx - r, sy - r, sx + r, sy + r]; });
+  want.forEach(([pr, n, sx, sy]) => {
+    const big = n.kind === 'topic' || n.kind === 'hub', fs = big ? 13 : 11.5;
+    g.font = `${big ? 700 : 500} ${fs}px Manrope,-apple-system,system-ui,sans-serif`;
+    let txt = n.label; if (txt.length > 30) txt = txt.slice(0, 28) + '…';
+    if (big && n.kind === 'topic' && n.r * k <= 9) txt += ` · ${n.count}`;
+    const w = g.measureText(txt).width + (big ? 16 : 12), h = big ? 22 : 19;
+    const x = sx - w / 2, y = sy + (n.kind === 'folder' ? n.r * 1.25 : n.r) * k + (big ? 6 : 4);
+    const box = [x - 2, y - 2, x + w + 2, y + h + 2];
+    if (pr < 4e9 && placed.some(b => b[0] < box[2] && b[2] > box[0] && b[1] < box[3] && b[3] > box[1])) return;
+    placed.push(box);
+    g.fillStyle = big ? 'rgba(18,19,22,.86)' : 'rgba(18,19,22,.74)';
+    g.beginPath(); roundRect(g, x, y, w, h, h / 2); g.fill();
+    if (big || n === focus) { g.strokeStyle = hexA(n.bad ? MP_COL.bad : n.col, n === focus ? .9 : .45); g.lineWidth = 1; g.stroke(); }
+    g.fillStyle = n.kind === 'folder' ? (n.bad ? '#FCA5A5' : '#E2E8F0') : n.kind === 'conv' ? (n.bad ? '#FECACA' : 'rgba(243,244,246,.92)') : '#F9FAFB';
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, sx, y + h / 2 + .5);
+  });
 }
-function mapLoop() {
-  if (tab !== 'mapa') { MP.raf = 0; return; }
-  if (MP.alpha > .004) mapTick();
-  mapDraw();
-  MP.raf = requestAnimationFrame(mapLoop);
+function roundRect(g, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
 }
+function badge(g, x, y, r) {
+  g.fillStyle = MP_COL.bad; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = MP_COL.bg; g.lineWidth = r * .3; g.stroke();
+  g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `900 ${r * 1.4}px Manrope,system-ui,sans-serif`; g.fillText('!', x, y + r * .05);
+}
+const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${n >> 8 & 255},${n & 255},${a})`; };
+const mixW = (hex, t) => { const n = parseInt(hex.slice(1), 16), m = c => Math.round(c + (255 - c) * t); return `rgb(${m(n >> 16)},${m(n >> 8 & 255)},${m(n & 255)})`; };
+
 function mapAt(e) {
   const cv = $('mp-c'), r = cv.getBoundingClientRect();
   const x = (e.clientX - r.left - cv.clientWidth / 2 - MP.ox) / MP.k, y = (e.clientY - r.top - cv.clientHeight / 2 - MP.oy) / MP.k;
   let best = null, bd = Infinity;
-  MP.nodes.forEach(n => { const d = Math.hypot(n.x - x, n.y - y); if (d < Math.max(n.r + 4 / MP.k, 7 / MP.k) && d < bd) { bd = d; best = n; } });
+  MP.nodes.forEach(n => {
+    if (!mapVis(n)) return;
+    const d = Math.hypot(n.x - x, n.y - y), hit = Math.max(n.r * (n.kind === 'folder' ? 1.3 : 1) + 3 / MP.k, 9 / MP.k);
+    if (d < hit && d - n.r < bd) { bd = d - n.r; best = n; }
+  });
   return {x, y, n: best};
 }
+// one line about a node: for the hover card and the search results
+function mapSub(n) {
+  if (n.kind === 'topic') return `${n.count} conversation${n.count === 1 ? '' : 's'} · ${num(n.msgs)} messages`;
+  if (n.kind === 'folder') return tilde(n.data.caminho);
+  if (n.kind === 'hub') return `${MP.adj[n.id].size} conversation(s) written nowhere`;
+  const c = n.data, t = c.assuntos.map(a => (assuntos.find(x => x.id === a) || {}).nome).filter(Boolean).join(', ');
+  return [num(c.mensagens || 0) + ' messages', t || 'no topic'].join(' · ');
+}
+function mapTip() {
+  const tip = $('mp-tip'), n = MP.hover;
+  if (!n || MP.drag || MP.pan || MP.pinch || !MP.mouse) { tip.classList.remove('on'); return; }
+  if (tip.dataset.id !== n.id) {
+    tip.dataset.id = n.id;
+    const t = el('div', 't'); t.append(mpSw(mpKind(n), n.col, n.bad && n.kind !== 'topic'), el('span', null, n.label));
+    const kids = [t, el('small', null, MP_KIND[mpKind(n)] + ' · ' + mapSub(n))];
+    if (n.kind === 'conv') { const w = mpWhy(n.data); kids.push(el('span', 'st ' + (n.paused ? 'mp-mu' : w ? 'mp-bad' : 'mp-ok'), w || 'Written to ' + (n.data.destinos || []).filter(d => d.existe).length + ' folder(s)')); }
+    if (n.kind === 'topic' && n.bad) kids.push(el('span', 'st mp-bad', 'Folder not found: nothing is written'));
+    if (n.kind === 'folder' && n.bad) kids.push(el('span', 'st mp-bad', 'This folder does not exist'));
+    kids.push(el('span', 'hint', n.kind === 'conv' ? 'Click for details · double-click to read' : n.kind === 'topic' ? 'Click for details · double-click to zoom in' : 'Click for details'));
+    tip.replaceChildren(...kids);
+  }
+  const box = $('mp').getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = MP.mouse.x - box.left + 16, y = MP.mouse.y - box.top + 16;
+  if (x + w > box.width - 8) x = MP.mouse.x - box.left - w - 12;
+  if (y + h > box.height - 8) y = MP.mouse.y - box.top - h - 12;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px'; tip.classList.add('on');
+}
+
+// ---- side panel ----
 function mapPanel() {
-  const p = $('mp-panel'), n = MP.sel; if (!p) return;
+  const p = $('mp-panel'), n = MP.sel, box = $('mp');
+  const head = (sw, kind, title, extra) => {
+    const hd = el('div', 'mph'); hd.append(sw, el('span', 'kd', kind), btn('×', () => mapSelect(null), 'x', 'Close (Esc)'), el('b', null, title));
+    if (extra) hd.append(extra);
+    return hd;
+  };
+  const body = el('div', 'mpb');
+  const sec = (title, kids, right) => { if (!kids.length) return; const h = el('h4', null, title); if (right) h.append(el('span', null, right)); const d = el('div', 'ls'); d.append(...kids); body.append(h, d); };
+  const stat = (cls, icon, text) => { const s = el('div', 'stat ' + cls); s.append(mpSvg(icon), el('span', null, text)); return s; };
+  const tiles = list => { const t = el('div', 'tiles'); t.append(...list.map(([v, l]) => { const d = el('div', 'tile'); d.append(el('b', null, v), el('small', null, l)); d.title = l + ': ' + v; return d; })); return t; };
+  const chip = m => { const b = btn('', () => mapGo(m), 'chip', 'Show on the map'); b.append(mpSw(mpKind(m), m.col, m.kind === 'folder' && m.bad), m.kind === 'folder' ? tilde(m.data.caminho) : m.label); return b; };
+  const item = (m, max) => {
+    const b = btn('', () => mapGo(m), 'li', m.kind === 'conv' ? mpWhy(m.data) || 'Show on the map' : 'Show on the map');
+    b.append(mpSw(mpKind(m), m.col, m.bad && m.kind !== 'topic'), el('span', 'nm', m.label));
+    if (m.kind === 'conv') {
+      b.append(el('span', 'ct', num(m.data.mensagens || 0)));
+      if (max) { const bar = el('span', 'bar'), i = el('i'); i.style.setProperty('--c', m.bad ? MP_COL.bad : m.col); i.style.width = Math.max(2, (m.data.mensagens || 0) / max * 100) + '%'; bar.append(i); b.append(bar); }
+    }
+    return b;
+  };
+  const many = (list, max, first = 12) => {
+    if (list.length <= first + 3) return list.map(m => item(m, max));
+    const out = list.slice(0, first).map(m => item(m, max)), more = btn(`Show all ${list.length}`, () => { more.replaceWith(...list.slice(first).map(m => item(m, max))); }, 'more');
+    return [...out, more];
+  };
+  const backBtn = MP.list && n ? btn('‹ All folders', () => { MP.sel = null; mapPanel(); mapKick(); }, 'bk', 'Back to the folder list') : null;
   if (!n && MP.list) {
-    // every folder, with who writes there; click one to find it on the map
-    const fs = MP.nodes.filter(x => x.kind === 'folder').sort((a, b) => tilde(a.data.caminho).localeCompare(tilde(b.data.caminho)));
-    const hd = el('div', 'mph'), dot = el('i'); dot.style.background = MP_COL.folder;
-    hd.append(dot, el('b', null, `All folders (${fs.length})`), btn('×', () => { MP.list = false; mapPanel(); }, 'lk x', 'Close'));
-    const body = el('div', 'mpb');
+    const fs = MP.nodes.filter(x => x.kind === 'folder').sort((a, b) => b.bad - a.bad || tilde(a.data.caminho).localeCompare(tilde(b.data.caminho)));
+    const hd = el('div', 'mph'); hd.append(mpSw('folder', MP_COL.folder), el('span', 'kd', 'Where files go'), btn('×', () => { MP.list = false; mapPanel(); }, 'x', 'Close (Esc)'), el('b', null, `All folders (${fs.length})`));
     body.append(...fs.map(f => {
       const nb = [...MP.adj[f.id]].map(id => MP.byId[id]), tp = nb.filter(x => x.kind === 'topic'), own = nb.filter(x => x.kind === 'conv');
-      const r = btn('', () => { MP.list = true; mapSelect(f, true); }, 'mpf', 'Show this folder on the map');
-      r.append(el('code', null, tilde(f.data.caminho)), el('small', null, [tp.length ? tp.map(x => x.label).join(', ') : '', own.length ? `${own.length} own-folder conversation(s)` : ''].filter(Boolean).join(' · ') || 'not used'));
+      const r = btn('', () => { mapSelect(f); mapFly(f, 1); }, 'mpf' + (f.bad ? ' bad' : ''), 'Show this folder on the map');
+      r.append(el('code', null, tilde(f.data.caminho)), el('small', null, (f.bad ? 'Does not exist · ' : '') + ([tp.length ? tp.map(x => x.label).join(', ') : '', own.length ? `${own.length} own-folder conversation(s)` : ''].filter(Boolean).join(' · ') || 'not used')));
       return r;
     }));
-    if (!fs.length) body.append(el('small', null, 'No folders yet.'));
-    p.style.display = ''; p.replaceChildren(hd, body); return;
+    if (!fs.length) body.append(el('small', 'mp-mu', 'No folders yet: give a topic a folder in Following.'));
+    p.replaceChildren(hd, body); box.classList.add('panel'); return;
   }
-  if (!n) { p.style.display = 'none'; return; }
-  p.style.display = '';
-  const hd = el('div', 'mph'), dot = el('i'); dot.style.background = n.kind === 'conv' ? (n.data.grupo ? MP_COL.group : MP_COL.conv) : MP_COL[n.kind];
-  hd.append(dot, el('b', null, n.label), ...(MP.list ? [btn('All folders', () => { MP.sel = null; mapPanel(); }, 'lk mpl', 'Back to the folder list')] : []), btn('×', () => { MP.sel = null; MP.list = false; mapPanel(); }, 'lk x', 'Close'));
-  const body = el('div', 'mpb'), link = (id, txt) => { const a = btn(txt, () => mapSelect(MP.byId[id], true), 'lk mpl', 'Show on the map'); return a; };
-  const nb = [...MP.adj[n.id]].map(id => MP.byId[id]);
-  const sec = (title, kids) => { if (!kids.length) return; body.append(el('h4', null, title)); const d = el('div', 'mpls'); d.append(...kids); body.append(d); };
+  if (!n) { box.classList.remove('panel'); return; }
+  const nb = [...MP.adj[n.id]].map(id => MP.byId[id]), kind = mpKind(n);
+  const hd = head(mpSw(kind, n.col, n.bad && n.kind !== 'topic'), MP_KIND[kind], n.label, backBtn);
   if (n.kind === 'conv') {
-    const c = n.data;
-    body.append(el('small', null, [c.grupo ? 'Group' : 'Contact', num(c.mensagens || 0) + ' messages', c.ultima ? 'last: ' + brDate(c.ultima) : ''].filter(Boolean).join(' · ')));
-    sec('Topics', nb.filter(x => x.kind === 'topic').map(x => link(x.id, x.label)));
-    const files = (c.destinos || []).filter(d => d.existe).map(d => el('code', null, tilde(d.caminho).replace(/\/+$/, '') + '/' + c.arquivo + '.md'));
-    sec('Written to', files.length ? files : [el('span', 'bad', 'Nowhere: no topic folder and no own folder')]);
-    const acts = el('div', 'tools'); acts.append(btn('Open messages', () => openPreview(previewOf(c), [], null), 'cta', 'Read the conversation'), btn('Settings', () => openConv(c.chave, 'ajustes'), '', 'History, folders, Claude and references'));
+    const c = n.data, why = mpWhy(c), dests = (c.destinos || []).filter(d => d.existe);
+    body.append(why ? stat(c.pausada ? 'mu' : 'bad', c.pausada ? 'pause' : 'warn', why) : stat('ok', 'ok', `Written to ${dests.length} folder${dests.length === 1 ? '' : 's'}`));
+    body.append(tiles([[num(c.mensagens || 0), 'messages'], [c.ultima ? brDate(c.ultima).slice(0, 5) : '—', 'last message'], [c.primeira ? brDate(c.primeira).slice(3) : '—', 'since']]));
+    const tp = nb.filter(x => x.kind === 'topic');
+    if (tp.length) { body.append(el('h4', null, 'Topics')); const d = el('div', 'chips'); d.append(...tp.map(chip)); body.append(d); }
+    const own = nb.filter(x => x.kind === 'folder');
+    if (own.length) { body.append(el('h4', null, 'Own folder')); const d = el('div', 'chips'); d.append(...own.map(chip)); body.append(d); }
+    if (dests.length) { body.append(el('h4', null, 'File')); body.append(...dests.map(d => el('code', null, tilde(d.caminho).replace(/\/+$/, '') + '/' + c.arquivo + '.md'))); }
+    const acts = el('div', 'acts'); acts.append(btn('Open messages', () => openPreview(previewOf(c), [], null), 'cta', 'Read the conversation (nothing is written)'), btn('Settings', () => openConv(c.chave, 'ajustes'), '', 'History, folders, Claude and references'));
     body.append(acts);
   } else if (n.kind === 'topic') {
-    if (pastaErr(n.data)) body.append(el('span', 'bad', (n.data.dirs || []).length ? 'Its folder does not exist (or the path is incomplete): nothing is written.' : 'No folder: nothing is written.'));
-    sec('Folders', nb.filter(x => x.kind === 'folder').map(x => link(x.id, tilde(x.data.caminho))));
-    const cs = nb.filter(x => x.kind === 'conv'); sec(`Conversations (${cs.length})`, cs.map(x => link(x.id, x.label)));
+    const t = n.data, cs = nb.filter(x => x.kind === 'conv').sort((a, b) => (b.data.mensagens || 0) - (a.data.mensagens || 0)), fs = nb.filter(x => x.kind === 'folder');
+    const badN = cs.filter(x => x.bad).length;
+    if (n.paused) body.append(stat('mu', 'pause', 'Paused: nothing in this topic is synced or written.'));
+    else if (n.bad) body.append(stat('bad', 'warn', (t.dirs || []).length ? `Its folder does not exist, so ${cs.length} conversation${cs.length === 1 ? ' is' : 's are'} not written. Fix the path in Following.` : 'No folder: nothing in this topic is written. Add one in Following.'));
+    else body.append(stat(badN ? 'bad' : 'ok', badN ? 'warn' : 'ok', badN ? `${badN} of ${cs.length} conversations are not written` : `All ${cs.length} conversation${cs.length === 1 ? ' is' : 's are'} written to its folder`));
+    body.append(tiles([[num(cs.length), 'conversations'], [num(n.msgs), 'messages'], [num(fs.length), fs.length === 1 ? 'folder' : 'folders']]));
+    if (fs.length) { body.append(el('h4', null, fs.length === 1 ? 'Folder' : 'Folders')); const d = el('div', 'chips'); d.append(...fs.map(chip)); body.append(d); }
+    const max = Math.max(1, ...cs.map(x => x.data.mensagens || 0));
+    sec('Conversations', many(cs, max), 'messages');
+    const acts = el('div', 'acts'); acts.append(btn('Zoom to topic', () => mapFit([n, ...nb], 650, 2.4), 'cta', 'Fits this topic and its conversations on screen'), btn('Edit in Following', () => go('conversas'), '', 'Folder, keywords and conversations of this topic'));
+    body.append(acts);
   } else if (n.kind === 'folder') {
+    const tp = nb.filter(x => x.kind === 'topic'), own = nb.filter(x => x.kind === 'conv');
+    body.append(n.bad ? stat('bad', 'warn', 'This folder does not exist: nothing can be written here.') : stat('ok', 'ok', 'Folder found on disk'));
     body.append(el('code', null, tilde(n.data.caminho)));
-    sec('Topics writing here', nb.filter(x => x.kind === 'topic').map(x => link(x.id, x.label)));
-    const own = nb.filter(x => x.kind === 'conv'); sec(`Own-folder conversations (${own.length})`, own.map(x => link(x.id, x.label)));
+    if (tp.length) { body.append(el('h4', null, 'Topics writing here')); const d = el('div', 'chips'); d.append(...tp.map(chip)); body.append(d); }
+    const total = tp.reduce((s, t) => s + t.count, 0) + own.length;
+    body.append(tiles([[num(total), 'conversations'], [num(tp.length), 'topics'], [num(own.length), 'own-folder']]));
+    sec(`Own-folder conversations`, many(own.sort((a, b) => (b.data.mensagens || 0) - (a.data.mensagens || 0)), Math.max(1, ...own.map(x => x.data.mensagens || 0))));
+    const acts = el('div', 'acts'), cp = btn('Copy path', async () => { try { await navigator.clipboard.writeText(n.data.caminho); cp.textContent = 'Copied'; setTimeout(() => { cp.textContent = 'Copy path'; }, 1400); } catch (e) { cp.textContent = 'Could not copy'; } }, '', 'Copies the full folder path');
+    acts.append(cp); body.append(acts);
   } else {
-    const cs = nb.filter(x => x.kind === 'conv'); body.append(el('small', null, 'Followed, but in no topic with a folder and without a folder of their own: nothing is written.'));
-    sec(`Conversations (${cs.length})`, cs.map(x => link(x.id, x.label)));
+    const cs = nb.filter(x => x.kind === 'conv');
+    body.append(stat('bad', 'warn', 'Followed, but in no topic and without a folder of their own: nothing is written. Give them a topic in Following.'));
+    sec(`Conversations (${cs.length})`, many(cs, Math.max(1, ...cs.map(x => x.data.mensagens || 0))));
+    const acts = el('div', 'acts'); acts.append(btn('Go to Following', () => go('conversas'), 'cta', 'Give these conversations a topic')); body.append(acts);
   }
-  p.replaceChildren(hd, body);
+  p.replaceChildren(hd, body); p.scrollTop = 0; box.classList.add('panel');
 }
-function mapSelect(n, center) {
-  MP.sel = n; mapPanel();
-  if (n && center) { const cv = $('mp-c'); MP.ox = -n.x * MP.k; MP.oy = -n.y * MP.k; }
+function mapSelect(n) {
+  const had = $('mp').classList.contains('panel');
+  MP.sel = n; if (!n) MP.list = false;
+  mapPanel(); mapKick();
+  // the panel covers the right side: keep the selected node in view
+  if (n && !had && innerWidth > 700) {
+    const A = mapArea(), sx = n.x * MP.k + MP.ox, sy = n.y * MP.k + MP.oy;
+    if (Math.abs(sx - A.cx) > A.w / 2 - 40 || Math.abs(sy - A.cy) > A.h / 2 - 40) mapCam(MP.k, MP.ox + A.cx - sx, MP.oy + A.cy - sy, 450);
+  }
 }
+const mapGo = n => { mapSelect(n); mapFly(n); };
+
+// ---- toolbar: filters, problems, search ----
+function mapChips() {
+  const n = MP.nodes, cnt = k => n.filter(x => mpKind(x) === k).length, bad = n.filter(x => x.kind === 'conv' && x.bad).length;
+  const chip = (key, label, count, sw, tip) => {
+    const b = btn('', () => { MP.show[key] = !MP.show[key]; if (MP.sel && !mapVis(MP.sel)) mapSelect(null); mapChips(); mapKick(); }, 'mpbtn', tip);
+    b.setAttribute('aria-pressed', MP.show[key]); b.append(sw, label, el('b', null, num(count))); return b;
+  };
+  const kids = [
+    chip('conv', 'Contacts', cnt('conv'), mpSw('conv', MP_COL.none), 'Show or hide one-to-one conversations'),
+    chip('group', 'Groups', cnt('group'), mpSw('group', MP_COL.none), 'Show or hide group conversations'),
+    chip('folder', 'Folders', cnt('folder'), mpSw('folder', MP_COL.folder), 'Show or hide the folders files are written to')
+  ];
+  if (bad) {
+    const b = btn('', () => { MP.probs = !MP.probs; mapChips(); if (MP.probs) mapFit(MP.nodes.filter(x => x.bad)); mapKick(); }, 'mpbtn bad', 'Highlight only what is not being written');
+    b.setAttribute('aria-pressed', MP.probs); b.append(mpSw('conv', MP_COL.bad, true), 'Not written', el('b', null, num(bad))); kids.push(b);
+  } else if (MP.probs) MP.probs = false;
+  const nm = btn('Names', () => { MP.names = !MP.names; mapChips(); mapKick(); }, 'mpbtn', 'Show every name (they also appear as you zoom in)'); nm.setAttribute('aria-pressed', MP.names);
+  const fl = btn('Folder list', () => { const open = MP.list && !MP.sel; MP.sel = null; MP.list = !open; mapPanel(); mapKick(); }, 'mpbtn', 'Every folder the app writes to');
+  $('mp-chips').replaceChildren(...kids, nm, fl);
+}
+// problems worth fixing, on top of the map
+function mapAlerts() {
+  const box = $('mp-alert'), out = [];
+  MP.nodes.filter(n => n.kind === 'topic' && n.bad).forEach(n => out.push({id: n.id + ':' + n.count, n, html: [el('b', null, n.label), (n.data.dirs || []).length ? ` writes to a folder that does not exist: ${n.count} conversation${n.count === 1 ? ' is' : 's are'} not saved.` : ` has no folder: ${n.count} conversation${n.count === 1 ? ' is' : 's are'} not saved.`]}));
+  const hub = MP.byId['x:bad'];
+  if (hub) { const c = MP.adj[hub.id].size; out.push({id: 'x:bad:' + c, n: hub, html: [el('b', null, `${c} conversation${c === 1 ? '' : 's'}`), ' with no topic and no folder: nothing is saved.']}); }
+  const show = out.filter(a => !MP.gone.has(a.id)), sig = show.map(a => a.id).join('|') + (MP.alertOpen ? '+' : '');
+  if (box.dataset.sig === sig) return;
+  box.dataset.sig = sig;
+  if (!show.length) { box.replaceChildren(); return; }
+  // folded: one red pill; open: each problem with its fix
+  const lost = new Set(); show.forEach(a => [...MP.adj[a.n.id]].forEach(id => { if (MP.byId[id].kind === 'conv' && MP.byId[id].bad) lost.add(id); }));
+  const pill = btn('', () => { MP.alertOpen = !MP.alertOpen; mapAlerts(); }, 'pill', MP.alertOpen ? 'Hide the problems' : 'See what is wrong and how to fix it');
+  pill.setAttribute('aria-expanded', !!MP.alertOpen);
+  pill.append(mpSvg('warn'), el('span', null, `${lost.size} conversation${lost.size === 1 ? '' : 's'} not saved`), el('b', null, `${show.length} problem${show.length === 1 ? '' : 's'}`), el('i', null, MP.alertOpen ? '▾' : '▸'));
+  box.replaceChildren(pill, ...(MP.alertOpen ? show.map(a => {
+    const it = el('div', 'it'), p = el('p'), acts = el('div', 'acts');
+    p.append(...a.html);
+    acts.append(btn('Show on map', () => { mapSelect(a.n); mapFit([a.n, ...[...MP.adj[a.n.id]].map(id => MP.byId[id])], 650, 2.2); }), btn('Fix in Following', () => go('conversas')));
+    p.append(acts);
+    it.append(mpSvg('warn'), p, btn('×', () => { MP.gone.add(a.id); mapAlerts(); }, 'x', 'Hide this notice'));
+    return it;
+  }) : []));
+}
+function mapSearch() {
+  const box = $('mp-res'), inp = $('mp-q'), q = fold(MP.q.trim());
+  if (!q) { box.hidden = true; inp.setAttribute('aria-expanded', 'false'); MP.res = []; return; }
+  const score = n => { const l = fold(n.label); return l.startsWith(q) ? 0 : l.split(/[\s/._-]+/).some(w => w.startsWith(q)) ? 1 : 2; }, ko = {topic: 0, hub: 1, folder: 2, conv: 3};
+  MP.res = MP.nodes.filter(n => mapMatch(n)).sort((a, b) => score(a) - score(b) || ko[a.kind] - ko[b.kind] || b.w - a.w).slice(0, 8);
+  MP.ri = Math.min(MP.ri, Math.max(0, MP.res.length - 1));
+  const mark = s => { const f = fold(s), i = f.indexOf(q), sp = el('span'); if (i < 0) { sp.textContent = s; return sp; } sp.append(s.slice(0, i), el('mark', null, s.slice(i, i + q.length)), s.slice(i + q.length)); return sp; };
+  box.replaceChildren(...(MP.res.length ? MP.res.map((n, i) => {
+    const b = btn('', () => mapPick(n), i === MP.ri ? 'on' : '', ''); b.setAttribute('role', 'option'); b.setAttribute('aria-selected', i === MP.ri);
+    const tx = el('span', 'tx'); tx.append(mark(n.label), el('small', null, MP_KIND[mpKind(n)] + ' · ' + mapSub(n)));
+    b.append(mpSw(mpKind(n), n.col, n.bad && n.kind !== 'topic'), tx);
+    b.onmouseenter = () => { MP.ri = i; [...box.children].forEach((c, j) => c.classList.toggle('on', j === i)); };
+    return b;
+  }) : [el('div', 'none', `Nothing called “${MP.q.trim()}” on the map`)]));
+  box.hidden = false; inp.setAttribute('aria-expanded', 'true');
+}
+function mapPick(n) {
+  const inp = $('mp-q'); inp.value = MP.q = ''; mapSearch(); inp.blur();
+  if (!mapVis(n)) { MP.show[mpKind(n)] = true; mapChips(); }
+  mapGo(n);
+}
+
 function mapBuild() {
   const box = $('mp'); if (!box || box.dataset.ok) return;
   box.dataset.ok = 1;
   const cv = $('mp-c'), q = $('mp-q');
+  const local = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left - cv.clientWidth / 2, e.clientY - r.top - cv.clientHeight / 2]; };
   cv.onpointerdown = e => {
-    const h = mapAt(e); cv.setPointerCapture(e.pointerId);
-    if (h.n) { MP.drag = {n: h.n, moved: false}; h.n.fixed = true; MP.alpha = Math.max(MP.alpha, .3); }
-    else MP.pan = {x: e.clientX - MP.ox, y: e.clientY - MP.oy, moved: false};
+    cv.setPointerCapture(e.pointerId); MP.ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    MP.touched = true; MP.anim = null; $('mp-tip').classList.remove('on');
+    if (MP.ptrs.size === 2) {
+      if (MP.drag) MP.drag.n.fixed = false;
+      MP.drag = MP.pan = null;
+      const [a, b] = [...MP.ptrs.values()]; MP.pinch = {d: Math.hypot(a[0] - b[0], a[1] - b[1]), k: MP.k};
+      return;
+    }
+    const h = mapAt(e);
+    if (h.n) { MP.drag = {n: h.n, moved: false, x: e.clientX, y: e.clientY}; }
+    else { MP.pan = {x: e.clientX - MP.ox, y: e.clientY - MP.oy, sx: e.clientX, sy: e.clientY, moved: false}; cv.classList.add('grabbing'); }
   };
   cv.onpointermove = e => {
-    if (MP.drag) { const h = mapAt(e); MP.drag.n.x = h.x; MP.drag.n.y = h.y; MP.drag.moved = true; MP.alpha = Math.max(MP.alpha, .2); return; }
-    if (MP.pan) { MP.ox = e.clientX - MP.pan.x; MP.oy = e.clientY - MP.pan.y; MP.pan.moved = true; return; }
-    const h = mapAt(e); if (h.n !== MP.hover) { MP.hover = h.n; cv.style.cursor = h.n ? 'pointer' : 'grab'; }
+    MP.mouse = {x: e.clientX, y: e.clientY};
+    if (MP.ptrs.has(e.pointerId)) MP.ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    if (MP.pinch && MP.ptrs.size === 2) {
+      const [a, b] = [...MP.ptrs.values()], r = cv.getBoundingClientRect();
+      const mx = (a[0] + b[0]) / 2 - r.left - cv.clientWidth / 2, my = (a[1] + b[1]) / 2 - r.top - cv.clientHeight / 2;
+      mapZoom(MP.pinch.k * Math.hypot(a[0] - b[0], a[1] - b[1]) / MP.pinch.d / MP.k, mx, my); return;
+    }
+    if (MP.drag) {
+      if (!MP.drag.moved && Math.hypot(e.clientX - MP.drag.x, e.clientY - MP.drag.y) < 4) return;
+      const h = mapAt(e); MP.drag.moved = true; MP.drag.n.fixed = true; MP.drag.n.x = h.x; MP.drag.n.y = h.y;
+      MP.alpha = Math.max(MP.alpha, .12); cv.classList.add('grabbing'); mapKick(); return;
+    }
+    if (MP.pan) {
+      if (!MP.pan.moved && Math.hypot(e.clientX - MP.pan.sx, e.clientY - MP.pan.sy) < 4) return;
+      MP.ox = e.clientX - MP.pan.x; MP.oy = e.clientY - MP.pan.y; MP.pan.moved = true; mapKick(); return;
+    }
+    const h = mapAt(e);
+    if (h.n !== MP.hover) { MP.hover = h.n; cv.style.cursor = h.n ? 'pointer' : ''; if (!h.n) $('mp-tip').classList.remove('on'); }
+    if (MP.hover) mapTip();
+    mapKick();
   };
-  cv.onpointerup = e => {
-    if (MP.drag) { MP.drag.n.fixed = false; if (!MP.drag.moved) mapSelect(MP.drag.n); MP.drag = null; }
-    else if (MP.pan) { if (!MP.pan.moved) mapSelect(null); MP.pan = null; }
+  cv.onpointerup = cv.onpointercancel = e => {
+    MP.ptrs.delete(e.pointerId); cv.classList.remove('grabbing');
+    if (MP.pinch) { if (MP.ptrs.size < 2) MP.pinch = null; return; }
+    if (MP.drag) { MP.drag.n.fixed = false; if (!MP.drag.moved) mapSelect(MP.drag.n === MP.sel ? null : MP.drag.n); MP.drag = null; }
+    else if (MP.pan) { if (!MP.pan.moved) { mapSelect(null); MP.list = false; mapPanel(); } MP.pan = null; }
+    mapKick();
   };
-  cv.onpointerleave = () => { MP.hover = null; };
-  cv.ondblclick = e => { const h = mapAt(e); if (h.n && h.n.kind === 'conv') openPreview(previewOf(h.n.data), [], null); };
+  cv.onpointerleave = () => { MP.hover = null; MP.mouse = null; $('mp-tip').classList.remove('on'); mapKick(); };
+  cv.ondblclick = e => {
+    const h = mapAt(e); if (!h.n) { const [mx, my] = local(e); mapZoom(1.8, mx, my); return; }
+    if (h.n.kind === 'conv') openPreview(previewOf(h.n.data), [], null);
+    else { mapSelect(h.n); mapFit([h.n, ...[...MP.adj[h.n.id]].map(id => MP.byId[id])], 650, 2.4); }
+  };
   cv.onwheel = e => {
     e.preventDefault();
-    const r = cv.getBoundingClientRect(), mx = e.clientX - r.left - cv.clientWidth / 2, my = e.clientY - r.top - cv.clientHeight / 2;
-    const k = Math.min(5, Math.max(.2, MP.k * Math.exp(-e.deltaY * .0015)));
-    MP.ox = mx - (mx - MP.ox) * k / MP.k; MP.oy = my - (my - MP.oy) * k / MP.k; MP.k = k;
+    const [mx, my] = local(e), dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+    mapZoom(Math.exp(-dy * (e.ctrlKey ? .012 : .0018)), mx, my);
   };
-  q.oninput = () => { MP.q = q.value; };
-  q.onkeydown = e => { if (e.key === 'Enter') { const n = MP.nodes.find(mapMatch); if (n && MP.q.trim()) mapSelect(n, true); } };
-  $('mp-names').onchange = e => { MP.names = e.target.checked; };
-  $('mp-folders').onclick = () => { MP.list = !MP.list || !!MP.sel; MP.sel = null; mapPanel(); };
-  $('mp-fit').onclick = () => { MP.k = 1; MP.ox = MP.oy = 0; MP.alpha = Math.max(MP.alpha, .5); };
+  q.oninput = () => { MP.q = q.value; MP.ri = 0; mapSearch(); mapKick(); };
+  q.onfocus = () => { if (MP.q.trim()) mapSearch(); };
+  q.onblur = () => setTimeout(() => { $('mp-res').hidden = true; q.setAttribute('aria-expanded', 'false'); }, 150);
+  q.onkeydown = e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (!MP.res.length) return; MP.ri = (MP.ri + (e.key === 'ArrowDown' ? 1 : -1) + MP.res.length) % MP.res.length; mapSearch(); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (MP.res[MP.ri]) mapPick(MP.res[MP.ri]); }
+    else if (e.key === 'Escape') { e.preventDefault(); if (q.value) { q.value = MP.q = ''; mapSearch(); mapKick(); } else q.blur(); }
+  };
+  $('mp-in').onclick = () => mapZoom(1.35);
+  $('mp-out').onclick = () => mapZoom(1 / 1.35);
+  $('mp-fit').onclick = () => { MP.touched = false; mapFit(); };
+  $('mp-go').onclick = () => go('adicionar');
+  document.addEventListener('keydown', e => {
+    if (tab !== 'mapa' || e.metaKey || e.ctrlKey || e.altKey || document.querySelector('dialog[open]')) return;
+    if (e.target.closest && e.target.closest('input,textarea,select,[contenteditable]')) return;
+    if (e.key === '/') { e.preventDefault(); q.focus(); q.select(); }
+    else if (e.key === 'Escape') { if (MP.probs) { MP.probs = false; mapChips(); } mapSelect(null); }
+    else if (e.key === '+' || e.key === '=') mapZoom(1.35);
+    else if (e.key === '-' || e.key === '_') mapZoom(1 / 1.35);
+    else if (e.key === '0') { MP.touched = false; mapFit(); }
+    else return;
+    mapKick();
+  });
+  if (window.ResizeObserver) new ResizeObserver(() => { if (!MP.touched) mapFit(null, 0); mapKick(); }).observe(box);
 }
 function mapShow() {
-  mapBuild(); mapData(); mapPanel();
-  const n = MP.nodes, st = $('mp-stats');
-  if (st) st.textContent = `${n.filter(x => x.kind === 'conv').length} conversations · ${n.filter(x => x.kind === 'topic').length} topics · ${n.filter(x => x.kind === 'folder').length} folders`;
-  if (!MP.raf) MP.raf = requestAnimationFrame(mapLoop);
+  mapBuild();
+  const first = !MP.built; $('mp-tip').dataset.id = '';
+  mapData();
+  const conv = MP.nodes.filter(x => x.kind === 'conv').length, tops = MP.nodes.filter(x => x.kind === 'topic').length, fol = MP.nodes.filter(x => x.kind === 'folder').length;
+  $('mp-stats').textContent = `${conv} conversation${conv === 1 ? '' : 's'} · ${tops} topic${tops === 1 ? '' : 's'} · ${fol} folder${fol === 1 ? '' : 's'}`;
+  $('mp-empty').hidden = !!(conv || tops);
+  mapChips(); mapAlerts(); mapPanel();
+  if (first || !MP.touched) requestAnimationFrame(() => { mapFit(null, first ? 0 : 400); });
+  mapKick();
 }
 
 // ---- contacts inside Conversations: WhatsApp people side by side with Apple Contacts ----
@@ -3166,8 +3719,9 @@ const durLabel = h => h % 720 === 0 ? `${h / 720} month${h === 720 ? '' : 's'}` 
 const minLabel = m => m % 60 === 0 ? durLabel(m / 60) : m + ' min';
 const FIELDS = [
   ['General'],
-  ['meu_nome', 'Your name in conversations', 'text', 'How your messages appear in the history and drafts'],
-  ['auto_sync_min', 'Sync every', 'dur:min:min,h,d', 'Interval of the automatic background sync'],
+  ['meu_nome', 'Your name in conversations', 'text', ''],
+  ['prefixo_md', 'Saved file name prefix', 'text', ''],
+  ['auto_sync_min', 'Sync every', 'dur:min:min,h,d', ''],
   // AI provider, then ONLY the settings of the AI in use, then what every AI shares
   ['@ia'],
   ['@priv'],
@@ -3182,7 +3736,7 @@ async function loadConfig() {
   // AI provider: visual and explicit about WHICH account is in use
   const iaCard = () => {
     const card = el('div', 'card'), hd = el('div', 'hd');
-    hd.append(el('b', null, 'AI provider'), el('span', null, 'Who writes drafts and suggestions. You can pick one only while it is signed in. Each one is used only through its terminal tool, with the account signed in there (your own subscription). The account in use is shown on each box. The conversation history is sent only to the provider you choose.'));
+    hd.append(el('b', null, 'AI provider'));
     const wrap = el('div'); wrap.style.padding = '4px 14px 14px'; wrap.style.display = 'grid'; wrap.style.gap = '12px';
     const grid3 = el('div', 'ias'), res = el('div'); res.style.display = 'none';
     // keep these controls out of the Save settings flow
@@ -3201,20 +3755,21 @@ async function loadConfig() {
       if (!s.instalado) { who.classList.add('bad'); txt.append(el('strong', null, 'Not installed on this Mac'), el('small', null, 'Install command:'), el('code', null, s.instalar)); }
       else if (s.aviso) { who.classList.add('bad'); txt.append(el('strong', null, s.aviso)); }
       else if (s.conta) { who.classList.add('ok'); txt.append(el('small', null, 'Connected as'), el('strong', null, s.conta)); const extra = [s.pessoa, s.plano, s.org].filter(Boolean).join(' · '); if (extra) txt.append(el('small', null, extra)); }
-      else txt.append(el('strong', null, 'Not signed in'), el('small', null, 'Click Sign in: your browser opens to log in.'));
+      else txt.append(el('strong', null, 'Not signed in'));
       if (s.perfil) txt.append(el('small', null, `Claude profile: ${s.perfil}`));
       who.prepend(el('span', 'dot')); who.append(txt);
       // default model (and effort) of this AI, right in its box; saved on change
       const mdl = el('div', 'mdl');
       const mfield = (lb, node, tip) => { const l = el('label', null, lb); l.title = tip; l.append(node); mdl.append(l); return node; };
-      if (s.instalado && k === 'claude') {
+      const logada = s.instalado && !!s.conta && !s.aviso;   // model choices only once the AI is signed in
+      if (logada && k === 'claude') {
         const m = el('select'); MODELS.forEach(([v, n]) => m.append(new Option(n, v))); if (![...m.options].some(o => o.value === d.modelo_resposta)) m.append(new Option(d.modelo_resposta, d.modelo_resposta)); m.value = d.modelo_resposta;
         m.onchange = async () => { const r = await api('/api/config', {modelo_resposta: m.value}); if (!fail(r)) { toast('Default model saved.', 'ok'); load(); } };
         mfield('Model', m, 'The one model Claude uses for everything in the app: drafts, suggestions and contact notes');
         const e = el('select'); e.append(new Option('Claude default', '')); EFFORTS.forEach(([v, n]) => e.append(new Option(n, v))); e.value = d.esforco_resposta || '';
         e.onchange = async () => { const r = await api('/api/config', {esforco_resposta: e.value}); if (!fail(r)) { toast('Default effort saved.', 'ok'); load(); } };
         mfield('Effort', e, 'How much Claude thinks before answering. Each conversation can have its own in the conversation menu');
-      } else if (s.instalado) {
+      } else if (logada) {
         const mk = 'modelo_' + k, mi = el('input'); mi.value = d.ia[mk] || ''; mi.placeholder = `${s.nome} default`;
         mi.onchange = async () => { const r = await api('/api/ia', {[mk]: mi.value.trim()}); if (!fail(r)) toast(`${s.nome} model saved.`, 'ok'); };
         mfield('Model', mi, k === 'gemini' ? 'e.g. pro, flash or gemini-2.5-pro. Empty = the default model of the Gemini tool' : 'e.g. gpt-5. Empty = the default model of the ChatGPT tool');
@@ -3231,11 +3786,11 @@ async function loadConfig() {
       if (!on && s.instalado && s.conta && !s.aviso) c.onclick = e => { if (e.target === c || e.target.closest('.top,.who')) c.querySelector('.cta')?.click(); };
       grid3.append(c);
     });
-    wrap.append(grid3, res, el('small', 'h', 'Using AI is optional: syncing and the .md files work without it. Each box has its own default model. Claude also offers connectors and per-conversation model and effort; ChatGPT and Gemini write only from the conversation history and the reference files. What each conversation may send is set in AI privacy.'));
+    wrap.append(grid3, res, el('small', 'h', 'Who writes drafts and suggestions. You can pick one only while it is signed in. Each one is used only through its terminal tool, with the account signed in there (your own subscription). The account in use is shown on each box. The conversation history is sent only to the provider you choose. Using AI is optional: syncing and the .md files work without it. Each box has its own default model. Claude also offers connectors and per-conversation model and effort; ChatGPT and Gemini write only from the conversation history and the reference files. What each conversation may send is set in AI privacy.'));
     card.append(hd, wrap); out.push(card);
   };
   const sec = title => { const c = el('div', 'card'), h = el('div', 'hd'); h.append(el('b', null, title)); grid = el('div', 'cfg'); c.append(h, grid); out.push(c); };
-  const SPECIAL = {'@ia': iaCard, '@priv': () => privCard(d, sec, () => grid)};
+  const SPECIAL = {'@ia': iaCard, '@priv': () => privCard(d, sec, () => grid, () => dirty())};
   FIELDS.forEach(([k, lb, type, tip, only]) => {
     if (SPECIAL[k]) return SPECIAL[k]();
     if (only && only !== iaKey) return;
@@ -3272,7 +3827,7 @@ async function loadConfig() {
     else if (type === 'textarea') { i = el('textarea'); i.rows = 3; i.value = d[k]; l.append(i); }
     else if (type.startsWith('select:')) { i = el('select'); type.slice(7).split(',').forEach(o => { const [v, n] = o.split('='); i.append(new Option(n, v)); }); if (![...i.options].some(o => o.value === d[k])) i.append(new Option(d[k], d[k])); i.value = d[k]; l.append(i); }
     else { i = el('input'); i.type = type; i.value = d[k]; l.append(i); }
-    l.append(el('small', null, tip));
+    if (tip) l.append(el('small', null, tip));   // the three General fields have no description
     inputs[k] = i; grid.append(l);
   });
   // keyword library: the same list the topics pick from in Conversations
@@ -3299,7 +3854,12 @@ async function loadConfig() {
   add.style.justifySelf = 'start'; fl.append(add); grid.append(fl);
   sec('Account file');
   const acc = el('div', 'wide'); acc.style.display = 'grid'; acc.style.gap = '6px';
-  const cur = el('code', null, d.arquivo_config); cur.style.wordBreak = 'break-all';
+  // folder of the account file: cloud icon when it syncs to the cloud (Drive, iCloud…), plain folder otherwise
+  const cur = el('div', 'accpath'), curIco = el('span', 'fico' + (d.arquivo_config_nuvem ? ' cloud' : '')), curCode = el('code', null, d.arquivo_config);
+  curIco.innerHTML = d.arquivo_config_nuvem ? SVG_CLOUD : SVG_FOLDER;
+  curIco.title = d.arquivo_config_nuvem ? 'This folder syncs to the cloud (Drive, iCloud…)' : 'Folder on this Mac';
+  curIco.setAttribute('aria-label', d.arquivo_config_nuvem ? 'Cloud-synced folder' : 'Folder');
+  curCode.style.wordBreak = 'break-all'; cur.append(curIco, curCode);
   const setDir = async pasta => {
     const r = await api('/api/config-pasta', {pasta});
     if (fail(r)) return;
@@ -3330,11 +3890,19 @@ async function loadConfig() {
   info.append(bar); grid.append(info);
   const state = el('span', 'h', 'All saved.');
   const doSave = async () => {
+    if (privBank && privBank.changed) { const pr = await api('/api/privacidade', {banco: privBank.get()}); if (fail(pr)) return false; }
     const body = {fontes_desligadas: [...off], fontes_extras: extras, fonte_icones: iconsSel};
     for (const k in inputs) body[k] = inputs[k].value;
+    const np = String(body.prefixo_md ?? '').trim();
+    if (np !== d.prefixo_md) {
+      const a = await askChoice(`You changed the file name prefix from "${d.prefixo_md}" to "${np}".\n\nCan I rename all the .md files already saved to the new prefix?\n\nIf you say no, the old files stay where they are, with no further updates, and new files are created from the beginning with the new prefix.`,
+        [['Yes, rename all', 'sim', 'cta'], ['No, keep the old ones', 'nao', ''], ['Cancel', 'cancelar', 'lk']]);
+      if (!a || a.v === 'cancelar') return false;
+      body.renomear_md = a.v === 'sim';
+    }
     const r = await api('/api/config', body);
     if (fail(r)) return false;
-    toast('Settings saved.');
+    toast(r.renomear ? `Settings saved. ${r.renomeados} file(s) renamed.` + (r.presos ? ` ${r.presos} left as they were (the new name was taken).` : '') : 'Settings saved.');
     await load(); loadSug(true); loadConfig();
     return true;
   };
@@ -3404,12 +3972,14 @@ async function load(soft) {
 $('sync').onclick = () => syncNow();
 $('pause').onclick = () => appPausado ? setPausa({tudo: false}, 'Resumed: syncing again.') : setPausa({tudo: true}, 'App paused.');
 let ultima = '', proxima = null, autoMin = 0;
+// minutes as hours and minutes: 1412 -> "23h 32min", 90 -> "1h 30min", 45 -> "45 min"
+const hmLabel = m => { m = Math.max(0, Math.round(m)); const h = Math.floor(m / 60), r = m % 60; return h ? `${h}h` + (r ? ` ${r}min` : '') : `${r} min`; };
 function drawLast() {
   const hoje = isoDay(new Date()), q = ultima;
   const when = !q ? '' : q.slice(0, 10) === hoje ? q.slice(11, 16) : brDate(q.slice(0, 10)) + ' ' + q.slice(11, 16);
   const left = proxima ? Math.max(0, Math.round((proxima * 1000 - Date.now()) / 6e4)) : null;
-  $('last').textContent = [when ? 'Synced ' + when : '', left != null ? `auto in ${left} min` : autoMin ? `auto every ${minLabel(autoMin)}` : ''].filter(Boolean).join(' · ');
-  $('last').title = (q ? 'Last sync: ' + q + '. ' : '') + `Automatic background sync every ${minLabel(autoMin)}.`;
+  $('last').textContent = [when ? 'Synced ' + when : '', left != null ? `auto in ${hmLabel(left)}` : autoMin ? `auto every ${hmLabel(autoMin)}` : ''].filter(Boolean).join(' · ');
+  $('last').title = (q ? 'Last sync: ' + q + '. ' : '') + `Automatic background sync every ${hmLabel(autoMin)}.`;
 }
 setInterval(drawLast, 30000);
 CF.main = makeFilter('conv_tags'); CF.main.build($('cf-main'), 'Search names and messages', $('res'));

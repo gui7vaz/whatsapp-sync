@@ -82,13 +82,10 @@ DEFAULTS = {
     "porta": (8765, 1024, 65535),
     "auto_sync_min": (15, 1, 43200),
     "dias_iniciais": (30, 0, 36500),
-    "sugestao_horas": (2160, 1, 87600),
-    "sugestao_max": (12, 1, 100),
     "pendencia_horas": (24, 1, 8760),
     "followup_dias": (3, 1, 365),
     "etapas": (["New", "In progress", "Waiting", "Done"], None, None),
     "modelo_resposta": ("sonnet", None, None),
-    "modelo_contatos": ("claude-sonnet-5-5", None, None),
     "notas_contatos": ("Caveman extremo. Palavras soltas como keywords para"
                        " identificar o contato.", None, None),
     "esforco_resposta": ("", None, None),
@@ -210,12 +207,9 @@ def save_config(cfg):
 
 def load_config():
     cfg = read_config()
-    if "sugestao_horas" not in cfg and "sugestao_dias" in cfg:  # old setting
-        try:
-            cfg["sugestao_horas"] = int(cfg["sugestao_dias"]) * 24
-        except (TypeError, ValueError):
-            pass
-    cfg.pop("sugestao_dias", None)
+    for old in ("sugestao_dias", "sugestao_horas", "sugestao_max",
+                "modelo_contatos"):   # removed settings (see SUGESTAO_MAX)
+        cfg.pop(old, None)
     for k, (default, _, _) in DEFAULTS.items():
         cfg.setdefault(k, list(default) if isinstance(default, list)
                        else default)
@@ -636,8 +630,9 @@ def msg_sql(con):
             f" FROM ZWAMESSAGE m {joins}")
 
 
-def fetch_msgs(con, c, since, me, names):
-    """Messages of a conversation from a date on, with names resolved."""
+def fetch_msgs(con, c, since, me, names, min_pk=None, max_pk=None):
+    """Messages of a conversation from a date on, with names resolved.
+    min_pk/max_pk: only messages with min_pk < id <= max_pk (incremental)."""
     chat_ids = [r[0] for r in con.execute(
         "SELECT Z_PK FROM ZWACHATSESSION WHERE ZCONTACTJID = ?", (c["jid"],))]
     if not chat_ids:
@@ -648,6 +643,12 @@ def fetch_msgs(con, c, since, me, names):
     if since is not None:
         q += " AND m.ZMESSAGEDATE >= ?"
         params.append(since)
+    if min_pk is not None:
+        q += " AND m.Z_PK > ?"
+        params.append(min_pk)
+    if max_pk is not None:
+        q += " AND m.Z_PK <= ?"
+        params.append(max_pk)
     q += " ORDER BY m.ZMESSAGEDATE, m.Z_PK"
     out = []
     for pk, ts, from_me, text, t, sender, title, sjid in con.execute(q, params):
@@ -693,7 +694,9 @@ def conv_sig(cfg, c, src):
                 params.append(since)
             row = con.execute(q, params).fetchone()
     return [src["id"], list(row), since, cfg["meu_nome"], c["nome"],
-            c["arquivo"], sorted(d["caminho"] for d in destinos(cfg, c))]
+            c["arquivo"], sorted(d["caminho"] + ("|pausado" if d.get("pausado")
+                                                 else "")
+                                 for d in destinos(cfg, c))]
 
 
 def file_mark(path):
@@ -823,7 +826,7 @@ def api_previa(k, dias, n):
     try:
         dias = min(3650, max(1, int(dias)))
     except (TypeError, ValueError):
-        dias = max(1, -(-int(cfg["sugestao_horas"]) // 24))
+        dias = 90
     try:
         n = min(5000, max(1, int(n)))
     except (TypeError, ValueError):
@@ -937,6 +940,11 @@ def sync():
     whole run, so the interface never waits for a full sync."""
     with SYNC_LOCK:
         summary = []
+        if load_config().get("pausado"):
+            summary = ["⏸ App paused: nothing is synced or written. Resume it"
+                       " with the Resume button at the top."]
+            LAST["resumo"] = summary
+            return summary
         try:
             with LOCK:
                 cfg = load_config()
@@ -954,7 +962,7 @@ def sync():
                     save_json(STATE, state)
                 keys = [key(c) for c in selected(cfg)]
             stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-            iguais = 0
+            iguais = pausadas = 0
             for k in keys:
                 with LOCK:
                     cfg = load_config()   # fresh: the user may have changed it meanwhile
@@ -962,6 +970,9 @@ def sync():
                     if c is None:
                         continue
                     state = load_json(STATE, {})
+                    if c.get("pausada"):
+                        pausadas += 1   # files and state stay as they are
+                        continue
                     if c["fonte"] not in srcs:
                         summary.append(f"✗ '{c['nome']}': WhatsApp installation"
                                        " turned off or not found")
@@ -973,8 +984,26 @@ def sync():
                         prev.get("gravados", [])) and all(
                         file_mark(p) == m[:2] for p, m in marks.items())
                     if (not full and prev.get("assinatura") == sig
-                            and (intact or not destinos(cfg, c))):
+                            and (intact or not active_dests(cfg, c))):
                         iguais += 1   # nothing new and the files are untouched
+                        continue
+                    inc = None
+                    if not full and intact:
+                        try:
+                            inc = try_append(cfg, c, srcs[c["fonte"]], prev,
+                                             sig, marks)
+                        except (OSError, sqlite3.Error):
+                            inc = None   # fall back to the full rewrite
+                    if inc:
+                        new, newmarks, marca = inc
+                        state[key(c)] = dict(
+                            prev, total=(prev.get("total") or 0) + len(new),
+                            sync=stamp, assinatura=sig, arquivos=newmarks,
+                            marca=marca)
+                        save_json(STATE, state)
+                        summary.append(f"✓ '{c['nome']}': +{len(new)} new "
+                                       f"message(s) added to {len(newmarks)}"
+                                       " folder(s)")
                         continue
                     msgs = read_msgs(c, cfg, fresh=True)
                     antes = prev.get("gravados", [])
@@ -986,10 +1015,13 @@ def sync():
                         continue
                     # a folder that failed (missing, foreign file) is retried
                     # next time: no signature is kept
-                    ok = len(feitos) == len(destinos(cfg, c))
+                    ok = len(feitos) == len(active_dests(cfg, c))
                     state[key(c)] = {
                         "total": len(msgs), "sync": stamp, "gravados": feitos,
                         "assinatura": sig if ok else None,
+                        "marca": {"ultima": msgs[-1]["data"],
+                                  "dia": msgs[-1]["data"][:10]}
+                        if msgs and ok else None,
                         "arquivos": {p: (file_mark(p) or [0, 0]) + [hashes[p]]
                                      for p in feitos}}
                     save_json(STATE, state)
@@ -998,6 +1030,9 @@ def sync():
                 state = load_json(STATE, {})
                 if full:
                     state["_completo"] = time.time()
+                if pausadas:
+                    summary.append(f"⏸ {pausadas} paused conversation(s),"
+                                   " skipped")
                 if iguais:
                     summary.append(f"= {iguais} conversation(s) without changes,"
                                    " skipped")
@@ -1042,14 +1077,81 @@ def render_md(c, msgs):
         lines.append(f"_Previously named: {', '.join(dict.fromkeys(antigos))}._\n")
     if not msgs:
         lines.append("\n_No messages in the selected period._\n")
-    day = None
+    return "".join(lines) + render_lines(msgs)[0]
+
+
+def render_lines(msgs, day=None):
+    """The message lines of the .md. day = day of the last line already in
+    the file (so an appended batch does not repeat its heading).
+    Returns (text, day of the last line)."""
+    lines = []
     for m in msgs:
         if m["data"][:10] != day:
             day = m["data"][:10]
             lines.append(f"\n## {day}\n\n")
         lines.append(f"- {m['data'][11:16]} · {m['de']}: "
                      + m["texto"].replace("\n", "\n  ") + "\n")
-    return "".join(lines)
+    return "".join(lines), day
+
+
+def file_digest(path):
+    """sha256 of a file, read in small blocks (never all in memory)."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for blk in iter(lambda: f.read(1 << 20), b""):
+            h.update(blk)
+    return h.hexdigest()
+
+
+def try_append(cfg, c, src, prev, sig, marks):
+    """Incremental save: when the only change since the last sync is NEW
+    messages at the end, appends just those to the .md files instead of
+    reading and rewriting the whole history. The app keeps no copy of the
+    messages, only a marker (id and date of the last message written).
+    Returns (new messages, {path: marks}, marker) or None, meaning: do the
+    full rewrite (history start moved, a message was edited or deleted, an
+    older message showed up late, a file was touched, anything unclear)."""
+    old, marca = prev.get("assinatura"), prev.get("marca")
+    gravados = prev.get("gravados") or []
+    if not old or not marca or not gravados or not isinstance(old[1], list) \
+            or len(old[1]) != 4 or not old[1][1]:
+        return None
+    if old[:1] + old[2:] != sig[:1] + sig[2:]:
+        return None   # history start, names or folders changed
+    n0, pk0, _, len0 = old[1]
+    n1, pk1 = sig[1][0], sig[1][1]
+    since = sig[2]
+    if not pk1 or n1 <= n0 or pk1 <= pk0:
+        return None
+    with open_db(src, fresh=True) as con:
+        ids = [r[0] for r in con.execute(
+            "SELECT Z_PK FROM ZWACHATSESSION WHERE ZCONTACTJID = ?",
+            (c["jid"],))]
+        if not ids:
+            return None
+        q = ("SELECT COUNT(*), TOTAL(LENGTH(ZTEXT)) FROM ZWAMESSAGE WHERE"
+             " ZCHATSESSION IN (%s) AND Z_PK <= ?" % ",".join("?" * len(ids)))
+        params = list(ids) + [pk0]
+        if since is not None:
+            q += " AND ZMESSAGEDATE >= ?"
+            params.append(since)
+        if tuple(con.execute(q, params).fetchone()) != (n0, len0):
+            return None   # something already written was edited or deleted
+        names = contacts(src) if c["jid"].endswith("@g.us") else {}
+        new = fetch_msgs(con, c, since, cfg["meu_nome"], names,
+                         min_pk=pk0, max_pk=pk1)
+    if len(new) != n1 - n0 or new[0]["data"] < marca["ultima"]:
+        return None   # a message arrived out of order: rebuild in order
+    text, dia = render_lines(new, marca["dia"])
+    out = {}
+    for path in gravados:
+        if file_mark(path) != (marks.get(path) or [])[:2]:
+            return None
+    for path in gravados:   # an OSError here makes the caller rewrite it all
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(text)
+        out[path] = (file_mark(path) or [0, 0]) + [file_digest(path)]
+    return new, out, {"ultima": new[-1]["data"], "dia": dia}
 
 
 def is_ours(path):
@@ -1070,6 +1172,10 @@ def save_md(cfg, c, msgs, antigos=(), marks=None):
     untouched file is not read again just to compare."""
     name = c["nome"]
     dests = destinos(cfg, c)
+    # paused destinations are left exactly as they are (not written, not deleted)
+    pausados = {os.path.join(d["caminho"], c["arquivo"] + ".md")
+                for d in dests if d.get("pausado")}
+    dests = [d for d in dests if not d.get("pausado")]
     marks = marks or {}
     text, ok, notes, feitos = render_md(c, msgs), 0, [], []
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -1105,10 +1211,11 @@ def save_md(cfg, c, msgs, antigos=(), marks=None):
                 raise
         feitos.append(path)
         ok += 1
-    apagados = remove_ours(p for p in antigos if p not in feitos)
+    apagados = remove_ours(p for p in antigos
+                           if p not in feitos and p not in pausados)
     if ok:
         notes.insert(0, f"✓ '{name}': {len(msgs)} messages in {ok} folder(s)")
-    elif not dests:
+    elif not dests and not pausados:
         notes.insert(0, f"– '{name}': no folder chosen, nothing written")
     if apagados:
         notes.append(f"– '{name}': .md deleted from {apagados} folder(s) that"
@@ -1200,21 +1307,28 @@ def destinos(cfg, c):
     """Folders where the conversation's .md is written: the conversation's
     own folder and the folders of its topics. Folder = write; nothing else."""
     topics = {t["id"]: t for t in cfg["assuntos"]}
-    cand = [("Conversation folder", p) for p in c.get("pastas", [])]
+    pc = bool(c.get("pausada"))
+    cand = [("Conversation folder", p, pc) for p in c.get("pastas", [])]
     for tid in c.get("assuntos", []):
         t = topics.get(tid)
         if t:
-            cand += [(t["nome"], p) for p in t.get("pastas", [])]
+            cand += [(t["nome"], p, pc or bool(t.get("pausado")))
+                     for p in t.get("pastas", [])]
     out, seen = [], set()
-    for nome, pasta in cand:
+    for nome, pasta, pausado in cand:
         d = resolve(cfg, pasta)
         if in_code_folder(cfg, [pasta]):
             continue  # never write chats into the code repository
         if d and d not in seen:
             seen.add(d)
             out.append({"nome": nome, "caminho": d,
-                        "existe": os.path.isdir(d)})
+                        "existe": os.path.isdir(d), "pausado": pausado})
     return out
+
+
+def active_dests(cfg, c):
+    """Destinations that are written now (not paused)."""
+    return [d for d in destinos(cfg, c) if not d.get("pausado")]
 
 
 def is_synced(path):
@@ -1229,38 +1343,39 @@ def is_synced(path):
     return False
 
 
+# Keyword suggestions show at most this many conversations per topic. The AI
+# search (Filter with AI / Ask Claude for suggestions) is not limited.
+SUGESTAO_MAX = 10
+
+
 def api_sugestoes(force=False):
     """Not-yet-followed conversations that match each topic: by
-    conversation name or by mentions in recent messages."""
+    conversation name or by mentions in ALL messages of the database."""
     if not force and SUG["em"] and time.time() - SUG["em"] < 600:
         return SUG["dados"]
     with LOCK:
         cfg = load_config()
         chats = {c["chave"]: c for c in get_chats(cfg)}
-        since = (datetime.now() - timedelta(hours=int(cfg["sugestao_horas"]))
-                 ).timestamp() - APPLE_EPOCH
-        rows = []
+        skip = {key(c) for c in selected(cfg)} | set(cfg["ignoradas"])
+        topics = [(t, topic_regex(t)) for t in cfg["assuntos"]]
+        topics = [(t, rx) for t, rx in topics if rx]
+        counts = {t["id"]: {} for t, _ in topics}
         for src in active_sources(cfg):
             with open_db(src) as con:
                 pk2jid = dict(con.execute(
                     "SELECT Z_PK, ZCONTACTJID FROM ZWACHATSESSION"))
-                for pk, text in con.execute(
-                        "SELECT ZCHATSESSION, ZTEXT FROM ZWAMESSAGE WHERE ZTEXT"
-                        " IS NOT NULL AND ZMESSAGEDATE >= ?", (since,)):
-                    if pk2jid.get(pk):
-                        rows.append((key_of(src["id"], pk2jid[pk]), text))
-    skip = {key(c) for c in selected(cfg)} | set(cfg["ignoradas"])
-    topics = [(t, topic_regex(t)) for t in cfg["assuntos"]]
-    topics = [(t, rx) for t, rx in topics if rx]
-    counts = {t["id"]: {} for t, _ in topics}
-    for k, text in rows:
-        if k not in chats or k in skip:
-            continue
-        low = norm(text)
-        for t, rx in topics:
-            if rx.search(low):
-                d = counts[t["id"]]
-                d[k] = d.get(k, 0) + 1
+                # the search index already holds every message, accent-folded
+                for _pk, ses, _ts, low in text_index(src, con):
+                    jid = pk2jid.get(ses)
+                    if not jid:
+                        continue
+                    k = key_of(src["id"], jid)
+                    if k not in chats or k in skip:
+                        continue
+                    for t, rx in topics:
+                        if rx.search(low):
+                            d = counts[t["id"]]
+                            d[k] = d.get(k, 0) + 1
     out = {}
     for t, rx in topics:
         items = []
@@ -1272,11 +1387,9 @@ def api_sugestoes(force=False):
             if by_name or n:
                 items.append(dict(ch, pelo_nome=by_name, mencoes=n))
         items.sort(key=lambda x: (not x["pelo_nome"], -x["mencoes"]))
-        out[t["id"]] = items[:300]   # the screen shows sugestao_max at a time
-    SUG.update(em=time.time(), dados={"sugestoes": out,
-                                      "dias": max(1, -(-int(cfg["sugestao_horas"]) // 24)),
-                                      "horas": int(cfg["sugestao_horas"]),
-                                      "max": int(cfg["sugestao_max"])})
+        out[t["id"]] = items[:SUGESTAO_MAX]
+    SUG.update(em=time.time(), dados={"sugestoes": out, "dias": 90,
+                                      "max": SUGESTAO_MAX})
     return SUG["dados"]
 
 
@@ -1334,6 +1447,9 @@ def api_assuntos(body):
         pv = priv_clean(load_config(), t.get("privacidade"))
         if pv["modo"]:
             clean[-1]["privacidade"] = pv
+        if next((o for o in load_config()["assuntos"]
+                 if o.get("id") == tid and o.get("pausado")), None):
+            clean[-1]["pausado"] = True
     with LOCK:
         cfg = load_config()
         cfg["assuntos"] = clean
@@ -1717,6 +1833,7 @@ def api_chats():
                       destinos=[dict(d, caminho=tilde(d["caminho"]))
                                 for d in ds],
                       salva=any(d["existe"] for d in ds),
+                      pausada=bool(c.get("pausada")),
                       sync=st.get("sync", ""), desde=c.get("desde"),
                       assuntos=c.get("assuntos", []),
                       etapa=c.get("etapa") or cfg["etapas"][0],
@@ -1738,10 +1855,10 @@ def api_chats():
     return {"chats": chats, "renomeadas": renomeadas, "ultima": LAST, "proxima": NEXT["em"],
             "auto": cfg["auto_sync_min"], "assuntos": cfg["assuntos"],
             "servico": SERVICE, "dias_iniciais": cfg["dias_iniciais"],
+            "pausado": bool(cfg.get("pausado")),
             "etapas": cfg["etapas"], "tela": cfg["tela"],
             "palavras": cfg["palavras"], "icones": cfg["fonte_icones"],
             "padrao": {"modelo": cfg["modelo_resposta"],
-                       "modelo_contatos": cfg["modelo_contatos"],
                        "esforco": cfg["esforco_resposta"]},
             "claude": ia_disponivel(cfg), "ia": IAS[ia_provedor(cfg)],
             "filtros": filtros_banco(cfg), "priv_padrao": priv_default(cfg),
@@ -2022,9 +2139,8 @@ def api_conectores(force=False):
     """Connectors configured in Claude on this Mac (claude mcp list).
     The lookup takes a few seconds, so it is cached for a day."""
     cfg = load_config()
-    perfil = claude_cfg(cfg)["perfil"]
     hit = load_json(CONECTORES, None)
-    if not force and hit and hit.get("perfil", "") == perfil \
+    if not force and hit \
             and time.time() - hit.get("em", 0) < 86400:
         return hit
     exe = find_claude()
@@ -2056,7 +2172,7 @@ def api_conectores(force=False):
             "estado": ("ok" if "connected" in st
                        else "auth" if "auth" in st else "erro")})
     items.sort(key=lambda x: (x["estado"] != "ok", x["nome"].lower()))
-    data = {"em": time.time(), "perfil": perfil, "conectores": items}
+    data = {"em": time.time(), "conectores": items}
     save_json(CONECTORES, data)
     return data
 
@@ -2143,6 +2259,78 @@ def api_select(body):
     return {"ok": True, "apagados": apagados}
 
 
+def api_pausa(body):
+    """Pauses or resumes: the whole app ({"tudo"}), a followed conversation
+    ({"chave", "pausada"}) or a topic ({"assunto", "pausado"}). A paused
+    thing is not synced or written; its files and settings stay as they are."""
+    with LOCK:
+        cfg = load_config()
+        if "tudo" in body:
+            cfg["pausado"] = bool(body["tudo"])
+        if "chave" in body:
+            c = find_conv(cfg, body["chave"])
+            if not c:
+                return {"erro": "Conversation not found."}
+            if body.get("pausada"):
+                c["pausada"] = True
+            else:
+                c.pop("pausada", None)
+        if "assunto" in body:
+            t = next((x for x in cfg["assuntos"]
+                      if x.get("id") == body["assunto"]), None)
+            if not t:
+                return {"erro": "Topic not found."}
+            if body.get("pausado"):
+                t["pausado"] = True
+            else:
+                t.pop("pausado", None)
+        save_config(cfg)
+    SUG["em"] = 0
+    if not any(k in body and body.get(k) for k in ("tudo", "pausada", "pausado")):
+        sync_later()   # something was resumed: catch up now
+    bump()
+    return {"ok": True, "pausado": bool(cfg.get("pausado"))}
+
+
+def saved_md_files(cfg, state):
+    """Every .md the app wrote: for each followed conversation, its file in
+    each folder declared in its own settings or in its topics' settings (and
+    where the last sync wrote it). Only files that start with the app's
+    header count, so a user's own file is never listed."""
+    found = {}
+    for c in selected(cfg):
+        paths = list((state.get(key(c)) or {}).get("gravados", [])) + [
+            os.path.join(d["caminho"], c["arquivo"] + ".md")
+            for d in destinos(cfg, c)]
+        for pth in paths:
+            if os.path.isfile(pth) and is_ours(pth):
+                found[pth] = key(c)
+    return found
+
+
+def api_md_apagar(body):
+    """Deletes every .md saved by the app (only in the declared folders).
+    Without confirmar it only counts them."""
+    with LOCK:
+        cfg = load_config()
+        state = load_json(STATE, {})
+        found = saved_md_files(cfg, state)
+        if not body.get("confirmar"):
+            return {"arquivos": len(found),
+                    "pastas": len({os.path.dirname(p) for p in found}),
+                    "conversas": len(set(found.values()))}
+        apagados = remove_ours(found)
+        if body.get("pausar"):
+            cfg["pausado"] = True
+            save_config(cfg)
+        for k in set(found.values()):   # the next sync rewrites them in full
+            (state.get(k) or {}).pop("assinatura", None)
+            (state.get(k) or {}).pop("marca", None)
+        save_json(STATE, state)
+    bump()
+    return {"ok": True, "apagados": apagados}
+
+
 # ---------- suggested replies ----------
 
 def find_claude():
@@ -2155,166 +2343,21 @@ def find_claude():
 
 # ---------- Claude account and provider ----------
 
-PROVEDORES = {"assinatura": "Claude subscription (login)",
-              "api": "Anthropic API key",
-              "bedrock": "Amazon Bedrock",
-              "vertex": "Google Vertex AI"}
-KEYCHAIN = "WhatsApp Sync - Anthropic API key"   # macOS Keychain item
-PERFIS_DIR = os.path.join(DATA, "claude-perfis")  # logins of extra accounts
-REGIAO_RX = re.compile(r"[a-z]{2,}(-[a-z0-9]+){1,3}")
-PROJETO_RX = re.compile(r"[a-z][a-z0-9\-]{4,61}[a-z0-9]")
-AWS_PERFIL_RX = re.compile(r"[\w.\-+=@,]{0,64}")
-CHAVE_RX = re.compile(r"sk-ant-[A-Za-z0-9_\-]{20,300}")
+# Claude is used ONLY through the `claude` command-line tool, with the account
+# signed in there in the terminal. No API keys, no other providers, no extra
+# login folders: whatever `claude auth status` shows is what the app uses.
 # inherited variables that would silently pick another account or provider
 CLAUDE_VARS = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL",
                "CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX",
-               "CLAUDE_CODE_USE_FOUNDRY", "CLAUDE_CONFIG_DIR",
-               "CLAUDE_CODE_OAUTH_TOKEN")
+               "CLAUDE_CODE_USE_FOUNDRY", "CLAUDE_CODE_OAUTH_TOKEN")
 
 
-def claude_cfg(cfg):
-    """Account and provider chosen in Settings (cleaned)."""
-    c = cfg.get("claude") if isinstance(cfg.get("claude"), dict) else {}
-    perfis = [p for p in c.get("perfis", []) if isinstance(p, dict)
-              and str(p.get("nome") or "").strip()
-              and str(p.get("pasta") or "").startswith(("/", "~"))]
-    pastas = {p["pasta"] for p in perfis}
-    perfil = c.get("perfil") if c.get("perfil") in pastas else ""
-    prov = c.get("provedor") if c.get("provedor") in PROVEDORES else "assinatura"
-    return {"provedor": prov, "perfil": perfil, "perfis": perfis,
-            "aws_regiao": str(c.get("aws_regiao") or ""),
-            "aws_perfil": str(c.get("aws_perfil") or ""),
-            "vertex_regiao": str(c.get("vertex_regiao") or ""),
-            "vertex_projeto": str(c.get("vertex_projeto") or "")}
-
-
-def keychain_key():
-    r = subprocess.run(["/usr/bin/security", "find-generic-password",
-                        "-s", KEYCHAIN, "-a", "anthropic", "-w"],
-                       capture_output=True, text=True)
-    return r.stdout.strip() if r.returncode == 0 else ""
-
-
-def keychain_set(key):
-    """Saves (or with '' deletes) the API key in the login Keychain. The key
-    goes through stdin, never the command line (visible to other processes)."""
-    if not key:
-        subprocess.run(["/usr/bin/security", "delete-generic-password",
-                        "-s", KEYCHAIN, "-a", "anthropic"],
-                       capture_output=True)
-        return True
-    cmd = (f'add-generic-password -U -s "{KEYCHAIN}" -a anthropic '
-           f'-w "{key}"\n')   # key matched CHAVE_RX: no quotes or spaces
-    r = subprocess.run(["/usr/bin/security", "-i"], input=cmd,
-                       capture_output=True, text=True)
-    return r.returncode == 0 and keychain_key() == key
-
-
-def claude_env(cfg):
-    """Environment for every claude call: only the chosen account and
-    provider, nothing inherited. Returns (env, error)."""
-    c = claude_cfg(cfg)
+def claude_env(cfg=None):
+    """Environment for every claude call: the terminal login, never an API key
+    or another provider. Returns (env, error)."""
     env = {k: v for k, v in os.environ.items() if k not in CLAUDE_VARS
            and not k.startswith(("CLAUDE_CODE_", "ANTHROPIC_"))}
-    if c["perfil"]:
-        env["CLAUDE_CONFIG_DIR"] = os.path.expanduser(c["perfil"])
-    if c["provedor"] == "api":
-        key = keychain_key()
-        if not key:
-            return None, ("No Anthropic API key saved: add it in Settings > "
-                          "Claude.")
-        env["ANTHROPIC_API_KEY"] = key
-    elif c["provedor"] == "bedrock":
-        if not c["aws_regiao"]:
-            return None, "Set the AWS region in Settings > Claude."
-        env.update(CLAUDE_CODE_USE_BEDROCK="1", AWS_REGION=c["aws_regiao"])
-        if c["aws_perfil"]:
-            env["AWS_PROFILE"] = c["aws_perfil"]
-    elif c["provedor"] == "vertex":
-        if not (c["vertex_regiao"] and c["vertex_projeto"]):
-            return None, ("Set the Google Cloud region and project in "
-                          "Settings > Claude.")
-        env.update(CLAUDE_CODE_USE_VERTEX="1",
-                   CLOUD_ML_REGION=c["vertex_regiao"],
-                   ANTHROPIC_VERTEX_PROJECT_ID=c["vertex_projeto"])
     return env, None
-
-
-def claude_resumo(cfg):
-    """What the Settings screen shows about the Claude account."""
-    c = claude_cfg(cfg)
-    nome = next((p["nome"] for p in c["perfis"] if p["pasta"] == c["perfil"]),
-                "Default (~/.claude)")
-    return dict(c, conta=nome, provedor_nome=PROVEDORES[c["provedor"]],
-                provedores=PROVEDORES, chave=bool(keychain_key()))
-
-
-def api_claude_conta(body):
-    """Saves the Claude account and provider (applies on the next call)."""
-    with LOCK:
-        cfg = load_config()
-        c = claude_cfg(cfg)
-        if "novo_perfil" in body:   # new account: own login folder
-            nome = str(body.get("novo_perfil") or "").strip()[:60]
-            if not nome:
-                return {"erro": "Give the account a name."}
-            pasta = str(body.get("pasta") or "").strip()
-            if pasta:
-                real = os.path.normpath(os.path.expanduser(pasta))
-                if not pasta.startswith(("/", "~")) or not os.path.isdir(real):
-                    return {"erro": "That folder does not exist."}
-                if in_code_folder({}, [real]):
-                    return {"erro": CODE_FOLDER_ERR}
-                pasta = tilde(real)
-            else:
-                slug = re.sub(r"[^a-z0-9]+", "-", unicodedata.normalize(
-                    "NFKD", nome).encode("ascii", "ignore").decode().lower()
-                ).strip("-") or "conta"
-                d, n = os.path.join(PERFIS_DIR, slug), 2
-                while os.path.exists(d):
-                    d, n = os.path.join(PERFIS_DIR, f"{slug}-{n}"), n + 1
-                os.makedirs(d, mode=0o700)
-                pasta = tilde(d)
-            if any(p["pasta"] == pasta for p in c["perfis"]):
-                return {"erro": "That account is already in the list."}
-            c["perfis"].append({"nome": nome, "pasta": pasta})
-            c["perfil"] = pasta
-        if "remover_perfil" in body:  # the login folder itself is kept
-            c["perfis"] = [p for p in c["perfis"]
-                           if p["pasta"] != body["remover_perfil"]]
-            if c["perfil"] == body["remover_perfil"]:
-                c["perfil"] = ""
-        if "perfil" in body:
-            if body["perfil"] and body["perfil"] not in \
-                    {p["pasta"] for p in c["perfis"]}:
-                return {"erro": "Unknown account."}
-            c["perfil"] = body["perfil"] or ""
-        if "provedor" in body:
-            if body["provedor"] not in PROVEDORES:
-                return {"erro": "Unknown provider."}
-            c["provedor"] = body["provedor"]
-        for k, rx, msg in (("aws_regiao", REGIAO_RX, "AWS region"),
-                           ("aws_perfil", AWS_PERFIL_RX, "AWS profile"),
-                           ("vertex_regiao", REGIAO_RX, "Google Cloud region"),
-                           ("vertex_projeto", PROJETO_RX,
-                            "Google Cloud project ID")):
-            if k in body:
-                v = str(body[k] or "").strip()
-                if v and not rx.fullmatch(v):
-                    return {"erro": f"Invalid {msg}."}
-                c[k] = v
-        if "chave" in body:   # never stored in config.json
-            key = str(body["chave"] or "").strip()
-            if key and not CHAVE_RX.fullmatch(key):
-                return {"erro": "That does not look like an Anthropic API key "
-                                "(it starts with sk-ant-)."}
-            if not keychain_set(key):
-                return {"erro": "Could not save the key in the Keychain."}
-        cfg["claude"] = {k: c[k] for k in (
-            "provedor", "perfil", "perfis", "aws_regiao", "aws_perfil",
-            "vertex_regiao", "vertex_projeto")}
-        save_config(cfg)
-    return {"ok": True, "claude": claude_resumo(cfg)}
 
 
 def api_claude_login(_=None):
@@ -2323,12 +2366,9 @@ def api_claude_login(_=None):
     exe = find_claude()
     if not exe:
         return {"erro": "Claude Code not found on this Mac."}
-    c = claude_cfg(load_config())
-    pre = (f"CLAUDE_CONFIG_DIR={shlex.quote(os.path.expanduser(c['perfil']))} "
-           if c["perfil"] else "")
     line = (f"cd ~ && unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN "
             f"CLAUDE_CODE_USE_BEDROCK CLAUDE_CODE_USE_VERTEX; "
-            f"{pre}{shlex.quote(exe)} /login")
+            f"{shlex.quote(exe)} /login")
     r = subprocess.run(["/usr/bin/osascript", "-e", "on run argv",
                         "-e", 'tell application "Terminal" to activate',
                         "-e", 'tell application "Terminal" to do script '
@@ -2349,8 +2389,7 @@ def api_claude_teste(_=None):
         return {"erro": err}
     return {"ok": True, "segundos": round(time.time() - t0, 1),
             "resposta": out.strip()[:40],
-            "conta": claude_resumo(cfg)["conta"],
-            "provedor": PROVEDORES[claude_cfg(cfg)["provedor"]]}
+            "conta": conta_claude(cfg).get("conta", "")}
 
 
 # ---------- AI provider: Claude, ChatGPT (Codex CLI) or Gemini (Gemini CLI) ----------
@@ -2403,28 +2442,34 @@ def jwt_claims(tok):
         return {}
 
 
-def conta_claude(cfg):
-    c = claude_cfg(cfg)
-    if c["provedor"] == "api":
-        return {"conta": "Anthropic API key" if keychain_key() else "",
-                "plano": "API"}
-    if c["provedor"] == "bedrock":
-        return {"conta": f"AWS {c['aws_perfil'] or 'default'} · "
-                         f"{c['aws_regiao']}", "plano": "Bedrock"}
-    if c["provedor"] == "vertex":
-        return {"conta": f"{c['vertex_projeto']} · {c['vertex_regiao']}",
-                "plano": "Vertex AI"}
-    perfil = next((p["nome"] for p in c["perfis"] if p["pasta"] == c["perfil"]),
-                  "") if c["perfis"] else ""
-    f = os.path.join(os.path.expanduser(c["perfil"]), ".claude.json") \
-        if c["perfil"] else os.path.expanduser("~/.claude.json")
+def conta_claude(cfg=None):
+    """Account signed in to the `claude` terminal tool (asked to the tool
+    itself, no network); falls back to its local config file."""
+    exe, (env, _) = find_claude(), claude_env()
+    if exe:
+        try:
+            r = subprocess.run([exe, "auth", "status"], capture_output=True,
+                               text=True, timeout=20, env=env,
+                               cwd=os.path.expanduser("~"))
+            j = json.loads(r.stdout[r.stdout.index("{"):])
+        except (OSError, ValueError, subprocess.TimeoutExpired):
+            j = None
+        if j is not None:
+            if not j.get("loggedIn"):
+                return {"conta": ""}
+            org, sub = j.get("orgName") or "", str(j.get("subscriptionType") or "")
+            return {"conta": j.get("email") or "Signed in with Claude",
+                    "plano": PLANOS.get("claude_" + sub, sub.title()),
+                    "org": "" if "personal" in org.lower() or "@" in org else org}
+    cdir = os.path.expanduser(os.environ.get("CLAUDE_CONFIG_DIR") or "~")
+    f = os.path.join(cdir, ".claude.json") if os.environ.get("CLAUDE_CONFIG_DIR") \
+        else os.path.expanduser("~/.claude.json")
     a = (load_json(f, {}) or {}).get("oauthAccount") or {}
     org = a.get("organizationName") or ""
     return {"conta": a.get("emailAddress") or "",
             "pessoa": a.get("fullName") or a.get("displayName") or "",
             "plano": PLANOS.get(a.get("organizationType") or "", ""),
-            "org": "" if "personal" in org.lower() or "@" in org else org,
-            "perfil": perfil or ("Default" if c["perfis"] else "")}
+            "org": "" if "personal" in org.lower() or "@" in org else org}
 
 
 def codex_home():
@@ -2639,6 +2684,9 @@ def api_ia_teste(body):
 PRIV_MODOS = ("livre", "filtro", "sem_ia")
 PRIV_NOMES = {"livre": "Everything passes", "filtro": "Filtered by AI",
               "sem_ia": "No AI"}
+# icons a privacy filter can wear (shown next to its name)
+FILTRO_ICONES = ("🔒", "💰", "👤", "🏢", "📞", "✉️", "🔑", "📍", "🏥",
+                 "⚖️", "🚫", "💬", "📎", "⭐")
 FILTROS_PADRAO = [
     {"id": "pessoais", "nome": "Personal information",
      "texto": "Personal information: phone numbers, e-mail addresses, street "
@@ -2781,7 +2829,10 @@ def api_privacidade(body):
                 while fid in seen:
                     fid += "-2"
                 seen.add(fid)
-                banco.append({"id": fid, "nome": nome, "texto": texto})
+                icone = str(f.get("icone") or "")
+                icone = icone if icone in FILTRO_ICONES else ""
+                banco.append({"id": fid, "nome": nome, "texto": texto,
+                              "icone": icone})
             cfg["filtros_privacidade"] = banco
         if "padrao" in body:
             p = priv_clean(cfg, body["padrao"], "livre")
@@ -2985,17 +3036,16 @@ def claude_json(text, kind):
 
 
 def unfollowed_blocks(cfg, ignoradas=False):
-    """Names and up to 8 recent messages of the conversations not followed
-    and not ignored (or, with ignoradas, only the ignored ones), active in
-    the suggestion window (newest first, about 60k characters in all).
-    Returns (chats, {short id: key}, text)."""
+    """Names and up to 8 recent messages of EVERY conversation not followed
+    and not ignored (or, with ignoradas, only the ignored ones), whole
+    database, newest conversation first. Too much for one request, so it is
+    cut into batches of about 60k characters (up to 250 conversations).
+    Returns (chats, [({short id: key}, text), ...])."""
     chats = {c["chave"]: c for c in get_chats(cfg)}
     ign = set(cfg["ignoradas"])
     if ignoradas:
         chats = {k: c for k, c in chats.items() if k in ign}
     skip = {key(c) for c in selected(cfg)} | (set() if ignoradas else ign)
-    since = (datetime.now() - timedelta(hours=int(cfg["sugestao_horas"]))
-             ).timestamp() - APPLE_EPOCH
     recent = {}   # key -> newest-first list of (from me, text)
     for src in active_sources(cfg):
         with open_db(src) as con:
@@ -3003,8 +3053,7 @@ def unfollowed_blocks(cfg, ignoradas=False):
                 "SELECT Z_PK, ZCONTACTJID FROM ZWACHATSESSION"))
             for pk, mine, text in con.execute(
                     "SELECT ZCHATSESSION, ZISFROMME, ZTEXT FROM ZWAMESSAGE"
-                    " WHERE ZTEXT IS NOT NULL AND ZMESSAGEDATE >= ?"
-                    " ORDER BY ZMESSAGEDATE DESC", (since,)):
+                    " WHERE ZTEXT IS NOT NULL ORDER BY ZMESSAGEDATE DESC"):
                 jid = pk2jid.get(pk)
                 k = jid and key_of(src["id"], jid)
                 if not k or k not in chats or k in skip:
@@ -3012,21 +3061,30 @@ def unfollowed_blocks(cfg, ignoradas=False):
                 lst = recent.setdefault(k, [])
                 if len(lst) < 8:
                     lst.append((mine, " ".join(text.split())[:240]))
-    order = sorted(recent, key=lambda k: chats[k]["ultima"], reverse=True)
-    ids, blocks, size = {}, [], 0
-    for k in order:
+    # conversations with no text message are still listed (their name may match)
+    order = sorted((k for k in chats if k not in skip),
+                   key=lambda k: chats[k].get("ultima") or "", reverse=True)
+
+    def block(n, k):
         c = chats[k]
         lines = "\n".join(("me: " if mine else "them: ") + txt
-                          for mine, txt in reversed(recent[k]))
-        b = (f'<conversation id="c{len(ids) + 1}" name="{c["nome"]}"'
-             f' group="{"yes" if c["grupo"] else "no"}">\n{lines}\n'
-             "</conversation>\n")
-        if size + len(b) > 60000 or len(ids) >= 250:
-            break
+                          for mine, txt in reversed(recent.get(k, [])))
+        return (f'<conversation id="c{n}" name="{c["nome"]}"'
+                f' group="{"yes" if c["grupo"] else "no"}">\n{lines}\n'
+                "</conversation>\n")
+    batches, ids, blocks, size = [], {}, [], 0
+    for k in order:
+        b = block(len(ids) + 1, k)
+        if ids and (size + len(b) > 60000 or len(ids) >= 250):
+            batches.append((ids, "".join(blocks)))
+            ids, blocks, size = {}, [], 0
+            b = block(1, k)
         ids[f"c{len(ids) + 1}"] = k
         blocks.append(b)
         size += len(b)
-    return chats, ids, "".join(blocks)
+    if ids:
+        batches.append((ids, "".join(blocks)))
+    return chats, batches
 
 
 PICK_RULES = (
@@ -3046,35 +3104,38 @@ def claude_pick(cfg, request, ignoradas=False):
         return {"erro": "Privacy: the default for conversations you do not "
                         "follow is No AI (Settings > AI privacy), so they are "
                         "never sent to an AI."}
-    chats, ids, blocks = unfollowed_blocks(cfg, ignoradas)
-    if not ids:
+    chats, batches = unfollowed_blocks(cfg, ignoradas)
+    if not batches:
         return {"itens": [], "analisadas": 0}
-    if pv["modo"] == "filtro":
-        blocks, err = sanitize(cfg, blocks, pv["filtros"])
+    out, seen, analisadas = [], set(), 0
+    for ids, blocks in batches:   # everything is read, one batch at a time
+        if pv["modo"] == "filtro":
+            blocks, err = sanitize(cfg, blocks, pv["filtros"])
+            if err:
+                return {"erro": err}
+        text, err = run_ai(cfg, "You help pick WhatsApp conversations. "
+                               + PICK_RULES, request + "\n\n" + blocks)
         if err:
             return {"erro": err}
-    text, err = run_ai(cfg, "You help pick WhatsApp conversations. "
-                           + PICK_RULES, request + "\n\n" + blocks)
-    if err:
-        return {"erro": err}
-    items = claude_json(text, list)
-    if items is None:
-        return {"erro": "Claude's answer could not be read. Try again."}
-    out, seen = [], set()
-    for it in items:
-        k = ids.get(str(it.get("id", "")).strip()) \
-            if isinstance(it, dict) else None
-        if k and k not in seen:
-            seen.add(k)
-            out.append(dict(chats[k], motivo=str(it.get("motivo") or "")[:300]))
-    return {"itens": out, "analisadas": len(ids)}
+        items = claude_json(text, list)
+        if items is None:
+            return {"erro": "The AI's answer could not be read. Try again."}
+        analisadas += len(ids)
+        for it in items:
+            k = ids.get(str(it.get("id", "")).strip()) \
+                if isinstance(it, dict) else None
+            if k and k not in seen:
+                seen.add(k)
+                out.append(dict(chats[k],
+                                motivo=str(it.get("motivo") or "")[:300]))
+    return {"itens": out, "analisadas": analisadas}
 
 
 def api_sugestoes_claude(body):
     """Asks Claude (the one installed on this Mac) which not-yet-followed
     conversations fit a topic. Only on request (button): sends the names
-    and a few recent messages of the conversations active in the
-    suggestion window. Nothing is written or followed."""
+    and a few recent messages of the conversations
+    (the whole database, in batches). Nothing is written or followed."""
     cfg = load_config()
     t = next((t for t in cfg["assuntos"] if t["id"] == body.get("assunto")),
              None)
@@ -3264,8 +3325,7 @@ def api_config():
                                 if c["fonte"] == s["id"])
     out.update(fontes=fontes, icones=cfg["fonte_icones"],
                ignoradas=len(cfg["ignoradas"]), dados=DATA,
-               arquivo_config=CONFIG, claude_conta=claude_resumo(cfg),
-               codigo=HERE, servico=SERVICE, claude=ia_disponivel(cfg),
+               arquivo_config=CONFIG,                codigo=HERE, servico=SERVICE, claude=ia_disponivel(cfg),
                ia=ia_cfg(cfg), ias=ia_status(cfg),
                filtros=filtros_banco(cfg), priv_padrao=priv_default(cfg),
                endereco=f"http://{HOSTNAME}:{cfg['porta']}/")
@@ -3340,12 +3400,9 @@ def api_config_save(body):
                                         " stage."}
             else:
                 v = str(v).strip()
-                if k in ("meu_nome", "modelo_resposta", "modelo_contatos",
-                         "notas_contatos") \
+                if k in ("meu_nome", "modelo_resposta", "notas_contatos") \
                         and not v:
                     v = default
-                if k == "modelo_contatos" and not MODELO_RX.fullmatch(v):
-                    return {"erro": "Invalid model name for contact suggestions."}
                 if k == "esforco_resposta" and v not in ESFORCOS:
                     v = ""
             cfg[k] = v
@@ -3880,7 +3937,7 @@ def api_contatos_sugerir(body):
     blocks = "".join(parts)
     modelo = str(body.get("modelo") or "")
     if not MODELO_RX.fullmatch(modelo):
-        modelo = cfg["modelo_contatos"]
+        modelo = cfg["modelo_resposta"]
     esforco = body["esforco"] if body.get("esforco") in ESFORCOS else ""
     text, err = run_ai(cfg, contact_rules(cfg), blocks, timeout=300,
                            modelo=modelo, esforco=esforco)
@@ -3939,13 +3996,12 @@ POSTS = {"/api/sugestoes_claude": api_sugestoes_claude,
          "/api/conversas_claude": api_conversas_claude,
          "/api/painel_claude": api_painel_claude,
          "/api/painel_salvos": api_painel_salvos,
-         "/api/select": api_select, "/api/conversa": api_conversa,
+         "/api/select": api_select, "/api/md-apagar": api_md_apagar, "/api/pausa": api_pausa, "/api/conversa": api_conversa,
          "/api/lote": api_lote,
          "/api/tela": api_tela, "/api/assuntos": api_assuntos,
          "/api/assunto": api_assunto, "/api/etapa": api_etapa,
          "/api/ignorar": api_ignorar, "/api/config": api_config_save,
          "/api/config-pasta": api_config_pasta,
-         "/api/claude-conta": api_claude_conta,
          "/api/claude-login": api_claude_login,
          "/api/claude-teste": api_claude_teste,
          "/api/privacidade": api_privacidade,

@@ -74,6 +74,13 @@ a.cl:hover{text-decoration-color:var(--cta);color:var(--cta-h)}
 .pbank{display:grid;gap:10px}
 .pbank .pf{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:6px}
 .pbank .pf .tools{margin:0}
+.ficon{display:inline-block;min-width:1.3em;text-align:center}
+.pbank .pft{display:flex;gap:8px;align-items:center}
+.pbank .pft input{flex:1;min-width:0}
+.pbank .pft .icsel{flex:none;width:auto;min-width:0;padding:4px 6px;font-size:16px}
+.ia .mdl{display:grid;gap:6px}
+.ia .mdl label{display:grid;gap:2px;font-size:12px;color:var(--muted)}
+.ia .mdl select,.ia .mdl input{width:100%;font-size:13px}
 /* AI provider picker */
 .ias{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .ia{border:2px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px;align-content:start;background:#fff;cursor:pointer;transition:border-color .15s,box-shadow .15s}
@@ -183,7 +190,7 @@ details.sec>summary .sa+i{margin-left:12px}
 .fctx{display:grid;gap:8px}
 .fctx:empty{display:none}
 @media (max-width:700px){.cvrow{grid-template-columns:minmax(0,1fr)}}
-/* the two fields get the same width and height; the Ask Claude button sits to their right */
+/* the two fields get the same width and height; the Filter with AI button sits to their right */
 .cvrow>.ai,.cvrow>.ai>.bar{display:contents}
 .cvrow>.ai>div:not(.bar){grid-column:1/-1}
 .cvrow>.ai>div:not(.bar):empty{display:none}
@@ -388,7 +395,6 @@ body.fix{overflow:hidden}
 body.fix main{padding-bottom:16px}
 .wa aside{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
 .wa aside input{margin:10px;width:auto}
-#wa-convs{overflow-y:auto;flex:1}
 .wa .it{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--line);border-radius:0;padding:10px 12px;font-weight:400;white-space:normal}
 .wa .it.on{background:#F0F2F5}
 .wa .it .l1{display:flex;justify-content:space-between;gap:8px}
@@ -402,7 +408,6 @@ body.fix main{padding-bottom:16px}
 .hd2 .n b{display:block;color:var(--heading);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hd2 .n span{font-size:12px;color:var(--muted)}
 .hd2 .back{display:none;padding:4px 10px}
-#wa-msgs{flex:1;overflow-y:auto;background:#EFEAE2;padding:12px 6%;display:flex;flex-direction:column;gap:3px}
 .wam{overflow-y:auto;background:#EFEAE2;padding:12px 4%;display:flex;flex-direction:column;gap:3px;min-height:200px;max-height:calc(86vh - 120px)}
 .wam .empty{align-self:center;background:#fff;border-radius:8px;margin-top:20px}
 .wam .more{align-self:center;font-size:13px;font-weight:500}
@@ -411,7 +416,6 @@ body.fix main{padding-bottom:16px}
 #prev{width:min(780px,96vw);display:none;flex-direction:column}
 #prev[open]{display:flex}
 #prev .hd{position:static}
-#wa-msgs .empty{align-self:center;background:#fff;border-radius:8px;margin-top:20px}
 .b{max-width:75%;padding:6px 9px 4px;border-radius:8px;box-shadow:0 1px .5px rgba(11,20,26,.13);color:#111B21;font-size:14.5px;line-height:1.35;overflow-wrap:anywhere}
 .b.them{align-self:flex-start;background:#fff;border-top-left-radius:0}
 .b.me{align-self:flex-end;background:#D9FDD3;border-top-right-radius:0}
@@ -421,7 +425,6 @@ body.fix main{padding-bottom:16px}
 .b .txt.media{font-style:italic;color:#667781}
 .b .hr{float:right;font-size:11px;color:#667781;margin:6px 0 0 10px}
 .day{align-self:center;background:#fff;color:#54656F;font-size:12px;border-radius:8px;padding:4px 10px;margin:8px 0;box-shadow:0 1px .5px rgba(11,20,26,.13)}
-#wa-msgs .more{align-self:center;font-size:13px;font-weight:500}
 dialog{border:1px solid var(--line2);border-radius:8px;padding:0;width:min(560px,94vw);max-height:86vh;color:var(--body);font:inherit;font-size:15px}
 dialog::backdrop{background:rgba(21,35,41,.45)}
 #ask{width:min(440px,94vw)}
@@ -601,8 +604,7 @@ body.locked nav,body.locked #sync,body.locked #last,body.locked main>section,bod
   .wa.open aside{display:none}
   .wa.open #wa-pane{display:flex}
   .hd2 .back{display:block}
-  #wa-msgs{padding:10px 8px}
-  .b{max-width:88%}
+    .b{max-width:88%}
   #drawer .two{grid-template-columns:1fr}
   .kpi b{font-size:24px}
 }
@@ -647,11 +649,13 @@ body.locked nav,body.locked #sync,body.locked #last,body.locked main>section,bod
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="logo" aria-hidden="true"><defs><linearGradient id="lg-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A4651"/><stop offset="1" stop-color="#152329"/></linearGradient><linearGradient id="lg-ear" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A4C"/><stop offset="1" stop-color="#D8551B"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#lg-bg)"/><path fill="#fff" d="M21 13H40L51 24V35A7 7 0 0 1 44 42H30L19.6 50.4C18.8 51 17.8 50.4 18 49.4L19.6 42.0A7 7 0 0 1 14 35V20A7 7 0 0 1 21 13Z"/><path fill="url(#lg-ear)" d="M40 13V21A3 3 0 0 0 43 24H51Z"/><g stroke-linecap="round" stroke-width="3.4"><path stroke="#F46F29" d="M21.5 22.5H32"/><path stroke="#233A44" d="M21.5 29H43.5"/><path stroke="#233A44" d="M21.5 35.5H37"/></g></svg>
     <h1>WhatsApp Sync</h1>
     <small id="last"></small>
+    <button id="pause" title="Pauses the whole app: nothing is synced or written until you resume">Pause app</button>
     <button class="cta" id="sync" title="Reads new messages from followed conversations now. Sends nothing and marks nothing as read.">Sync now</button>
   </div>
   <nav id="nav"></nav>
 </div></header>
 <main>
+  <div id="pausebar" class="call bad" style="display:none"></div>
   <div id="msg"></div>
 
   <section id="t-painel"><div id="pn-box"></div></section>
@@ -696,16 +700,6 @@ body.locked nav,body.locked #sync,body.locked #last,body.locked main>section,bod
     </div>
   </section>
 
-  <section id="t-mensagens">
-    <div class="wa" id="wa">
-      <aside>
-        <input type="text" id="bq" placeholder="Search messages" autocomplete="off" title="Searches the word in every followed conversation">
-        <div id="wa-convs"></div>
-      </aside>
-      <div id="wa-pane"><div id="wa-head"></div><div id="wa-msgs"></div></div>
-    </div>
-  </section>
-
   <section id="t-config"><div id="cf-box"></div></section>
 </main>
 <dialog id="dlg"></dialog>
@@ -717,11 +711,13 @@ body.locked nav,body.locked #sync,body.locked #last,body.locked main>section,bod
 <div id="bulk" role="region" aria-label="Actions for the selected conversations"></div>
 <div id="pendbar" role="region" aria-label="Contact fixes waiting to be applied"></div>
 <script>
-const TABS = [['painel', 'Dashboard'], /* Board tab disabled: ['quadro', 'Board'], */ ['adicionar', 'Conversations'], ['conversas', 'Following'], ['mapa', 'Map'], ['mensagens', 'Messages'], ['config', 'Settings']];
+const TABS = [['painel', 'Dashboard'], /* Board tab disabled: ['quadro', 'Board'], */ ['adicionar', 'Conversations'], ['conversas', 'Following'], ['mapa', 'Map'], ['config', 'Settings']];
 // the address shows the menu name (#conversations); the code keeps its own ids
+// Reply (message drafts) menu: hidden for now, code kept. Set to true to bring it back.
+const REPLY_MENU = false;
 const SLUG = Object.fromEntries(TABS.map(([id, name]) => [id, name.toLowerCase()]));
 const UNSLUG = Object.fromEntries(TABS.map(([id, name]) => [name.toLowerCase(), id]));
-const TIPS = {mapa: 'Every followed conversation, topic and folder as a map: what goes where', painel: 'Numbers for followed conversations: volume, pending replies and response times', quadro: 'Followed conversations in columns', conversas: 'Followed conversations by topic, destination folders and suggestions', adicionar: 'Search WhatsApp and follow new conversations', mensagens: 'Read followed conversations, WhatsApp style, and search them', config: 'App defaults, for every conversation'};
+const TIPS = {mapa: 'Every followed conversation, topic and folder as a map: what goes where', painel: 'Numbers for followed conversations: volume, pending replies and response times', quadro: 'Followed conversations in columns', conversas: 'Followed conversations by topic, destination folders and suggestions', adicionar: 'Search WhatsApp and follow new conversations', config: 'App defaults, for every conversation'};
 const MODELS = [['sonnet', 'Sonnet — balanced'], ['haiku', 'Haiku — fastest'], ['opus', 'Opus — more capable'], ['fable', 'Fable — most capable']];
 const EFFORTS = [['low', 'Low'], ['medium', 'Medium'], ['high', 'High'], ['xhigh', 'Very high'], ['max', 'Max']];
 const SIT = {devo: ['Reply', 'hot', 'The last message is from the other person and has no reply'], devem: ['Waiting', 'wait', 'The last message is yours and has no reply yet'], emdia: ['Up to date', 'good', 'Nothing pending'], grupo: ['Group', '', 'Group chat']};
@@ -734,8 +730,9 @@ const SVG_CONTACT = svg('M20 0H4v2h16V0zM4 24h16v-2H4v2zM20 4H4c-1.1 0-2 .9-2 2v
 const SVG_PEN = svg('M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.21a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z');
 const SVG_FOLDER = svg('M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z');
 const SVG_NEWFOLDER = svg('M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-1 8h-3v3h-2v-3h-3v-2h3V9h2v3h3v2z');
+const SVG_PAUSE = svg('M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+const SVG_PLAY = svg('M8 5v14l11-7z');
 const SVG_TRASH = svg('M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z');
-const SVG_OPEN = svg('M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z');
 // WhatsApp-style mark: green speech bubble with a white handset
 const SVG_WA = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#25D366" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><g transform="translate(6.4 6.4) scale(.47)"><path fill="#fff" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></g></svg>';
 // icon per WhatsApp installation (only shown when there are two or more)
@@ -775,7 +772,7 @@ function askInvite(c, after) {
 const SVG_STOP = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86z"/><text x="12" y="14.3" font-size="6.2" font-weight="700" text-anchor="middle" fill="#fff" font-family="Arial,Helvetica,sans-serif">STOP</text></svg>';
 const SVG_CLOUD = svg('M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z');
 let chats = [], assuntos = [], sug = {}, sugDias = 90, sugJanela = '90 days', editing = null, tab = 'painel', pend = 0, quadro = [], etapas = [], modo = 'etapa', multi = false, cfg = null, qopen = false, qconf = {}, cfgDirty = false;
-let padrao = {modelo: 'sonnet', esforco: '', modelo_contatos: 'claude-sonnet-5-5'}, temClaude = true, iaNome = 'Claude', painel = null, pdias = 30, booted = false, conectores = null;
+let padrao = {modelo: 'sonnet', esforco: ''}, temClaude = true, iaNome = 'Claude', painel = null, pdias = 30, booted = false, conectores = null;
 const drafts = {};
 const TAB = Math.random().toString(36).slice(2);
 const openSec = new Set();
@@ -799,7 +796,7 @@ const PRIV_DESC = {
   filtro: 'Before anything else, the AI removes what the chosen filters describe; only the filtered text is used.',
   sem_ia: 'This app never sends the conversation to any AI. Sync and .md files keep working.'};
 const PRIV_AVISO = 'Filters are done by the AI itself, so they are not perfect: it can miss something or remove too much. The conversation is still sent to the AI provider to be filtered. Use No AI for anything that must never leave your Mac.';
-const filtroNomes = ids => (ids || []).map(i => (filtrosBanco.find(f => f.id === i) || {}).nome || i).join(', ');
+const filtroNomes = ids => (ids || []).map(i => { const f = filtrosBanco.find(x => x.id === i) || {}; return (f.icone ? f.icone + ' ' : '') + (f.nome || i); }).join(', ');
 const privLabel = p => PRIV_TXT[p.modo] + (p.modo === 'filtro' && p.filtros.length ? ': ' + filtroNomes(p.filtros) : '');
 function privTag(p, fn, tip, full) {
   const b = btn('', fn, 'ptag p-' + p.modo + (full ? '' : ' only') + (p.herda ? ' herda' : ''), tip || ('AI privacy: ' + privLabel(p) + (p.origem ? ` (${p.origem})` : '') + '. Click to change.'));
@@ -820,7 +817,7 @@ function privEditor(cur, herda, onChange) {
       if (v === 'filtro' && modo === 'filtro') {
         const fl = el('div', 'pfil');
         if (!filtrosBanco.length) fl.append(el('small', 'bad', 'No filter prompt yet: add one in Settings > AI privacy.'));
-        filtrosBanco.forEach(f => { const cl = el('label', 'chk'), cb = el('input'); cb.type = 'checkbox'; cb.checked = fil.has(f.id); cb.onchange = () => { cb.checked ? fil.add(f.id) : fil.delete(f.id); onChange && onChange(); }; cl.title = f.texto; cl.append(cb, f.nome); fl.append(cl); });
+        filtrosBanco.forEach(f => { const cl = el('label', 'chk'), cb = el('input'); cb.type = 'checkbox'; cb.checked = fil.has(f.id); cb.onchange = () => { cb.checked ? fil.add(f.id) : fil.delete(f.id); onChange && onChange(); }; cl.title = f.texto; const fi = el('span', 'ficon', f.icone || '▽'); cl.append(cb, fi, f.nome); fl.append(cl); });
         fl.append(el('div', 'call warn', PRIV_AVISO));
         tx.append(fl);
       }
@@ -865,26 +862,30 @@ function topicPriv(t) {
   d.replaceChildren(f); d.onclose = null; d.showModal();
 }
 // Settings card: default + prompt bank
+const FILTER_ICONS = ['🔒', '💰', '👤', '🏢', '📞', '✉️', '🔑', '📍', '🏥', '⚖️', '🚫', '💬', '📎', '⭐'];
 function privCard(d, sec, grid) {
-  sec('AI privacy');
+  sec('AI Ready-made filters');
   const g = grid(), w = el('div', 'wide'); w.style.display = 'grid'; w.style.gap = '12px';
   ['input', 'change'].forEach(ev => w.addEventListener(ev, e => e.stopPropagation()));
-  const ed = privEditor(d.priv_padrao, null, () => { sv.disabled = false; });
-  const sv = btn('Save default', async () => { const v = ed.value; if (v.modo === 'filtro' && !v.filtros.length) return toast('Pick at least one filter.', 'bad'); const r = await api('/api/privacidade', {padrao: v}); if (fail(r)) return; toast('Default privacy saved.'); await load(); loadConfig(); }, 'cta', 'Saves the default privacy'); sv.disabled = true; sv.style.justifySelf = 'start';
-  w.append(el('small', null, 'Default for every conversation without its own setting or topic rule, and for the conversations you do not follow (Ask AI in suggestions). Each conversation (menu > Privacy) and each topic (privacy flag next to its name in Following) can have its own. Symbols: ✓ everything passes · funnel = filtered by AI · ⦸ no AI.'), ed.el, sv);
   // prompt bank
   const bank = (d.filtros || []).map(f => ({...f})), list = el('div', 'pbank');
   const save = async msg => { const r = await api('/api/privacidade', {banco: bank}); if (fail(r)) return; toast(msg); await load(); loadConfig(); };
   const draw = () => list.replaceChildren(...bank.map((f, i) => {
-    const b = el('div', 'pf'), n = el('input'), t = el('textarea'); n.value = f.nome; n.placeholder = 'Filter name'; t.rows = 3; t.value = f.texto; t.placeholder = 'What the AI must remove, e.g. "Prices, discounts and contract values."';
+    const b = el('div', 'pf'), top = el('div', 'pft'), n = el('input'), t = el('textarea'), ic = el('select');
+    ic.className = 'icsel'; ic.title = 'Icon of this filter'; ic.append(new Option('▽', '')); FILTER_ICONS.forEach(x => ic.append(new Option(x, x))); ic.value = f.icone || '';
+    n.value = f.nome; n.placeholder = 'Filter name'; t.rows = 3; t.value = f.texto; t.placeholder = 'What the AI must remove, e.g. "Prices, discounts and contract values."';
+    const ok = btn('Save', () => save('Filter saved.'), 'cta'); ok.disabled = !!f.id;
     n.oninput = () => { f.nome = n.value; ok.disabled = false; }; t.oninput = () => { f.texto = t.value; ok.disabled = false; };
-    const tl = el('div', 'tools'), ok = btn('Save', () => save('Filter saved.'), 'cta'); ok.disabled = !!f.id;
-    tl.append(ok, btn('Delete', async () => { if (!await ask(`Delete the filter "${f.nome}"?\n\nConversations and topics using it stop using it.`, 'Delete', true)) return; bank.splice(i, 1); save('Filter deleted.'); }, 'lk'));
-    b.append(n, t, tl); return b;
+    ic.onchange = () => { f.icone = ic.value; ok.disabled = false; };
+    top.append(ic, n, ok, btn('Delete', async () => { if (!await ask(`Delete the filter "${f.nome}"?\n\nConversations and topics using it stop using it.`, 'Delete', true)) return; bank.splice(i, 1); save('Filter deleted.'); }, 'lk'));
+    b.append(top, t); return b;
   }));
   draw();
-  const add = btn('New filter', () => { bank.push({nome: '', texto: ''}); draw(); list.lastChild.querySelector('input').focus(); }, '', 'Adds a ready-made prompt to the bank'); add.style.justifySelf = 'start';
-  w.append(el('b', null, 'Ready-made filters'), el('small', null, 'Each filter is an instruction telling the AI what to remove before it reads the conversation. Pick them in Filtered by AI.'), list, add, el('div', 'call warn', PRIV_AVISO));
+  // new filter: + at the right of the card title
+  const hd = g.parentNode.firstChild; hd.style.flexWrap = 'nowrap';
+  const add = btn('+', () => { bank.push({nome: '', texto: '', icone: ''}); draw(); list.lastChild.querySelector('input:not(.icsel)').focus(); }, 'ico', 'New filter: adds a ready-made prompt to the bank');
+  add.style.marginLeft = 'auto'; add.style.fontSize = '20px'; add.style.lineHeight = '1'; add.setAttribute('aria-label', 'New filter'); hd.append(add);
+  w.append(el('small', null, 'Each filter is an instruction telling the AI what to remove before it reads the conversation. Pick them in Filtered by AI.'), list, el('div', 'call warn', PRIV_AVISO));
   g.append(w);
 }
 const tilde = p => (p || '').replace(/^\/Users\/[^/]+/, '~');
@@ -965,26 +966,39 @@ function nav() {
   }));
 }
 function go(id, arg) { const h = '#' + (SLUG[id] || id) + (arg ? '/' + encodeURIComponent(arg) : ''); if (location.hash !== h) location.hash = h; else route(); }
-function route() {
+// leaving Settings with unsaved changes: Save / Discard / Cancel (stay)
+let cfgSaveFn = null, navGuard = false;
+async function route() {
   let [id, arg] = location.hash.slice(1).split('/');
   id = UNSLUG[(id || '').toLowerCase()] || id;  // old addresses (#painel, #adicionar…) still work
   if (id === 'assuntos') id = 'conversas';  // the old Topics tab is now part of Conversations
   if (id === 'contatos') id = 'adicionar';  // the old Contacts tab is now part of Conversations
   const ok = t => TABS.some(x => x[0] === t);
-  if (id === 'mensagens' && arg) { const a = decodeURIComponent(arg); if (!cur || cur.arquivo !== a) { cur = quadro.find(x => x.arquivo === a) || {arquivo: a, falta: true}; curN = 400; } $('bq').value = ''; }
-  else if (id === 'mensagens') cur = null;
   const saved = store.get('tab') === 'assuntos' ? 'conversas' : store.get('tab');
-  show(ok(id) ? id : ok(saved) ? saved : 'painel');
+  const tid = ok(id) ? id : ok(saved) ? saved : 'painel';
+  if (tab === 'config' && cfgDirty && tid !== 'config') {
+    if (navGuard) return;
+    navGuard = true;
+    const wanted = location.hash;
+    history.replaceState(null, '', '#' + SLUG.config);   // stay on Settings while asking
+    const a = await askChoice('You changed Settings and did not save them.\n\nSave them before leaving, discard the changes, or cancel and stay here?',
+      [['Save', 'save', 'cta'], ['Discard', 'discard', 'danger'], ['Cancel (stay here)', 'cancel', 'lk']]);
+    navGuard = false;
+    if (!a || a.v === 'cancel') return;
+    if (a.v === 'save' && !(cfgSaveFn && await cfgSaveFn())) return;   // a failed save keeps you here
+    cfgDirty = false; location.hash = wanted; return;
+  }
+  if (tid === 'config' && tab === 'config' && cfgDirty) return;   // the address came back to Settings: keep the edits
+  show(tid);
 }
 function show(id) {
-  document.body.classList.toggle('fix', id === 'mensagens' || id === 'mapa'); setTop();
+  document.body.classList.toggle('fix', id === 'mapa'); setTop();
   if (id !== tab && picked.size) { picked.clear(); lastPick = null; }
   tab = id; pref('tab', id); nav(); if (typeof drawPendBar === 'function') drawPendBar();
   if (id === 'adicionar') loadContatos();
   TABS.forEach(([t]) => $('t-' + t).classList.toggle('on', t === id));
   if (id === 'painel') loadPainel();
   if (id === 'quadro') loadQuadro();
-  if (id === 'mensagens') renderWa();
   if (id === 'config') loadConfig();
   if (id === 'mapa') mapShow();
   drawBulk();
@@ -1011,19 +1025,21 @@ function withPhone(title, c) {
   f.append(typeof title === 'string' ? el('b', null, title) : title, el('span', 'sub2', tel));
   return f;
 }
-function convLink(c) { const a = el('a', 'cl', c.nome); a.href = '#messages/' + encodeURIComponent(c.arquivo); a.title = 'Open the conversation'; a.draggable = false; return a; }
+// click a conversation name: popup with its messages, WhatsApp style (read-only)
+const previewOf = c => chats.find(x => x.chave === c.chave) || c;
+function nameLink(c, open, tip) { const a = el('a', 'cl', c.nome); a.href = '#'; a.title = tip || 'Read the messages'; a.draggable = false; a.onclick = e => { e.preventDefault(); open(e); }; return a; }
+const convLink = c => nameLink(c, () => openPreview(previewOf(c), [], null));
 const kind = c => { const t = el('span', 'tag kd ' + (c.grupo ? 'gr' : 'ct'), c.grupo ? 'Group' : 'Contact'); t.title = c.grupo ? 'Group chat' : 'One-to-one chat'; return t; };
 // type tag (same size, one color per type) to the left of the name
 function named(c, open, openTip) {
   const w = el('div', 'nm');
   if (multi) w.append(srcTag(c));
-  w.append(kind(c), el('b', null, c.nome));
-  const a = ico(SVG_OPEN, open, openTip); a.classList.add('lnk');
-  const wa = ico(SVG_WA, () => openWA(c), 'Open in WhatsApp'); wa.classList.add('lnk');
-  w.append(a, wa);
+  w.append(kind(c), nameLink(c, open, openTip));
+  // a group opens in WhatsApp only through its invite link: without one, no icon
+  if (!c.grupo || c.convite) { const wa = ico(SVG_WA, () => openWA(c), 'Open in WhatsApp'); wa.classList.add('lnk'); w.append(wa); }
   return w;
 }
-const openMsgs = c => () => go('mensagens', c.arquivo);
+const openMsgs = c => () => openPreview(previewOf(c), [], null);
 // topics always show in one order (the Following tab order; drag the grip to change it)
 const topicIdx = id => { const i = assuntos.findIndex(t => t.id === id); return i < 0 ? 1e9 : i; };
 const byTopic = ids => [...(ids || [])].sort((a, b) => topicIdx(a) - topicIdx(b));
@@ -1089,27 +1105,32 @@ const pastaErr = t => !(t.dirs || []).some(d => d.existe);
 const pastaInfo = t => !(t.dirs || []).length ? 'no folder: nothing is written' : (t.dirs.filter(d => d.existe).map(d => d.caminho).join(', ') || 'folder not found: nothing is written');
 function convRow(c, slim, ctx) {
   const k = cardBy(c.chave) || {}, tags = el('div', 'chips');
-  if (k.situacao === 'devo' || k.situacao === 'devem') tags.append(sitTag(k.situacao));
   if (!slim) byTopic(c.assuntos).forEach(a => tags.append(el('span', 'tag', tnames([a]))));
-  if (ctx === 'own') {}
-  else if ((c.pastas || []).length) { const t = el('span', 'tag', 'Own folder'); t.title = 'Also written to ' + c.pastas.join(', '); tags.append(t); }
+  let own = null;
+  if (ctx !== 'own' && (c.pastas || []).length) { own = el('span', 'tag', 'Own folder'); own.title = 'Also written to ' + c.pastas.join(', '); }
+  if (c.pausada) { const t = el('span', 'tag bad', 'Paused'); t.title = 'Paused: nothing is synced or written for this conversation. Click the play button to resume.'; tags.append(t); }
   if (!slim && !c.salva) { const t = el('span', 'tag bad', 'Not written'); t.title = (c.destinos || []).length ? 'The chosen folder does not exist: nothing is written. Fix it with the pencil.' : 'No folder chosen: nothing from this conversation is written. Add one with the pencil.'; tags.append(t); }
   const nc = (c.referencias.conectores || []).length;
   if (nc) { const t = el('span', 'tag good', `Connectors: ${nc}`); t.title = 'Claude checks connectors when drafting replies for this conversation'; tags.append(t); }
   tags.prepend(histTag(c));
-  if (c.priv) tags.prepend(privTag(c.priv, () => openConv(c.chave, 'privacy')));
+  // every text tag first (Reply/Waiting, Own folder, history, topics…), the icons after them
+  if (own) tags.prepend(own);
+  // Reply / Waiting tags are no longer shown in the conversation lists
+  if (c.priv) tags.append(privTag(c.priv, () => openConv(c.chave, 'privacy')));   // privacy icon: after the tags, next to the buttons
   const acts = el('div', 'acts'), topic = ctx && typeof ctx === 'object' ? ctx : null;
   const stop = btn('', () => stopFollow(c, topic), 'ico stop', topic ? `Stop following in ${topic.nome}` : 'Stop following');
   stop.innerHTML = SVG_STOP; stop.setAttribute('aria-label', stop.title);
-  acts.append(penBtn(c), stop);
-  const r = row(named(c, openMsgs(c), 'Open in Messages'), subSel(c) + (c.md_salvo ? ' · ' + fmtSize(c.md_salvo) : ''), tags, acts);
+  const pz = ico(c.pausada ? SVG_PLAY : SVG_PAUSE, () => setPausa({chave: c.chave, pausada: !c.pausada}, c.pausada ? `Resumed: ${c.nome}.` : `Paused: ${c.nome}.`), c.pausada ? 'Resume this conversation: it is synced and written again' : 'Pause this conversation: nothing is synced or written, its .md stays as it is');
+  acts.append(pz, penBtn(c), stop);
+  const r = row(named(c, openMsgs(c), 'Read the messages'), subSel(c) + (c.md_salvo ? ' · ' + fmtSize(c.md_salvo) : ''), tags, acts);
   r.prepend(pickBox(c.chave));
   // own folder: its path goes under the numbers line
   if (ctx === 'own') (c.pastas || []).forEach(p => { const l = el('span', 'opath'), i = el('span', 'fico'); i.innerHTML = SVG_FOLDER; l.append(i, tilde(p)); l.title = 'Written to this folder'; r.querySelector('.n').append(l); });
   // inside a topic only the topic is marked; Own folder rows are just listed
+  if (c.pausada) { r.classList.add('semp'); r.title = 'Paused: nothing is synced or written for this conversation'; }
   if (slim || ctx === 'own') return r;
-  r.classList.add(c.salva ? 'mon' : 'semp');
-  r.title = c.salva ? 'Followed; written to: ' + c.destinos.filter(d => d.existe).map(d => d.caminho).join(', ') : 'Followed, but not written to any folder';
+  r.classList.add(c.salva && !c.pausada ? 'mon' : 'semp');
+  r.title = c.pausada ? 'Paused: nothing is synced or written for this conversation' : c.salva ? 'Followed; written to: ' + c.destinos.filter(d => d.existe).map(d => d.caminho).join(', ') : 'Followed, but not written to any folder';
   return r;
 }
 function modal(dlg) { if (!dlg.open) dlg.showModal(); }
@@ -1174,7 +1195,7 @@ async function stopFollow(c, t) {
   }
   await load(); await loadQuadro(); if (tab === 'painel') loadPainel();
 }
-function ask(text, okLabel, danger, check) {
+function ask(text, okLabel, danger, check, checked) {
   return new Promise(done => {
     const d = $('ask'), f = el('div', 'form'), bar = el('div', 'tools');
     let answer = false, cb = null;
@@ -1182,7 +1203,7 @@ function ask(text, okLabel, danger, check) {
     bar.style.margin = '4px 0 0';
     bar.append(ok, btn('Cancel', () => d.close(), '', 'Does nothing'));
     f.append(el('p', null, text));
-    if (check) { const l = el('label', 'chk'); cb = el('input'); cb.type = 'checkbox'; l.append(cb, check); f.append(l); }
+    if (check) { const l = el('label', 'chk'); cb = el('input'); cb.type = 'checkbox'; cb.checked = !!checked; l.append(cb, check); f.append(l); }
     f.append(bar);
     d.replaceChildren(f);
     d.onclose = () => done(check ? (answer ? {apagar: cb.checked} : null) : answer);
@@ -1207,13 +1228,28 @@ function askText(text, okLabel, value) {
 }
 for (const id of ['dlg', 'drawer', 'prev']) $(id).addEventListener('click', e => { if (e.target === $(id)) $(id).close(); });
 
+let appPausado = false;
+function drawPause() {
+  const b = $('pause'), bar = $('pausebar'), s = $('sync');
+  b.textContent = appPausado ? 'Resume app' : 'Pause app'; b.className = appPausado ? 'cta' : '';
+  b.title = appPausado ? 'Starts syncing and writing again' : 'Pauses the whole app: nothing is synced or written until you resume';
+  s.disabled = appPausado; s.title = appPausado ? 'The app is paused: resume it first' : s.title;
+  bar.style.display = appPausado ? '' : 'none';
+  bar.replaceChildren(el('span', null, 'The app is paused: nothing is synced or written, and the .md files stay as they are. '), btn('Resume', () => setPausa({tudo: false}), 'cta', 'Starts syncing and writing again'));
+}
+async function setPausa(body, msg) {
+  const r = await api('/api/pausa', body); if (fail(r)) return;
+  if ('tudo' in body) appPausado = !!body.tudo;
+  if (msg) toast(msg, 'ok');
+  drawPause(); await load(); if (tab === 'painel') loadPainel();
+}
 async function syncNow(quiet) {
   const b = $('sync'); b.disabled = true; b.textContent = 'Syncing…';
   const d = await api('/api/sync', {});
   b.disabled = false; b.textContent = 'Sync now';
   const bad = fail(d);
   if (!bad && !quiet) toast(d.resumo.join('  ·  ') || 'No conversation chosen.');
-  await load(); await loadQuadro(); if (tab === 'painel') loadPainel(); if (tab === 'mensagens') renderWa();
+  await load(); await loadQuadro(); if (tab === 'painel') loadPainel();
   return !bad;
 }
 
@@ -1267,7 +1303,7 @@ function openFollow(c, assunto) {
     for (const k in sug) sug[k] = sug[k].filter(x => x.chave !== c.chave);
     await syncNow(true); dlg.close();
     const n = selBy(c.chave);
-    toast(`Following "${c.nome}": ${n ? num(n.total) : 0} messages ${date.value ? 'since ' + brDate(date.value) : 'from the full history'}.`, 'ok', n ? [btn('Open', () => go('mensagens', n.arquivo), '', 'Read the conversation')] : []);
+    toast(`Following "${c.nome}": ${n ? num(n.total) : 0} messages ${date.value ? 'since ' + brDate(date.value) : 'from the full history'}.`, 'ok', n ? [btn('Open', () => openPreview(n, [], null), '', 'Read the conversation')] : []);
   }, 'cta', 'Starts following this conversation; with a folder, the history is written there right away');
   const bar = el('div'); bar.append(ok, btn('Cancel', () => dlg.close(), '', 'Close without following'));
   dialogShell(dlg, hd, [fsec('History', null, dw, hint),
@@ -1283,6 +1319,43 @@ function claudeSelect(list, value, def, tip) {
   s.value = value || '';
   return s;
 }
+// "Drafts and contact notes": shared by every conversation, edited from the Reply tab and saved right away
+function draftSettings() {
+  const det = el('details', 'sec'), sm = el('summary', null, 'Drafts and contact notes'), body = el('div', 'form');
+  sm.append(el('i', null, 'applies to all conversations'));
+  det.append(sm, body);
+  ['input', 'change'].forEach(ev => body.addEventListener(ev, e => e.stopPropagation()));
+  const put = async (patch, msg) => { const r = await api('/api/config', patch); if (!fail(r) && msg) toast(msg, 'ok'); return !r.erro; };
+  let loaded = false;
+  const draw = d => {
+    const kids = [];
+    const field = (k, lb, tip, mk) => { const l = el('label', null, lb), i = mk(); l.title = tip; l.append(i, el('small', null, tip)); kids.push(l); return i; };
+    const ta = (k, lb, tip) => { const i = field(k, lb, tip, () => { const t = el('textarea'); t.rows = 3; t.value = d[k]; return t; }); i.onchange = () => put({[k]: i.value}, 'Saved.'); };
+    const nm = (k, lb, tip) => { const i = field(k, lb, tip, () => { const t = el('input'); t.type = 'number'; t.value = d[k]; return t; }); i.onchange = async () => { if (await put({[k]: i.value}, 'Saved.')) { const r = await api('/api/config'); if (!r.erro) i.value = r[k]; } }; };
+    ta('notas_contatos', 'Instruction for contact notes', 'How the AI writes the Notes field of a contact card when it suggests a contact (Conversations > Edit > Suggest from conversation). Empty = back to the default');
+    nm('resposta_opcoes', 'Drafts per request', 'How many reply options to generate (1 to 5)');
+    nm('resposta_mensagens', 'Context messages', 'How many recent messages the AI reads');
+    // writing-style files: checked = used, trash removes from the list (the file stays on the Mac)
+    const list = [...(d.voz_arquivos || [])], items = el('div', 'list'), box = el('div', 'files'), l = el('label', null, 'Files with your writing style');
+    const drawF = () => { items.replaceChildren(...list.map(f => {
+      const r = el('div', 'fl'), del = ico(SVG_TRASH, async () => {
+        if (!await ask(`Remove "${f.split('/').pop()}" from your writing-style files?\n\nThe file itself stays on your Mac.`, 'Remove file', true)) return;
+        list.splice(list.indexOf(f), 1); drawF(); put({voz_arquivos: list}, 'Saved.');
+      }, 'Remove this file from the list', true);
+      r.title = f; r.append(el('span', null, f.split('/').pop()), el('small', null, tilde(f)), del); return r; }));
+      items.style.display = list.length ? '' : 'none'; };
+    const add = btn('Add file…', async () => { const x = await api('/api/escolher', {tipo: 'arquivo', titulo: 'File with your writing style'}); if (x.caminho && !list.includes(x.caminho)) { list.push(x.caminho); drawF(); put({voz_arquivos: list}, 'Saved.'); } }, '', 'Opens the Mac file picker. Accepts .md and .txt.');
+    drawF(); box.append(items, add); l.append(box, el('small', null, 'Optional texts in your style (.md or .txt); all are read on every draft request')); kids.push(l);
+    ta('instrucoes_resposta', 'Standing instructions for drafts', 'Apply to every draft (e.g. always be informal, never promise deadlines)');
+    body.replaceChildren(...kids);
+  };
+  det.addEventListener('toggle', async () => {
+    if (!det.open || loaded) return;
+    const d = await api('/api/config'); if (fail(d)) return;
+    loaded = true; draw(d);
+  });
+  return det;
+}
 function openConv(chave, foco) {
   const c = selBy(chave); if (!c) return;
   const k = cardBy(chave) || {}, dw = $('drawer');
@@ -1290,7 +1363,7 @@ function openConv(chave, foco) {
 
   // header
   const hd = el('div', 'hd'), t = el('div', 't'), link = convLink(c);
-  link.onclick = () => dw.close();
+  const open0 = link.onclick; link.onclick = e => { dw.close(); open0(e); };
   t.append(withPhone(link, c), el('span', null, subSel(c)));
   if (c.grupo) {
     const gl = el('span', 'h glink');
@@ -1335,7 +1408,7 @@ function openConv(chave, foco) {
   if (c.priv && c.priv.modo === 'sem_ia') { gen.disabled = true; resp.push(el('div', 'call', `⦸ No AI: this conversation is never sent to an AI (${c.priv.origem}). Change it in the Privacy tab.`)); }
   else if (c.priv && c.priv.modo === 'filtro') resp.push(el('small', 'h', `Funnel — filtered by AI before drafting (${filtroNomes(c.priv.filtros)}). Not perfect: check the draft.`));
   if (iaNome !== 'Claude') { two.style.display = 'none'; resp.push(el('small', 'h', `Drafts are made by ${iaNome} (Settings > AI provider). Connectors and the model/effort choice work only with Claude.`)); }
-  resp.push(g, two, refLine, gen, out);
+  resp.push(g, two, refLine, gen, out, draftSettings());
   const sResp = pane('reply', 'Reply', ...resp);
   if (drafts[chave]) showDrafts(drafts[chave]);
 
@@ -1465,12 +1538,13 @@ function openConv(chave, foco) {
   const sFold = pane('folder', 'Folders', el('span', 'h', 'Every folder this conversation is written to: its own folders and the folders of its topics.'), where);
   // tab order: topics, history, folder, external references, reply
   ['topics', 'history', 'folder', 'refs', 'privacy', 'reply'].forEach(id => tabsBar.append(tabsBar.querySelector(`[data-p="${id}"]`)));
+  if (!REPLY_MENU) tabsBar.querySelector('[data-p="reply"]').remove();
   const tw = el('div', 'dtw'); tw.append(tabsBar);
-  dw.replaceChildren(hd, tw, sTop, sHist, sFold, sRef, sPriv, sResp); modal(dw);
-  pickPane(foco === 'ajustes' ? 'topics' : foco === 'privacy' ? 'privacy' : 'reply');
+  dw.replaceChildren(hd, tw, sTop, sHist, sFold, sRef, sPriv, ...(REPLY_MENU ? [sResp] : [])); modal(dw);
+  pickPane(foco === 'ajustes' ? 'topics' : foco === 'privacy' ? 'privacy' : REPLY_MENU ? 'reply' : 'topics');
   sumR(); drawFiles(); drawConns(); loadFiles();
   if (R.conectores.length) loadConns();
-  dw.scrollTop = 0; if (foco !== 'ajustes') setTimeout(() => g.focus({preventScroll: true}), 50);
+  dw.scrollTop = 0; if (REPLY_MENU && foco !== 'ajustes') setTimeout(() => g.focus({preventScroll: true}), 50);
 }
 
 // ---- conversations ----
@@ -1484,12 +1558,14 @@ function renderConversas() {
   const listCard = (id, title, sub, list, red) => {
     if (!list.length) return null;
     // same look as the topic cards: arrow, name, indented rows when open
-    const card = el('div', 'card topic' + (red ? ' err' : '')), hd = el('div', 'hd th'), tl = el('div', 'tl');
+    const np = list.filter(c => c.pausada).length;   // a paused conversation turns the card red, like in a topic
+    const card = el('div', 'card topic' + (red || np ? ' err' : '')), hd = el('div', 'hd th'), tl = el('div', 'tl');
+    if (np) card.title = `${np} conversation${np === 1 ? '' : 's'} here ${np === 1 ? 'is' : 'are'} paused: nothing is written for ${np === 1 ? 'it' : 'them'}.`;
     const isOpen = openSec.has('x:' + id), toggle = () => { isOpen ? openSec.delete('x:' + id) : openSec.add('x:' + id); renderConversas(); };
     const name = el('b', 'tn', `${title} (${list.length})`); name.tabIndex = 0; name.title = isOpen ? 'Click to close' : 'Click to show its conversations';
     name.onkeydown = e => { if (e.key === 'Enter') toggle(); };
     tl.append(el('span', 'grip ghost', '⋮⋮'), el('span', 'tarr', isOpen ? '▾' : '▸'), name);
-    hd.append(tl, el('span', null, sub));
+    hd.append(tl, el('span', null, sub + (np ? ` · ${np} paused` : '')));
     if (isOpen) hd.append(pickAllBtn(list.map(c => c.chave)));
     hd.onclick = e => { if (e.target.closest('button,input,a')) return; toggle(); };
     card.append(hd);
@@ -1553,7 +1629,7 @@ function renderConversas() {
   const tracked = Object.keys(inText).filter(k => selBy(k)).length, hint = $('q-hint');
   hint.replaceChildren();
   if (CF.main.waiting()) hint.append(el('span', 'spin'), 'Searching the messages of every conversation…');
-  else if (tracked) hint.append(`"${raw}" also appears in ${tracked} followed conversation(s). `, btn('See in Messages', () => { $('bq').value = raw; go('mensagens'); }, 'lk', 'Shows the matching messages in followed conversations'));
+  else if (tracked) hint.append(`"${raw}" also appears in ${tracked} followed conversation(s). `);
   drawBulk();
 }
 const fold = t => (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -1750,14 +1826,14 @@ function drawCvAsk(A, boxId, lista) {
   const box = $(boxId); if (!box) return;
   if (!A.ui) {
     const q = el('textarea'), bar = el('div', 'bar'), st = el('div');
-    q.rows = 1; q.placeholder = (lista === 'ignoradas' ? 'Ask Claude to filter the hidden conversations' : 'Ask Claude to filter') + ', e.g. customers asking for a quote. Uses your Claude account; only runs when you click.';
+    q.rows = 1; q.placeholder = (lista === 'ignoradas' ? 'Filter the hidden conversations with AI' : 'Filter with AI') + ', e.g. customers asking for a quote. Uses your AI account; only runs when you click.';
     q.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && q.value.trim()) { e.preventDefault(); askConversas(A, lista, q.value.trim()); } };
-    const b = btn('Ask Claude', () => q.value.trim() && askConversas(A, lista, q.value.trim()), 'cta', `Sends the names and a few recent messages of the ${lista === 'ignoradas' ? 'ignored conversations' : 'conversations you don\'t follow'} (within the suggestion window in Settings) to Claude on this Mac, which picks the ones that match. Nothing is followed or written.`);
+    const b = btn('Filter with AI', () => q.value.trim() && askConversas(A, lista, q.value.trim()), 'cta', `Sends the names and a few recent messages of the ${lista === 'ignoradas' ? 'ignored conversations' : 'conversations you don\'t follow'} (the whole database, in batches) to the AI provider chosen in Settings, which picks the ones that match. Nothing is followed or written.`);
     bar.append(q, b); box.append(bar, st);
     A.ui = {b, st};
   }
   const {b, st} = A.ui;
-  b.disabled = A.loading; b.textContent = A.loading ? 'Asking Claude…' : 'Ask Claude';
+  b.disabled = A.loading; b.textContent = A.loading ? 'Filtering…' : 'Filter with AI';
   st.replaceChildren();
   if (A.erro) st.append(el('div', 'call bad', A.erro));
   else if (A.rank) st.append(el('span', 'h', `Claude filter: "${A.q}" — ${Object.keys(A.rank).length} of the ${A.n} conversations it read. `),
@@ -1953,7 +2029,7 @@ function pathField(value, tipo, titulo, ph) {
   w.append(i, btn(tipo === 'arquivo' ? 'Choose file…' : 'Choose folder…', () => pickPath(i, tipo, titulo), '', 'Opens the Mac file picker'));
   return [w, i];
 }
-let palavras = [], kwFocus = null, sugMax = 12;  // keyword library, kept in the local config of this Mac
+let palavras = [], kwFocus = null, sugMax = 10;  // keyword library, kept in the local config of this Mac
 const sugShown = {}, sugIA = {};  // sugIA: Claude's suggestions per topic
 // Claude suggestions: only on click, sends names and a few recent messages of
 // conversations you don't follow to the Claude installed on this Mac
@@ -1969,7 +2045,7 @@ function aiBox(t) {
   d.rows = 2; d.value = st.desc ?? t.descricao ?? ''; d.placeholder = 'Describe this topic for Claude: who, what, which companies or projects. Uses your Claude account; only runs when you click.';
   d.oninput = () => { sugIA[t.id] = {...(sugIA[t.id] || {}), desc: d.value}; };
   const ask = btn(st.loading ? 'Asking Claude…' : 'Ask Claude for suggestions', () => askClaude(t, d.value.trim()), 'cta',
-    'Sends the names and a few recent messages of conversations you don\'t follow (within the suggestion window in Settings) to Claude on this Mac, which picks the ones that fit this topic. Nothing is followed or written.');
+    'Sends the names and a few recent messages of conversations you don\'t follow (the whole database, in batches) to Claude on this Mac, which picks the ones that fit this topic. Nothing is followed or written.');
   ask.disabled = !!st.loading;
   const bar = el('div', 'bar'); bar.append(d, ask);
   box.append(bar);
@@ -2095,8 +2171,10 @@ function section(id, title, count, rows, openDefault, keys) {
 }
 function renderAssuntos() {
   const cards = assuntos.map(t => {
-    const err = pastaErr(t), card = el('div', 'card topic' + (err ? ' err' : '')), hd = el('div', 'hd th'), left = el('div', 'tl');
-    if (err) card.title = (t.dirs || []).length ? 'None of this topic\'s folders exists, so nothing is written.' : 'This topic has no folder, so nothing is written. Open it and click Add folder.';
+    const pausedIn = chats.filter(c => c.sel && c.pausada && (c.assuntos || []).includes(t.id)).length, err = pastaErr(t) || !!t.pausado || pausedIn > 0, card = el('div', 'card topic' + (err ? ' err' : '')), hd = el('div', 'hd th'), left = el('div', 'tl');
+    if (t.pausado) card.title = 'Paused: nothing is written to this topic\'s folders. Click the play button to resume.';
+    else if (pausedIn && !pastaErr(t)) card.title = `${pausedIn} conversation${pausedIn === 1 ? '' : 's'} of this topic ${pausedIn === 1 ? 'is' : 'are'} paused: nothing is written for ${pausedIn === 1 ? 'it' : 'them'}.`;
+    else if (err) card.title = (t.dirs || []).length ? 'None of this topic\'s folders exists, so nothing is written.' : 'This topic has no folder, so nothing is written. Open it and click Add folder.';
     const isOpen = openSec.has('t:' + t.id), toggle = () => { isOpen ? openSec.delete('t:' + t.id) : openSec.add('t:' + t.id); renderAssuntos(); };
     const arrow = el('span', 'tarr', isOpen ? '▾' : '▸');
     left.append(topicGrip(card, t), arrow);
@@ -2111,10 +2189,12 @@ function renderAssuntos() {
     // clicking the header (not its buttons, inputs or grip) opens or closes the topic
     hd.onclick = e => { if (editing === t.id || e.target.closest('button,input,a,.grip')) return; toggle(); };
     const right = el('div', 'tr');
-    if (err) right.append(el('span', 'terr', (t.dirs || []).length ? 'folder not found: nothing is written' : 'no folder: nothing is written'));
+    if (t.pausado) right.append(el('span', 'terr', 'paused: nothing is written'));
+    else if (pastaErr(t)) right.append(el('span', 'terr', (t.dirs || []).length ? 'folder not found: nothing is written' : 'no folder: nothing is written'));
+    else if (pausedIn) right.append(el('span', 'terr', `${pausedIn} paused conversation${pausedIn === 1 ? '' : 's'}`));
     const tp = t.privacidade && t.privacidade.modo ? t.privacidade : {modo: privPadrao.modo, filtros: privPadrao.filtros, herda: true};
     right.append(privTag(tp, () => topicPriv(t), t.privacidade && t.privacidade.modo ? `AI privacy of this topic: ${privLabel(tp)}. Applies to its conversations without their own setting. Click to change.` : `No AI privacy rule for this topic (conversations use their own setting or the default: ${privLabel(privPadrao)}). Click to set one for all its conversations.`, t.privacidade && t.privacidade.modo ? true : false));
-    right.append(ico(SVG_PEN, () => { editing = t.id; renderAssuntos(); }, 'Rename this topic'), ico(SVG_TRASH, () => deleteTopic(t), 'Delete this topic', true));
+    right.append(ico(t.pausado ? SVG_PLAY : SVG_PAUSE, () => setPausa({assunto: t.id, pausado: !t.pausado}, t.pausado ? `Resumed: ${t.nome}.` : `Paused: ${t.nome}.`), t.pausado ? 'Resume this topic: its folders are written again' : 'Pause this topic: nothing is written to its folders, its .md files stay as they are'), ico(SVG_PEN, () => { editing = t.id; renderAssuntos(); }, 'Rename this topic'), ico(SVG_TRASH, () => deleteTopic(t), 'Delete this topic', true));
     hd.append(left, right);
     card.append(hd);
     if (!isOpen) return card;
@@ -2152,7 +2232,7 @@ function renderAssuntos() {
 async function loadSug(force) {
   const d = await api('/api/sugestoes' + (force ? '?novo=1' : ''));
   if (d.erro) return;
-  sug = d.sugestoes; sugDias = d.dias; sugJanela = d.horas ? 'the last ' + durLabel(d.horas) : sugDias + ' days'; sugMax = d.max || sugMax; renderAssuntos();
+  sug = d.sugestoes; sugDias = d.dias; sugJanela = 'all history'; sugMax = d.max || sugMax; renderAssuntos();
 }
 
 // ---- board ----
@@ -2160,9 +2240,7 @@ async function loadQuadro() {
   const d = await api('/api/quadro');
   if (d.erro) return;
   quadro = d.cards; etapas = d.etapas; qconf = d; pend = quadro.filter(c => c.situacao === 'devo').length; nav();
-  if (cur) cur = quadro.find(x => x.arquivo === cur.arquivo) || cur;
   renderBoards(); renderConversas(); if (!editing) renderAssuntos(); if (!qopen) renderQcfg();
-  if (tab === 'mensagens') renderWa();
 }
 let dragging = null;
 function renderQuadro() {
@@ -2332,7 +2410,6 @@ async function openPreview(c, words, period, topic) {
 }
 
 // ---- messages ----
-let timer, cur = null, curN = 400;
 const NAME_COLORS = ['#D8551B', '#286740', '#996201', '#233A44', '#4F6169', '#7B898F'];
 const nameColor = n => { let h = 0; for (const ch of n) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return NAME_COLORS[h % NAME_COLORS.length]; };
 const dayLabel = iso => {
@@ -2347,63 +2424,6 @@ function bubble(m, showName, lb) {
   const t = el('span', 'txt' + (m.tipo !== 'texto' && /^\[.*\]$/.test(m.texto) ? ' media' : ''), m.texto);
   b.append(t, el('span', 'hr', m.data.slice(11, 16)));
   return b;
-}
-function renderWa() {
-  const q = $('bq').value.trim();
-  const list = [...quadro].sort((a, b) => (b.data || '').localeCompare(a.data || ''));
-  $('wa-convs').replaceChildren(...(list.length ? list.map(c => {
-    const it = el('button', 'it' + (cur && cur.arquivo === c.arquivo && !q ? ' on' : '')); it.type = 'button';
-    it.title = 'Open this conversation';
-    const top = el('div', 'l1'), nb = el('b', null, c.nome); if (multi) nb.prepend(srcTag(c), ' '); top.append(nb, el('small', c.situacao === 'devo' ? 'hot' : '', c.data ? (dayLabel(c.data) === 'Today' ? c.data.slice(11, 16) : dayLabel(c.data)) : ''));
-    it.append(top, el('span', 'l2', c.texto ? (c.grupo ? c.de + ': ' : '') + c.texto : 'No messages in the chosen period'));
-    it.onclick = () => { $('bq').value = ''; go('mensagens', c.arquivo); };
-    return it;
-  }) : [el('div', 'empty', 'No followed conversations yet.')]));
-  if (q) return searchAll(q);
-  if (cur && cur.falta) return;
-  if (cur) return openChat(cur, true);
-  $('wa').classList.remove('open');
-  $('wa-head').replaceChildren(); $('wa-msgs').replaceChildren(el('div', 'empty', 'Pick a conversation on the side or search for a word.'));
-}
-async function openChat(c, keep) {
-  const same = $('wa-head').dataset.arq === c.arquivo;
-  $('wa').classList.add('open');
-  const d = await api('/api/busca?arquivo=' + encodeURIComponent(c.arquivo) + '&n=' + curN);
-  if (d.erro || cur !== c) return;
-  const box = $('wa-msgs'), atBottom = !same || box.scrollHeight - box.scrollTop - box.clientHeight < 80;
-  const hd = el('div', 'hd2'), info = el('div', 'n');
-  info.append(el('b', null, c.nome), el('span', null, `${num(d.total)} messages` + (c.grupo ? ' · group' : '')));
-  hd.append(btn('←', () => go('mensagens'), 'back', 'Back to the conversation list'), info);
-  if (c.grupo) hd.append(btn('Members', () => members(c), '', 'Shows the group members'));
-  hd.append(penBtn(c),
-    btn(c.situacao === 'devo' ? 'Suggest reply' : 'Reply', () => openConv(c.chave), 'cta', 'Asks Claude for reply drafts. Nothing is sent.'));
-  $('wa-head').replaceChildren(hd); $('wa-head').dataset.arq = c.arquivo;
-  const items = [];
-  if (d.total > d.msgs.length) items.push(btn(`Older messages (${num(d.total - d.msgs.length)})`, () => { curN *= 4; openChat(c, true); }, 'more', 'Loads older messages of this conversation'));
-  let day = '';
-  [...d.msgs].reverse().forEach(m => {
-    if (m.data.slice(0, 10) !== day) { day = m.data.slice(0, 10); items.push(el('div', 'day', dayLabel(m.data))); }
-    items.push(bubble(m, c.grupo));
-  });
-  if (!d.msgs.length) items.push(el('div', 'empty', 'No messages in the chosen period for this conversation.'));
-  box.replaceChildren(...items);
-  if (atBottom) box.scrollTop = box.scrollHeight;
-}
-async function searchAll(q) {
-  $('wa').classList.add('open');
-  const d = await api('/api/busca?q=' + encodeURIComponent(q) + '&n=200');
-  if (d.erro || $('bq').value.trim() !== q) return;
-  const hd = el('div', 'hd2'), info = el('div', 'n');
-  info.append(el('b', null, `Search: "${q}"`), el('span', null, `${num(d.total)} messages` + (d.total > d.msgs.length ? ` — showing the ${d.msgs.length} most recent` : '')));
-  hd.append(btn('←', () => { $('bq').value = ''; renderWa(); }, 'back', 'Clears the search'), info, btn('Clear search', () => { $('bq').value = ''; renderWa(); }, '', 'Back to the conversation'));
-  $('wa-head').replaceChildren(hd); $('wa-head').dataset.arq = '';
-  $('wa-msgs').replaceChildren(...(d.msgs.length ? d.msgs.map(m => {
-    const b = bubble(m, true, `${m.conversa} · ${brDate(m.data)}`);
-    b.title = 'Open the conversation'; b.style.cursor = 'pointer';
-    b.onclick = () => { $('bq').value = ''; go('mensagens', m.arquivo); };
-    return b;
-  }) : [el('div', 'empty', 'Nothing found.')]));
-  $('wa-msgs').scrollTop = 0;
 }
 async function members(c) {
   const dlg = $('dlg');
@@ -2650,7 +2670,7 @@ function renderPainel() {
       sortSeg.append(...[['oldest', 'Oldest'], ['newest', 'Newest']].map(([k, n]) => btn(n, () => { replySort = k; pref('reply_sort', k); renderPainel(); }, replySort === k ? 'on' : '', k === 'oldest' ? 'Longest waiting first' : 'Most recent first')));
       return foldCard('reply', 'To reply', pend.length ? `${pend.length} waiting` : 'nobody waiting', () => {
         const list = [...pend].sort((a, b) => replySort === 'oldest' ? b.espera_h - a.espera_h : a.espera_h - b.espera_h);
-        return list.length ? list.map(x => row(convLink(x), 'waiting since ' + ago(x.ultima), btn('Suggest reply', () => openConv(x.chave), 'cta', 'Asks Claude for reply drafts. Nothing is sent.')))
+        return list.length ? list.map(x => row(convLink(x), 'waiting since ' + ago(x.ultima), ...(REPLY_MENU ? [btn('Suggest reply', () => openConv(x.chave), 'cta', 'Asks Claude for reply drafts. Nothing is sent.')] : [])))
           : [el('div', 'empty', 'All caught up: nobody is waiting for your reply.')];
       }, sortSeg);
     },
@@ -2775,9 +2795,9 @@ function mapDraw() {
     const on = lit(n), col = n.kind === 'conv' ? (n.data.grupo ? MP_COL.group : MP_COL.conv) : MP_COL[n.kind];
     g.globalAlpha = on ? 1 : .15;
     if (on && (n === focus || n.kind !== 'conv')) { g.shadowColor = col; g.shadowBlur = n === focus ? 18 : 10; }
-    g.fillStyle = n.kind === 'conv' && !n.data.salva ? MP_COL.bad : col;
+    g.fillStyle = n.kind === 'conv' && (!n.data.salva || n.data.pausada) ? MP_COL.bad : col;
     g.beginPath(); g.arc(n.x, n.y, n.r, 0, 7); g.fill(); g.shadowBlur = 0;
-    if (n.kind === 'topic' && pastaErr(n.data)) { g.strokeStyle = MP_COL.bad; g.lineWidth = 3 / MP.k; g.stroke(); }
+    if (n.kind === 'topic' && (pastaErr(n.data) || n.data.pausado)) { g.strokeStyle = MP_COL.bad; g.lineWidth = 3 / MP.k; g.stroke(); }
     if (n === MP.sel) { g.strokeStyle = '#fff'; g.lineWidth = 2 / MP.k; g.stroke(); }
     const showLabel = n.kind !== 'conv' || MP.names || MP.k > 1.6 || n === focus || (focus && near.has(n.id)) || (q && on);
     if (showLabel && on) {
@@ -2831,7 +2851,7 @@ function mapPanel() {
     sec('Topics', nb.filter(x => x.kind === 'topic').map(x => link(x.id, x.label)));
     const files = (c.destinos || []).filter(d => d.existe).map(d => el('code', null, tilde(d.caminho).replace(/\/+$/, '') + '/' + c.arquivo + '.md'));
     sec('Written to', files.length ? files : [el('span', 'bad', 'Nowhere: no topic folder and no own folder')]);
-    const acts = el('div', 'tools'); acts.append(btn('Open messages', () => go('mensagens', c.arquivo), 'cta', 'Read the conversation'), btn('Settings', () => openConv(c.chave, 'ajustes'), '', 'History, folders, Claude and references'));
+    const acts = el('div', 'tools'); acts.append(btn('Open messages', () => openPreview(previewOf(c), [], null), 'cta', 'Read the conversation'), btn('Settings', () => openConv(c.chave, 'ajustes'), '', 'History, folders, Claude and references'));
     body.append(acts);
   } else if (n.kind === 'topic') {
     if (pastaErr(n.data)) body.append(el('span', 'bad', (n.data.dirs || []).length ? 'Its folder does not exist (or the path is incomplete): nothing is written.' : 'No folder: nothing is written.'));
@@ -2870,7 +2890,7 @@ function mapBuild() {
     else if (MP.pan) { if (!MP.pan.moved) mapSelect(null); MP.pan = null; }
   };
   cv.onpointerleave = () => { MP.hover = null; };
-  cv.ondblclick = e => { const h = mapAt(e); if (h.n && h.n.kind === 'conv') go('mensagens', h.n.data.arquivo); };
+  cv.ondblclick = e => { const h = mapAt(e); if (h.n && h.n.kind === 'conv') openPreview(previewOf(h.n.data), [], null); };
   cv.onwheel = e => {
     e.preventDefault();
     const r = cv.getBoundingClientRect(), mx = e.clientX - r.left - cv.clientWidth / 2, my = e.clientY - r.top - cv.clientHeight / 2;
@@ -3017,9 +3037,9 @@ function askSuggest(n) {
   return new Promise(done => {
     const d = $('ask'), f = el('div', 'form'), bar = el('div', 'tools');
     let answer = null;
-    const set0 = padrao.modelo_contatos || 'claude-sonnet-5-5';
+    const set0 = padrao.modelo || 'sonnet';
     const sm = el('select'), se = el('select');
-    [[set0, `${set0} (Settings)`], ...MODELS.filter(m => m[0] !== set0)].forEach(([v, t]) => sm.append(new Option(t, v)));
+    [[set0, `${label(MODELS, set0)} (Settings)`], ...MODELS.filter(m => m[0] !== set0)].forEach(([v, t]) => sm.append(new Option(t, v)));
     [['', 'Claude default effort'], ...EFFORTS].forEach(([v, t]) => se.append(new Option(t, v)));
     sm.value = set0; se.value = padrao.esforco || '';
     sm.title = 'Claude model. The first one is the default from Settings.'; se.title = 'How much Claude thinks. Starts at the default effort from Settings.';
@@ -3147,24 +3167,9 @@ const minLabel = m => m % 60 === 0 ? durLabel(m / 60) : m + ' min';
 const FIELDS = [
   ['General'],
   ['meu_nome', 'Your name in conversations', 'text', 'How your messages appear in the history and drafts'],
-  ['Sync'],
   ['auto_sync_min', 'Sync every', 'dur:min:min,h,d', 'Interval of the automatic background sync'],
-  ['Conversation suggestions'],
-  ['sugestao_horas', 'Look for mentions in the last', 'dur:h:h,d,mo', 'Message window searched for keywords'],
-  ['sugestao_max', 'Max suggestions per topic', 'number', 'How many conversations to suggest per topic'],
   // AI provider, then ONLY the settings of the AI in use, then what every AI shares
   ['@ia'],
-  ['Claude — default for every conversation', '', '', '', 'claude'],
-  ['modelo_resposta', 'Default model', 'select:' + MODELS.map(m => m.join('=')).join(','), 'Used for drafts of every conversation without its own model (conversation menu). Uses your Claude account\'s usage limit', 'claude'],
-  ['esforco_resposta', 'Default effort', 'select:=Claude default,' + EFFORTS.map(m => m.join('=')).join(','), 'How much Claude thinks before answering. Each conversation can have its own in the conversation menu', 'claude'],
-  ['modelo_contatos', 'Model for contact suggestions', 'text', 'Claude model that reads a conversation to suggest a contact\'s name and company (Contacts tab). Default: claude-sonnet-5-5', 'claude'],
-  ['@claudeadv'], ['@outra'],
-  ['Drafts and contact notes'],
-  ['notas_contatos', 'Instruction for contact notes', 'textarea', 'How the AI writes the Notes field of a contact card when it suggests a contact (Conversations > Edit > Suggest from conversation). Empty = back to the default'],
-  ['resposta_opcoes', 'Drafts per request', 'number', 'How many reply options to generate (1 to 5)'],
-  ['resposta_mensagens', 'Context messages', 'number', 'How many recent messages the AI reads'],
-  ['voz_arquivos', 'Files with your writing style', 'arquivos', 'Optional texts in your style (.md or .txt); all are read on every draft request'],
-  ['instrucoes_resposta', 'Standing instructions for drafts', 'textarea', 'Apply to every draft (e.g. always be informal, never promise deadlines)'],
   ['@priv'],
 ];
 async function loadConfig() {
@@ -3177,7 +3182,7 @@ async function loadConfig() {
   // AI provider: visual and explicit about WHICH account is in use
   const iaCard = () => {
     const card = el('div', 'card'), hd = el('div', 'hd');
-    hd.append(el('b', null, 'AI provider'), el('span', null, 'Who writes drafts and suggestions. Each one uses its own subscription, signed in once in your browser. The conversation history is sent only to the provider you choose.'));
+    hd.append(el('b', null, 'AI provider'), el('span', null, 'Who writes drafts and suggestions. You can pick one only while it is signed in. Each one is used only through its terminal tool, with the account signed in there (your own subscription). The account in use is shown on each box. The conversation history is sent only to the provider you choose.'));
     const wrap = el('div'); wrap.style.padding = '4px 14px 14px'; wrap.style.display = 'grid'; wrap.style.gap = '12px';
     const grid3 = el('div', 'ias'), res = el('div'); res.style.display = 'none';
     // keep these controls out of the Save settings flow
@@ -3199,94 +3204,38 @@ async function loadConfig() {
       else txt.append(el('strong', null, 'Not signed in'), el('small', null, 'Click Sign in: your browser opens to log in.'));
       if (s.perfil) txt.append(el('small', null, `Claude profile: ${s.perfil}`));
       who.prepend(el('span', 'dot')); who.append(txt);
+      // default model (and effort) of this AI, right in its box; saved on change
+      const mdl = el('div', 'mdl');
+      const mfield = (lb, node, tip) => { const l = el('label', null, lb); l.title = tip; l.append(node); mdl.append(l); return node; };
+      if (s.instalado && k === 'claude') {
+        const m = el('select'); MODELS.forEach(([v, n]) => m.append(new Option(n, v))); if (![...m.options].some(o => o.value === d.modelo_resposta)) m.append(new Option(d.modelo_resposta, d.modelo_resposta)); m.value = d.modelo_resposta;
+        m.onchange = async () => { const r = await api('/api/config', {modelo_resposta: m.value}); if (!fail(r)) { toast('Default model saved.', 'ok'); load(); } };
+        mfield('Model', m, 'The one model Claude uses for everything in the app: drafts, suggestions and contact notes');
+        const e = el('select'); e.append(new Option('Claude default', '')); EFFORTS.forEach(([v, n]) => e.append(new Option(n, v))); e.value = d.esforco_resposta || '';
+        e.onchange = async () => { const r = await api('/api/config', {esforco_resposta: e.value}); if (!fail(r)) { toast('Default effort saved.', 'ok'); load(); } };
+        mfield('Effort', e, 'How much Claude thinks before answering. Each conversation can have its own in the conversation menu');
+      } else if (s.instalado) {
+        const mk = 'modelo_' + k, mi = el('input'); mi.value = d.ia[mk] || ''; mi.placeholder = `${s.nome} default`;
+        mi.onchange = async () => { const r = await api('/api/ia', {[mk]: mi.value.trim()}); if (!fail(r)) toast(`${s.nome} model saved.`, 'ok'); };
+        mfield('Model', mi, k === 'gemini' ? 'e.g. pro, flash or gemini-2.5-pro. Empty = the default model of the Gemini tool' : 'e.g. gpt-5. Empty = the default model of the ChatGPT tool');
+      }
       const acts = el('div', 'acts');
       if (!s.instalado) acts.append(btn('Install…', async () => { const r = await api('/api/ia-instalar', {provedor: k}); if (!fail(r)) toast(`Terminal opened with the install command for ${s.nome}. When it finishes, come back and reload this page.`); }, '', 'Opens Terminal with the official install command; you see it before it runs'));
       else {
-        if (!on) acts.append(btn('Use ' + s.nome, async () => { const r = await api('/api/ia', {provedor: k}); if (fail(r)) return; toast(`${s.nome} now writes your drafts and suggestions.`); await load(); loadConfig(); }, 'cta', `Drafts and suggestions will be made by ${s.nome}`));
+        if (!on && s.conta && !s.aviso) acts.append(btn('Use ' + s.nome, async () => { const r = await api('/api/ia', {provedor: k}); if (fail(r)) return; toast(`${s.nome} now writes your drafts and suggestions.`); await load(); loadConfig(); }, 'cta', `Drafts and suggestions will be made by ${s.nome}`));
         acts.append(btn(s.conta ? 'Switch account…' : 'Sign in…', async () => { const r = await api('/api/ia-login', {provedor: k}); if (!fail(r)) toast(`Terminal opened: follow the steps to sign in to ${s.nome} in your browser, then reload this page.`); }, s.conta ? 'lk' : '', 'Opens the sign-in in your browser. The app never sees your password'));
         const t = btn('Test', async () => { t.disabled = true; t.textContent = 'Testing…'; const r = await api('/api/ia-teste', {provedor: k}); t.disabled = false; t.textContent = 'Test'; showRes(r, s.nome); }, 'lk', `Makes a tiny call to ${s.nome}`);
         acts.append(t);
       }
-      c.append(top, who, acts);
-      if (!on && s.instalado) c.onclick = e => { if (e.target === c || e.target.closest('.top,.who')) c.querySelector('.cta')?.click(); };
+      c.append(top, who, ...(mdl.children.length ? [mdl] : []), acts);
+      if (!on && s.instalado && s.conta && !s.aviso) c.onclick = e => { if (e.target === c || e.target.closest('.top,.who')) c.querySelector('.cta')?.click(); };
       grid3.append(c);
     });
-    wrap.append(grid3, res, el('small', 'h', 'Using AI is optional: syncing and the .md files work without it. Only the settings of the AI in use are shown below. Claude also offers connectors and per-conversation model and effort; ChatGPT and Gemini write only from the conversation history and the reference files. What each conversation may send is set in AI privacy.'));
+    wrap.append(grid3, res, el('small', 'h', 'Using AI is optional: syncing and the .md files work without it. Each box has its own default model. Claude also offers connectors and per-conversation model and effort; ChatGPT and Gemini write only from the conversation history and the reference files. What each conversation may send is set in AI privacy.'));
     card.append(hd, wrap); out.push(card);
   };
-  // settings of ChatGPT or Gemini (only the one in use)
-  const outraCard = () => {
-    if (iaKey === 'claude') return;
-    const s = d.ias[iaKey], mk = 'modelo_' + iaKey;
-    sec(`${s.nome} settings`);
-    const l = el('label', null, 'Model'), i = el('input'); i.value = d.ia[mk] || ''; i.placeholder = `${s.nome} default`;
-    l.title = iaKey === 'gemini' ? 'e.g. pro, flash or gemini-2.5-pro' : 'e.g. gpt-5';
-    ['input', 'change'].forEach(ev => i.addEventListener(ev, e => e.stopPropagation()));
-    i.onchange = async () => { const r = await api('/api/ia', {[mk]: i.value.trim()}); if (!fail(r)) toast(`${s.nome} model saved.`); };
-    l.append(i, el('small', null, `Optional. Empty = the default model of the ${s.nome} tool. Saved right away.`));
-    grid.append(l, el('small', 'wide', `${s.nome} uses the account shown in AI provider. Connectors and per-conversation model/effort are Claude-only.`));
-  };
   const sec = title => { const c = el('div', 'card'), h = el('div', 'hd'); h.append(el('b', null, title)); grid = el('div', 'cfg'); c.append(h, grid); out.push(c); };
-  const claudeAdv = () => {
-  sec('Claude: accounts and advanced options');
-  const cl = d.claude_conta, cbox = el('div', 'wide'); cbox.style.display = 'grid'; cbox.style.gap = '10px';
-  // saved right away (like keywords), not with the Save settings button
-  ['input', 'change'].forEach(ev => cbox.addEventListener(ev, e => e.stopPropagation()));
-  const clSave = async (body, msg) => { const r = await api('/api/claude-conta', body); if (fail(r)) return false; if (msg) toast(msg); loadConfig(); return true; };
-  // account: each one is a separate Claude Code login folder
-  const accSel = el('select'); accSel.append(new Option('Default (~/.claude)', ''));
-  cl.perfis.forEach(p => accSel.append(new Option(`${p.nome} (${tilde(p.pasta)})`, p.pasta)));
-  accSel.value = cl.perfil; accSel.onchange = () => clSave({perfil: accSel.value}, 'Claude account changed.');
-  const accL = el('label', null, 'Account'); accL.title = 'Which Claude Code login the app uses'; accL.append(accSel);
-  const accTools = el('div', 'tools'); accTools.style.margin = '0';
-  accTools.append(
-    btn('New account…', async () => { const n = await askText('Name for this Claude account (e.g. Work, Personal):', 'Add account'); if (n) await clSave({novo_perfil: n.trim()}, 'Account added. Click "Sign in" to log in to it.'); }, '', 'Creates a separate login for another Claude account'),
-    btn('Use existing folder…', async () => { const r = await api('/api/escolher', {tipo: 'pasta', titulo: 'Claude Code config folder of the account (e.g. ~/.claude-work)'}); if (!r.caminho) return; const n = await askText('Name for this account:', 'Add account', r.caminho.split('/').pop()); if (n) await clSave({novo_perfil: n.trim(), pasta: r.caminho}, 'Account added.'); }, 'lk', 'Adds an account that is already logged in another Claude Code folder'),
-    btn('Sign in…', async () => { const r = await api('/api/claude-login', {}); if (!fail(r)) toast('Terminal opened: sign in there, then come back and click Test.'); }, 'lk', 'Opens Terminal with Claude Code on this account so you can log in. You type the password there; the app never sees it.'));
-  if (cl.perfil) accTools.append(btn('Remove from list', async () => { if (await ask('Remove this account from the list?\n\nIts login folder stays on your Mac.', 'Remove', true)) clSave({remover_perfil: cl.perfil}, 'Account removed from the list.'); }, 'lk', 'Removes the account from the list (the login folder stays)'));
-  // provider
-  const provSel = el('select'); Object.entries(cl.provedores).forEach(([v, n]) => provSel.append(new Option(n, v))); provSel.value = cl.provedor;
-  const provL = el('label', null, 'Provider'); provL.title = 'Who runs Claude for the app'; provL.append(provSel);
-  const extra = el('div'); extra.style.display = 'grid'; extra.style.gap = '8px';
-  const field = (lb, k, ph, tip) => { const l = el('label', null, lb), i = el('input'); i.value = cl[k] || ''; i.placeholder = ph; l.title = tip; l.append(i); return [l, i]; };
-  const drawProv = () => {
-    const v = provSel.value, kids = [];
-    if (v === 'assinatura') kids.push(el('small', null, 'Uses the login of the account above (Claude Pro, Max, Team or Enterprise). To log in or switch users, click "Sign in…".'));
-    if (v === 'api') {
-      const i = el('input'); i.type = 'password'; i.autocomplete = 'off'; i.placeholder = cl.chave ? 'Saved in the Keychain — paste a new one to replace' : 'sk-ant-…';
-      const l = el('label', null, 'API key'); l.title = 'Kept only in the macOS Keychain, never in config.json'; l.append(i);
-      const t = el('div', 'tools'); t.style.margin = '0';
-      t.append(btn('Save key and use API', async () => { if (!i.value.trim() && !cl.chave) return toast('Paste the API key first.', 'bad'); const b = {provedor: 'api'}; if (i.value.trim()) b.chave = i.value.trim(); i.value = ''; await clSave(b, 'Using the Anthropic API key.'); }, 'cta'));
-      if (cl.chave) t.append(btn('Delete key', async () => { if (await ask('Delete the API key from the Keychain?', 'Delete', true)) clSave({chave: '', provedor: 'assinatura'}, 'Key deleted. Back to the subscription login.'); }, 'lk'));
-      kids.push(l, t, el('small', null, cl.chave ? 'A key is saved in the macOS Keychain.' : 'No key saved yet.'));
-    }
-    if (v === 'bedrock' || v === 'vertex') {
-      const fs = v === 'bedrock'
-        ? [field('AWS region', 'aws_regiao', 'us-east-1', 'Region where Claude is enabled in Bedrock'), field('AWS profile (optional)', 'aws_perfil', 'default', 'Profile from ~/.aws; empty = default credentials')]
-        : [field('Region', 'vertex_regiao', 'us-east5', 'Google Cloud region with Claude enabled'), field('Project ID', 'vertex_projeto', 'my-project', 'Google Cloud project ID')];
-      const keys = v === 'bedrock' ? ['aws_regiao', 'aws_perfil'] : ['vertex_regiao', 'vertex_projeto'];
-      const use = btn(`Use ${cl.provedores[v]}`, () => { const b = {provedor: v}; keys.forEach((k, n) => b[k] = fs[n][1].value.trim()); clSave(b, `Using ${cl.provedores[v]}.`); }, 'cta'); use.style.justifySelf = 'start';
-      kids.push(...fs.map(f => f[0]), use,
-        el('small', null, v === 'bedrock' ? 'Uses the AWS credentials already on this Mac (aws configure / SSO).' : 'Uses the Google Cloud credentials already on this Mac (gcloud auth application-default login).'));
-    }
-    extra.replaceChildren(...kids);
-  };
-  provSel.onchange = () => { drawProv(); res.style.display = 'none'; if (provSel.value === 'assinatura') clSave({provedor: 'assinatura'}, 'Using the subscription login.'); };
-  drawProv();
-  const res = el('div'); res.style.display = 'none';
-  const test = btn('Test', async () => {
-    test.disabled = true; res.className = 'call'; res.style.display = ''; res.replaceChildren(el('span', null, 'Testing…'));
-    const r = await api('/api/claude-teste', {}); test.disabled = false;
-    res.className = 'call ' + (r.erro ? 'bad' : 'ok');
-    const msg = r.erro ? 'Claude test failed: ' + r.erro : `Claude working: ${r.provedor}, account ${r.conta} (${r.segundos}s).`;
-    res.replaceChildren(el('span', null, msg));
-    toast(msg, r.erro ? 'bad' : 'ok');  // survives a screen refresh (e.g. a sync finishing)
-  }, '', 'Makes a tiny call with the chosen account and provider');
-  test.style.justifySelf = 'start';
-  cbox.append(el('small', null, `In use: ${cl.provedor_nome} · account ${cl.conta}. Changes apply right away, from the next draft or suggestion.`), accL, accTools, provL, extra, test, res);
-  grid.append(cbox);
-  };
-  const SPECIAL = {'@ia': iaCard, '@claudeadv': () => iaKey === 'claude' && claudeAdv(), '@outra': outraCard, '@priv': () => privCard(d, sec, () => grid)};
+  const SPECIAL = {'@ia': iaCard, '@priv': () => privCard(d, sec, () => grid)};
   FIELDS.forEach(([k, lb, type, tip, only]) => {
     if (SPECIAL[k]) return SPECIAL[k]();
     if (only && only !== iaKey) return;
@@ -3368,18 +3317,29 @@ async function loadConfig() {
   const bar = el('div', 'tools'); bar.style.marginTop = '8px';
   bar.append(btn('Open data folder', () => api('/api/abrir', {o: 'dados'}), '', d.dados),
     btn('Open code folder', () => api('/api/abrir', {o: 'codigo'}), '', d.codigo),
+    btn('Delete all saved .md…', async () => {
+      const n = await api('/api/md-apagar', {}); if (fail(n)) return;
+      if (!n.arquivos) return toast('No saved .md files found in the declared folders.', 'ok');
+      const msg = `Delete ${n.arquivos} .md file(s) of ${n.conversas} conversation(s), in ${n.pastas} folder(s)?\n\nOnly the .md files this app saved are deleted, and only in the folders declared in the settings of each conversation or of its topics/groups. Any other file in those folders is left alone, and nothing is deleted from WhatsApp.\n\nThis cannot be undone. While the app is not paused, a conversation that still has a folder is written again at the next sync.`;
+      const a = await ask(msg, 'Delete all .md', true, 'Also pause syncing everything (so nothing is written again until you resume)', true); if (!a) return;
+      const r = await api('/api/md-apagar', {confirmar: true, pausar: a.apagar}); if (fail(r)) return;
+      toast(`${r.apagados} .md file(s) deleted.` + (a.apagar ? ' The app is paused.' : ''), 'ok'); await load(); loadConfig();
+    }, 'danger', 'Deletes every .md the app saved, only in the folders declared for conversations and topics'),
     btn('Show all ignored again', async () => { await api('/api/ignorar', {limpar: true}); toast('Ignored conversations are shown again.'); await load(); loadSug(true); loadConfig(); }, '', 'Shows and suggests again every conversation you clicked Ignore on'),
     btn('Restart the app', restart, '', 'Restarts the background service'));
   info.append(bar); grid.append(info);
   const state = el('span', 'h', 'All saved.');
-  const save = btn('Save settings', async () => {
+  const doSave = async () => {
     const body = {fontes_desligadas: [...off], fontes_extras: extras, fonte_icones: iconsSel};
     for (const k in inputs) body[k] = inputs[k].value;
     const r = await api('/api/config', body);
-    if (fail(r)) return;
+    if (fail(r)) return false;
     toast('Settings saved.');
     await load(); loadSug(true); loadConfig();
-  }, 'cta', 'Saves every setting on this screen');
+    return true;
+  };
+  cfgSaveFn = doSave;
+  const save = btn('Save settings', doSave, 'cta', 'Saves every setting on this screen');
   save.disabled = true;
   const undo = btn('Discard', loadConfig, 'lk', 'Back to the saved values'); undo.style.display = 'none';
   const dirty = () => { cfgDirty = true; save.disabled = false; undo.style.display = ''; state.textContent = 'There are unsaved changes.'; };
@@ -3434,6 +3394,7 @@ async function load(soft) {
     if (Object.keys(missing).length) { Object.assign(telaPrefs, missing); api('/api/tela', missing); }
     if (tab === 'painel' && painel) renderPainel();
   }
+  appPausado = !!d.pausado; drawPause();
   ultima = d.ultima.quando || ''; proxima = d.proxima; autoMin = d.auto; drawLast();
   renderConversas(); if (!(soft && editing)) renderAssuntos(); if (tab === 'quadro') renderQuadro();
   drawKwCfg(); if (CF.main) { CF.main.drawKw(); CF.ign.drawKw(); }
@@ -3441,6 +3402,7 @@ async function load(soft) {
   return true;
 }
 $('sync').onclick = () => syncNow();
+$('pause').onclick = () => appPausado ? setPausa({tudo: false}, 'Resumed: syncing again.') : setPausa({tudo: true}, 'App paused.');
 let ultima = '', proxima = null, autoMin = 0;
 function drawLast() {
   const hoje = isoDay(new Date()), q = ultima;
@@ -3452,7 +3414,6 @@ function drawLast() {
 setInterval(drawLast, 30000);
 CF.main = makeFilter('conv_tags'); CF.main.build($('cf-main'), 'Search names and messages', $('res'));
 CF.ign = makeFilter('ign_tags'); CF.ign.build($('cf-ign'), 'Search hidden conversations', $('ign'));
-$('bq').oninput = () => { clearTimeout(timer); timer = setTimeout(renderWa, 250); };
 $('qcfg-btn').onclick = () => { qopen = !qopen; renderQcfg(); };
 $('fnew').append(btn('New topic', () => { editing = 'novo'; if (fview !== 'lista') { fview = 'lista'; pref('fview', 'lista'); renderFview(); } renderAssuntos(); }, 'cta', 'Creates a topic; then pick its folder and keywords'));
 if (['etapa', 'situacao'].includes(store.get('modo'))) modo = store.get('modo');

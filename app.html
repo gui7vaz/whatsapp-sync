@@ -3976,7 +3976,7 @@ let ultima = '', proxima = null, autoMin = 0;
 const hmLabel = m => { m = Math.max(0, Math.round(m)); const h = Math.floor(m / 60), r = m % 60; return h ? `${h}h` + (r ? ` ${r}min` : '') : `${r} min`; };
 function drawLast() {
   const hoje = isoDay(new Date()), q = ultima;
-  const when = !q ? '' : q.slice(0, 10) === hoje ? q.slice(11, 16) : brDate(q.slice(0, 10)) + ' ' + q.slice(11, 16);
+  const when = !q ? '' : brDate(q.slice(0, 10)) + ' ' + q.slice(11, 16);   // always date and time
   const left = proxima ? Math.max(0, Math.round((proxima * 1000 - Date.now()) / 6e4)) : null;
   $('last').textContent = [when ? 'Synced ' + when : '', left != null ? `auto in ${hmLabel(left)}` : autoMin ? `auto every ${hmLabel(autoMin)}` : ''].filter(Boolean).join(' · ');
   $('last').title = (q ? 'Last sync: ' + q + '. ' : '') + `Automatic background sync every ${hmLabel(autoMin)}.`;
